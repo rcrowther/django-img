@@ -14,8 +14,10 @@ from django.forms.utils import flatatt
 from django.urls import reverse
 from collections import OrderedDict
 from django.utils.functional import cached_property
-from willow.image import Image as WillowImage
-from PIL import Image as PILImage
+#from willow.image import Image as WillowImage
+#from PIL import Image as PILImage
+#from image.constants import PILLOW_FORMAT, PILLOW_APP_FORMAT
+ 
 #x
 from io import BytesIO
 from django.core.files.images import ImageFile
@@ -171,7 +173,7 @@ class AbstractImage(models.Model):
         return cls.reforms.rel.related_model
 
 
-    def reform_info(self, src_format, ifilter):
+    def reform_save_info(self, src_format, ifilter):
         '''
         Gather and choose between configs about how to save filter results.
         Probes into several settings. 
@@ -245,28 +247,25 @@ class AbstractImage(models.Model):
             with self.open_file() as fsrc:
                 # No need to place the file, it can be stashed on a buffer
                 # Get a PIL Image
-                pil_src = PILImage.open(fsrc)
+                #pil_src = PILImage.open(fsrc)
+                src_info = ifilter_instance.file_wrap(fsrc)
+                #print('pllow format read:')
+                #print(str(pil_src.format))
                 
                 # Before we pile in, good to know, need to decide, 
                 # through defaults and overrides, what the write 
                 # attributes will be e.g. destination format and jpeg 
                 # quality. 
-                reform_write_attrs = self.reform_info(pil_src.format, ifilter)
-                
-                # Add some general write attributes. PIL ignores the unusable.
-                reform_write_attrs['progressive'] = True  
-                reform_write_attrs['optimize'] = True
+                reform_write_attrs = self.reform_save_info(
+                    src_info.format, 
+                    ifilter,
+                    )
+
                 
                 # Far as I know, PIL cant write to a Django File, and 
                 # a File can't process Pill buffer, either. But they can
                 # both deal with a generic Python buffer.
-                # reform_buff = self.reform_file_generate(
-                    # pil_src, 
-                    # ifilter, 
-                    # reform_write_attrs
-                    # )
                 reform_buff = filter_instance.run_to_buffer(
-                    pil_src,
                     reform_write_attrs
                     )
 
@@ -295,8 +294,8 @@ class AbstractImage(models.Model):
                 image = self,
                 filter_spec = filter_instance.path_str(),
                 ifile = reform_file,
-                width = 54,
-                height = 54,
+                width = filter_instance.width,
+                height = filter_instance.height,
             )
             reform.save()
 

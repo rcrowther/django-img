@@ -1,11 +1,15 @@
 from image import image_processes
-from image.constants import ALLOWED_EXTENSIONS
+from image.constants import IMAGE_FORMATS, FORMAT_APP_PILLOW, FORMAT_PILLOW_APP
+from PIL import Image as PILImage
 from io import BytesIO
 
 
 class Filter():
     name = 'noName' # comes from classname?
 
+    def __init__(self):
+        self._src_image = None
+        
     def path_str(self):
         '''
         Return thhe dotted module and classname as a string.
@@ -37,20 +41,41 @@ class Filter():
 
         return classpath.lower()
 
-
+    def file_wrap(self, src_file):
+        '''Wrap a Python file handle for processing a reform.
+        Save the file to '_src_image' attribute.
+         
+        Opening a file in most APIs will supply useful information,
+        which may  be regarded as more definitive than either Python 
+        or Django can provide. So this method should return the 
+        information as a dictionary.
+        
+        Elements the current implementations reliy on are (source) 'format'
+        'width' and 'height'.
+        @src_file an open Python file handle 
+        '''
+        raise NotImplementedError
+        
     def process(self, pillow):
         '''chain of pillow actions to reform an instance of pillow.image'''
         raise NotImplementedError
         
 
-    def run_to_buffer(self, pil_src, write_attrs):
+    def run_to_buffer(self, write_attrs):
         """
-        Run a PIL src through the filter into a buffer.
+        Run a image processing src through filters into a buffer.
         dest can be any file-like object
         write info is any extra params for PIL writing e.g. (jeeg/) quality optomise, etc. 
         return a bytebuffer containing the finished, written image.
         """
-        pil_dst = self.process(pil_src) or pil_src
+        # Add some general write attributes. PIL ignores the unusable.
+        write_attrs['progressive'] = True  
+        write_attrs['optimize'] = True
+        
+        # convert the format to PIL
+        write_attrs['format'] = FORMAT_APP_PILLOW[write_attrs['format']]
+                
+        pil_dst = self.process(self._src_image) or self._src_image
 
         out_buff = BytesIO()
         pil_dst.save(
@@ -58,28 +83,45 @@ class Filter():
             **write_attrs
         )
         return out_buff
+
         
-        
-class FormatFilter(Filter):
+class PillowMixin:
+    def file_wrap(self, file_path):
+        self._src_image = PILImage.open(file_path)
+        return {
+            'format': FORMAT_PILLOW_APP[self._src_image.format],
+            'width': self._src_image.width,
+            'height': self._src_image.height,
+            }
+
+
+class _Format(Filter):
     '''Establish the format for an image. Stting iformat=None means the image is unchanged.'''
     iformat = None
     
     def __new__(cls, *args, **kwargs):
         print('called FormatFilter')
         f = getattr(cls.iformat)
-        if(f and (not(f in ALLOWED_EXTENSIONS))):
+        if(f and (not(f in IMAGE_FORMATS))):
             raise ValueError("{} attribute format must be one of {}".format(
                 cls.name, 
-                "'" + "', '".join(ALLOWED_EXTENSIONS.append('None')) + "'")
+                "'" + "', '".join(IMAGE_FORMATS.append('None')) + "'")
             )            
         return super(Filter, cls).__new__(cls, *args, **kwargs)
-    
+
+            
     def process(self, pillow):
         # By passing this allows us to use the filter for format reform.
         return pillow
+    
+    
                         
+class Format(PillowMixin, _Format):
+    pass
+    
+    
                         
-class ResizeFilter(FormatFilter):
+class _Resize(_Format):
     '''Resize n image.
     Shrinks inside the box defined by the given args. So the result will
     usually be smaller width or height than the given box.
@@ -103,7 +145,7 @@ class ResizeFilter(FormatFilter):
                 cls.name, 
                 "'" + "', '".join(nulled) + "'")
             )
-        return super(FormatFilter, cls).__new__(cls, *args, **kwargs)
+        return super(_Format, cls).__new__(cls, *args, **kwargs)
         
     def process(self, pillow):
         pillow = image_processes.resize_aspect(
@@ -113,8 +155,12 @@ class ResizeFilter(FormatFilter):
         )
         return pillow
         
-                                
-class ResizeSmartFilter(FormatFilter):
+        
+class Resize(PillowMixin, _Resize):
+    pass
+        
+                                    
+class _ResizeSmart(_Format):
     '''Resize an image.
     This resize lays the image on a background of ''fill-color'.
     So the result always matches the given sizes.
@@ -138,7 +184,7 @@ class ResizeSmartFilter(FormatFilter):
                 cls.name, 
                 "'" + "', '".join(nulled) + "'")
             )
-        return super(FormatFilter, cls).__new__(cls, *args, **kwargs)
+        return super(_Format, cls).__new__(cls, *args, **kwargs)
         
     def process(self, pillow):
         pillow = image_processes.resize_smart(
@@ -150,7 +196,11 @@ class ResizeSmartFilter(FormatFilter):
         return pillow
 
 
-class CropFilter(FormatFilter):
+class ResizeSmart(PillowMixin, _ResizeSmart):
+    pass
+    
+    
+class _Crop(_Format):
     '''Resize and maybe re-format an image.
     A base class e.g.
         class Large(image.ResizeFilter):
@@ -171,7 +221,7 @@ class CropFilter(FormatFilter):
                 cls.name, 
                 "'" + "', '".join(nulled) + "'")
             )
-        return super(FormatFilter, cls).__new__(cls, *args, **kwargs)
+        return super(_Format, cls).__new__(cls, *args, **kwargs)
         
     def process(self, pillow):
         pillow = image_processes.crop(
@@ -180,7 +230,11 @@ class CropFilter(FormatFilter):
             self.height
         )
         return pillow
-                    
+
+
+class Crop(PillowMixin, _Crop):
+    pass
+                        
 # class Large(image.ResizeFilter):
     # width=513
     # height=760
@@ -203,7 +257,7 @@ class CropFilter(FormatFilter):
     # height=64
     # iformat='png'
 
-class Thumb(ResizeFilter):
+class Thumb(Resize):
     width=64
     height=64
     iformat='png'

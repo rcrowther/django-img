@@ -1,11 +1,11 @@
 #from image.decorators import register
 
 from image.filters import (
-    FormatFilter, ResizeFilter, CropFilter, ResizeSmartFilter, Thumb
+    Format, Resize, Crop, ResizeSmart, Thumb
 )
 
 __all__ = [
-    "FormatFilter", "ResizeFilter", "CropFilter", "ResizeSmartFilter", "Thumb",
+    "Format", "Resize", "Crop", "ResizeSmart", "Thumb",
     ]
 # See django.contrib.admin.__init__()
 #def autodiscover():
