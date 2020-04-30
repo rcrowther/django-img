@@ -25,7 +25,7 @@ _UPPER_EXTENSIONS = {k.upper():v for k,v in _FORMAT_FILE_EXTENSIONS_BASE.items()
 ALLOWED_FILE_EXTENSIONS = {**_FORMAT_FILE_EXTENSIONS_BASE, **_UPPER_EXTENSIONS}
 
 
-# returns the Pillow format key for this apps format keys.
+# returns the Pillow format key for this apps keys.
 FORMAT_APP_PILLOW = {
     'bmp' : 'BMP',
     'jpg' : 'JPEG',
@@ -35,5 +35,5 @@ FORMAT_APP_PILLOW = {
     'webp' : 'WEBP',
 }
 
-# returns this apps format key for a Pillow format keys.
+# returns this apps format key for a Pillow keys.
 FORMAT_PILLOW_APP = {v:k for k,v in FORMAT_APP_PILLOW.items()}

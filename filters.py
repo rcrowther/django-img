@@ -4,11 +4,36 @@ from PIL import Image as PILImage
 from io import BytesIO
 
 
+        
 class Filter():
-    name = 'noName' # comes from classname?
+    '''
+    A filter defines how to transorm a image with a spec into 
+    a derivative with a different spec.
+    As such, it is more than a static configuration. It is half-
+    functional. takes an open Python file and returns a buffer. 
+    The stock implementation uses Pillow, but this setup allows 
+    other codebases to bue used in a filler without cahnging calling 
+    code.
+    '''
+    #def __new__(cls, *args, **kwargs):
+        # print('called Filter new')
+        # print(str(cls))
+        # print(str(dir(cls)))
+        # print(str(dir(cls.__class__)))
+        # print(str(args))
+        # print(str(kwargs))
+        #cls.testAttrNotFalse()
+        #return super().__new__(cls, *args, **kwargs)
 
-    def __init__(self):
-        self._src_image = None
+
+    @classmethod
+    def testAttrNotFalse(cls, *args):
+        nulled = [k for k in args if (not(getattr(cls, k)))]
+        if (len(nulled) > 0):
+            raise ValueError("Attribute(s) not set or None: class '{}': attr: {}".format(
+                cls.__name__, 
+                "'" + "', '".join(nulled) + "'")
+            )           
         
     def path_str(self):
         '''
@@ -41,41 +66,78 @@ class Filter():
 
         return classpath.lower()
 
-    def file_wrap(self, src_file):
+    def process(self, src_file, save_info_callback):
         '''Wrap a Python file handle for processing a reform.
-        Save the file to '_src_image' attribute.
-         
-        Opening a file in most APIs will supply useful information,
-        which may  be regarded as more definitive than either Python 
-        or Django can provide. So this method should return the 
-        information as a dictionary.
-        
-        Elements the current implementations reliy on are (source) 'format'
-        'width' and 'height'.
+        Return should be a BytesIO buffer or similar. Some APIs do not
+        include file saving, but most will deal with a generic Python
+        buffer.
+                 
+        'save_info_callback' makes decisions about how the resulting 
+        buffer should be saved. Opening a file in most APIs will supply 
+        useful information, currently the file format, which may be 
+        regarded as more definitive than either Python or Django can 
+        provide. There is no need to call this funtion for dev, but 
+        final versions should respect the environment by calling it and 
+        acting on the results. Current implementation needs the source 
+        format and filter itself, then return decisions on 'format' and 
+        'jpeg_quality'.
+                
         @src_file an open Python file handle 
+        @save_info_callback external function that returns dictionary
+        of decisions based on file/filter details and environment 
+        settings
+        @return a BytesIO or similar
         '''
         raise NotImplementedError
         
-    def process(self, pillow):
-        '''chain of pillow actions to reform an instance of pillow.image'''
-        raise NotImplementedError
-        
 
-    def run_to_buffer(self, write_attrs):
-        """
-        Run a image processing src through filters into a buffer.
-        dest can be any file-like object
-        write info is any extra params for PIL writing e.g. (jeeg/) quality optomise, etc. 
-        return a bytebuffer containing the finished, written image.
-        """
-        # Add some general write attributes. PIL ignores the unusable.
+
+    # def run_to_buffer(self, write_attrs):
+        # """
+        # Run a image processing src through filters into a buffer.
+        # dest can be any file-like object
+        # write info is any extra params for PIL writing e.g. (jeeg/) quality optomise, etc. 
+        # return a bytebuffer containing the finished, written image.
+        # """
+        # # Add some general write attributes. PIL ignores the unusable.
+        # write_attrs['progressive'] = True  
+        # write_attrs['optimize'] = True
+        
+        # # convert the format to PIL
+        # write_attrs['format'] = FORMAT_APP_PILLOW[write_attrs['format']]
+                
+        # pil_dst = self.process(self._src_image) or self._src_image
+
+        # out_buff = BytesIO()
+        # pil_dst.save(
+            # out_buff,
+            # **write_attrs
+        # )
+        # return out_buff
+
+        
+class PillowMixin:
+    
+    def process(self, src_file, save_info_callback):
+        src_image = PILImage.open(src_file)
+        
+        # write_attrs currently {format, jpeg_quality}
+        write_attrs = save_info_callback(
+                    FORMAT_PILLOW_APP[src_image.format], 
+                    self,
+                    )
+
+        # mods on the save data
+        # convert the returned format to PIL
+        write_attrs['format'] = FORMAT_APP_PILLOW[write_attrs['format']]
+        
+        # Add some general write attributes. Pillow ignores the unusable.        
         write_attrs['progressive'] = True  
         write_attrs['optimize'] = True
-        
-        # convert the format to PIL
-        write_attrs['format'] = FORMAT_APP_PILLOW[write_attrs['format']]
-                
-        pil_dst = self.process(self._src_image) or self._src_image
+
+        # break out processing, it's the only action that changes
+        # across different filters
+        pil_dst = self.process(src_image) or src_image
 
         out_buff = BytesIO()
         pil_dst.save(
@@ -84,44 +146,37 @@ class Filter():
         )
         return out_buff
 
+
+    def pillow_actions(self, pillow):
+        '''chain of actions to reform an instance of pillow.image.
+        This section of the 
+        '''
+        raise NotImplementedError
         
-class PillowMixin:
-    def file_wrap(self, file_path):
-        self._src_image = PILImage.open(file_path)
-        return {
-            'format': FORMAT_PILLOW_APP[self._src_image.format],
-            'width': self._src_image.width,
-            'height': self._src_image.height,
-            }
 
-
-class _Format(Filter):
+class Format(PillowMixin, Filter):
     '''Establish the format for an image. Stting iformat=None means the image is unchanged.'''
     iformat = None
     
     def __new__(cls, *args, **kwargs):
-        print('called FormatFilter')
-        f = getattr(cls.iformat)
-        if(f and (not(f in IMAGE_FORMATS))):
-            raise ValueError("{} attribute format must be one of {}".format(
-                cls.name, 
-                "'" + "', '".join(IMAGE_FORMATS.append('None')) + "'")
-            )            
-        return super(Filter, cls).__new__(cls, *args, **kwargs)
+        print('called Format new')          
+        if (not(cls.iformat in IMAGE_FORMATS)):
+            raise ValueError("Attribute 'iformat' returns unknown value: class '{}': val: '{}'\nAvailable formats:'{}'".format(
+                cls.__name__, 
+                cls.iformat,
+                "', '".join(IMAGE_FORMATS))
+            ) 
+            
+        return super().__new__(cls, *args, **kwargs)
 
             
-    def process(self, pillow):
+    def pillow_actions(self, pillow):
         # By passing this allows us to use the filter for format reform.
         return pillow
     
     
                         
-class Format(PillowMixin, _Format):
-    pass
-    
-    
-                        
-class _Resize(_Format):
+class Resize(Format):
     '''Resize n image.
     Shrinks inside the box defined by the given args. So the result will
     usually be smaller width or height than the given box.
@@ -129,25 +184,17 @@ class _Resize(_Format):
         class Large(image.ResizeFilter):
             width=513
             height=760    
-            tpe='PNG'
+            iformat='png'
     '''
     width = None
     height = None
-    fill_color="white"
+    
     
     def __new__(cls, *args, **kwargs):
-        #print("called new")
-        #print(str(dir(cls)))
-        #print(str(args))
-        nulled = [x for x in ['width', 'height', 'iformat',] if (not(getattr(cls, x)))]
-        if (len(nulled) > 0):
-            raise ValueError("{} attributes must be set. {} return None.".format(
-                cls.name, 
-                "'" + "', '".join(nulled) + "'")
-            )
-        return super(_Format, cls).__new__(cls, *args, **kwargs)
+        cls.testAttrNotFalse('width', 'height')
+        return super().__new__(cls, *args, **kwargs)
         
-    def process(self, pillow):
+    def pillow_actions(self, pillow):
         pillow = image_processes.resize_aspect(
             pillow, 
             self.width, 
@@ -155,12 +202,10 @@ class _Resize(_Format):
         )
         return pillow
         
-        
-class Resize(PillowMixin, _Resize):
-    pass
+
         
                                     
-class _ResizeSmart(_Format):
+class ResizeSmart(Format):
     '''Resize an image.
     This resize lays the image on a background of ''fill-color'.
     So the result always matches the given sizes.
@@ -174,19 +219,12 @@ class _ResizeSmart(_Format):
     height = None
     fill_color="white"
     
+    
     def __new__(cls, *args, **kwargs):
-        #print("called new")
-        #print(str(dir(cls)))
-        #print(str(args))
-        nulled = [x for x in ['width', 'height', 'iformat', 'fill_color'] if (not(getattr(cls, x)))]
-        if (len(nulled) > 0):
-            raise ValueError("{} attributes must be set. {} return None.".format(
-                cls.name, 
-                "'" + "', '".join(nulled) + "'")
-            )
-        return super(_Format, cls).__new__(cls, *args, **kwargs)
+        cls.testAttrNotFalse('width', 'height')
+        return super().__new__(cls, *args, **kwargs)
         
-    def process(self, pillow):
+    def pillow_actions(self, pillow):
         pillow = image_processes.resize_smart(
             pillow, 
             self.width, 
@@ -195,15 +233,12 @@ class _ResizeSmart(_Format):
         )
         return pillow
 
-
-class ResizeSmart(PillowMixin, _ResizeSmart):
-    pass
     
     
-class _Crop(_Format):
+class Crop(Format):
     '''Resize and maybe re-format an image.
     A base class e.g.
-        class Large(image.ResizeFilter):
+        class Large(image.CropFilter):
             width=513
             height=760    
             tpe='PNG'
@@ -212,18 +247,10 @@ class _Crop(_Format):
     height = None
     
     def __new__(cls, *args, **kwargs):
-        #print("called new")
-        #print(str(dir(cls)))
-        #print(str(args))
-        nulled = [x for x in ['width', 'height', 'iformat'] if (not(getattr(cls, x)))]
-        if (len(nulled) > 0):
-            raise ValueError("{} attributes must be set. {} return None.".format(
-                cls.name, 
-                "'" + "', '".join(nulled) + "'")
-            )
-        return super(_Format, cls).__new__(cls, *args, **kwargs)
+        cls.testAttrNotFalse('width', 'height')
+        return super().__new__(cls, *args, **kwargs)
         
-    def process(self, pillow):
+    def pillow_actions(self, pillow):
         pillow = image_processes.crop(
             pillow, 
             self.width, 
@@ -232,8 +259,30 @@ class _Crop(_Format):
         return pillow
 
 
-class Crop(PillowMixin, _Crop):
-    pass
+class SmartCrop(Format):
+    '''Resize and maybe re-format an image.
+    A base class e.g.
+        class Large(image.CropFilter):
+            width=513
+            height=760    
+            tpe='PNG'
+    '''
+    width = None
+    height = None
+    fill_color="white"
+
+    
+    def __new__(cls, *args, **kwargs):
+        cls.testAttrNotFalse('width', 'height')
+        return super().__new__(cls, *args, **kwargs)
+        
+    def pillow_actions(self, pillow):
+        pillow = image_processes.crop(
+            pillow, 
+            self.width, 
+            self.height
+        )
+        return pillow
                         
 # class Large(image.ResizeFilter):
     # width=513
@@ -257,7 +306,7 @@ class Crop(PillowMixin, _Crop):
     # height=64
     # iformat='png'
 
-class Thumb(Resize):
+class Thumb(ResizeSmart):
     width=64
     height=64
     iformat='png'

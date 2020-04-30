@@ -16,7 +16,7 @@ from collections import OrderedDict
 from django.utils.functional import cached_property
 #from willow.image import Image as WillowImage
 #from PIL import Image as PILImage
-#from image.constants import PILLOW_FORMAT, PILLOW_APP_FORMAT
+from image import filters
  
 #x
 from io import BytesIO
@@ -173,12 +173,13 @@ class AbstractImage(models.Model):
         return cls.reforms.rel.related_model
 
 
-    def reform_save_info(self, src_format, ifilter):
+    def save_info_callback(self, src_format, ifilter):
         '''
         Gather and choose between configs about how to save filter results.
         Probes into several settings. 
         @ifilter an instance of a filter
         '''
+        # defaults
         iformat = src_format
         jpeg_quality = '85'
         
@@ -228,9 +229,12 @@ class AbstractImage(models.Model):
             filtername = ifilter
             #filterinstance = make one from the name. But that means a registry?
             #filter, created = Filter.objects.get_or_create(spec=filter)
-        else:
-            filtername = ifilter.path_str()
+        elif isinstance(ifilter, filters.Filter):
             filter_instance = ifilter            
+            filtername = ifilter.path_str()
+        else:
+            filter_instance = ifilter()
+            filtername = filter_instance.path_str()
         #cache_key = filter.get_cache_key(self)
         Reform = self.get_reform_model()
 
@@ -248,7 +252,7 @@ class AbstractImage(models.Model):
                 # No need to place the file, it can be stashed on a buffer
                 # Get a PIL Image
                 #pil_src = PILImage.open(fsrc)
-                src_info = ifilter_instance.file_wrap(fsrc)
+                reform_buff = ifilter_instance.process(fsrc, save_info_callback)
                 #print('pllow format read:')
                 #print(str(pil_src.format))
                 
@@ -256,18 +260,18 @@ class AbstractImage(models.Model):
                 # through defaults and overrides, what the write 
                 # attributes will be e.g. destination format and jpeg 
                 # quality. 
-                reform_write_attrs = self.reform_save_info(
-                    src_info.format, 
-                    ifilter,
-                    )
+                # reform_write_attrs = self.reform_save_info(
+                    # src_info.format, 
+                    # ifilter,
+                    # )
 
                 
                 # Far as I know, PIL cant write to a Django File, and 
-                # a File can't process Pill buffer, either. But they can
+                # a File can't process PIL buffer, either. But they can
                 # both deal with a generic Python buffer.
-                reform_buff = filter_instance.run_to_buffer(
-                    reform_write_attrs
-                    )
+                # reform_buff = filter_instance.run_to_buffer(
+                    # reform_write_attrs
+                    # )
 
             # Something missing here is the filename to use. The 
             # field settings will handle the path, but we need a filename.                
