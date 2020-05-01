@@ -34,7 +34,8 @@ class Filter():
                 cls.__name__, 
                 "'" + "', '".join(nulled) + "'")
             )           
-        
+
+
     def path_str(self):
         '''
         Return thhe dotted module and classname as a string.
@@ -115,10 +116,9 @@ class Filter():
         # )
         # return out_buff
 
-        
 class PillowMixin:
     
-    def process(self, src_file, save_info_callback):
+    def process(self, src_file, dst_name_no_extension, save_info_callback):
         src_image = PILImage.open(src_file)
         
         # write_attrs currently {format, jpeg_quality}
@@ -126,6 +126,11 @@ class PillowMixin:
                     FORMAT_PILLOW_APP[src_image.format], 
                     self,
                     )
+                    
+        dst_fname = "{}.{}".format(
+            dst_name_no_extension,
+            write_attrs['format']
+            )
 
         # mods on the save data
         # convert the returned format to PIL
@@ -137,14 +142,15 @@ class PillowMixin:
 
         # break out processing, it's the only action that changes
         # across different filters
-        pil_dst = self.process(src_image) or src_image
+        pil_dst = self.pillow_actions(src_image) or src_image
 
         out_buff = BytesIO()
         pil_dst.save(
             out_buff,
             **write_attrs
         )
-        return out_buff
+        
+        return (out_buff, dst_fname)
 
 
     def pillow_actions(self, pillow):

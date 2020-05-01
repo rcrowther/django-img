@@ -9,6 +9,7 @@ from image.models import Image
 # as url/static
 #tmp, until we have registry
 from image.image_filters import Small
+from image.registry import registry
 
 register = template.Library()
 
@@ -18,17 +19,34 @@ register = template.Library()
 - take an image title
 {% image_tag_by_title 'dirty_river', Large, class='header-image' %}
 ''' 
+'''
+Lookup an image by reform (filter) and title.
+If a view has already generated a context with models, this is not 
+a prefered method, as it will make an extra database lookup.
+'''
 @register.simple_tag
 def image_tag_by_title(img_title, ifilter, **kwargs):
-    img_title = 'phone'
+    print('image_tag_by_title:')
+    print(str(img_title))
+    print(str(ifilter))
+    #print('context in temlate tag:')
+    #print(str(context))
+    #img_title = 'phone'
     im = Image.objects.get(title=img_title)
-    ifilte=Small()
-    r = im.get_reform(ifilte)
+    f = registry.get_instance(ifilter)
+    #f = Small()
+    r = im.get_reform(f)
     return r.img_tag(kwargs)
-        
+
+
+'''
+Lookup an image by reform (filter), context and reference.
+If a view has already generated a context with models, this is the
+prefered method.
+'''        
 @register.simple_tag(takes_context=True)
 def image_tag(context, img_model, ifilter, **kwargs):
-# split context reference to delve context?
+    # split context reference to delve context?
 
     print('image in temlate tag:')
     print(str(img_model))
@@ -38,7 +56,9 @@ def image_tag(context, img_model, ifilter, **kwargs):
     obj_key = 'object'
     obj = context[obj_key]
     im = obj.img
-    r = im.get_reform(Small())
+    f = registry.get(ifilter)
+    #f = Small()
+    r = im.get_reform(f)
     flatatt(kwargs)
     return r.url()
         

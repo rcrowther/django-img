@@ -82,6 +82,7 @@ class AbstractImage(models.Model):
             return True
         except NotImplementedError:
             return False
+
             
     #? We have it or don't. Whats this for?        
     def get_file_size(self):
@@ -99,7 +100,6 @@ class AbstractImage(models.Model):
             self.save(update_fields=['file_size'])
 
         return self.size
-
 
 
     def get_upload_to(self, filename):
@@ -121,6 +121,7 @@ class AbstractImage(models.Model):
             full_path = os.path.join(folder_name, filename)
 
         return full_path
+
         
     @contextmanager
     def open_file(self):
@@ -154,17 +155,6 @@ class AbstractImage(models.Model):
             if close_file:
                 image_file.close()
 
-
-    #x
-    @contextmanager
-    def get_willow_image(self):
-        with self.open_file() as image_file:
-            yield WillowImage.open(image_file)
-
-    # @contextmanager
-    # def get_pillow_image(self):
-        # with self.open_file() as image_file:
-            # yield PILImage.open(image_file)
             
     @classmethod
     def get_reform_model(cls):
@@ -177,7 +167,7 @@ class AbstractImage(models.Model):
         '''
         Gather and choose between configs about how to save filter results.
         Probes into several settings. 
-        @ifilter an instance of a filter
+        @ifilter instance of a Filter
         '''
         # defaults
         iformat = src_format
@@ -198,33 +188,14 @@ class AbstractImage(models.Model):
                 
         return {'format': iformat, 'quality': jpeg_quality}
 
-        
-    # def reform_file_generate(self, pil_src, ifilter, write_attrs):
-        # """
-        # Run a PIL src through a filter into a buffer.
-        # dest can be any file-like object
-        # write info is any extra params for PIL writing e.g. (jeeg/) quality optomise, etc. 
-        # return a bytebuffer containing the finished, written image.
-        # """
-        # print('write_attrs:')
-        # print(write_attrs)
-        # pil_dst = ifilter.process(pil_src) or pil_src
 
-        # out_buff = BytesIO()
-        # pil_dst.save(
-            # out_buff,
-            # **write_attrs
-        # )
-        # return out_buff
-            
-    #! decide parameter handling
-    #! pillow formats do not match
     def get_reform(self, ifilter):
-        '''ifilter must be an instance
+        '''ifilter can be class, instance or text for registry???
         '''
         #! what if filter is none?
         filtername = None
-        filter = None
+        filter_instance = None
+        #! registry?
         if isinstance(ifilter, str):
             filtername = ifilter
             #filterinstance = make one from the name. But that means a registry?
@@ -244,47 +215,28 @@ class AbstractImage(models.Model):
             )
         except Reform.DoesNotExist:
             # make a new, reformed image and record for Reform DB table            
-            # first, get the source file
-            src = self.ifile
 
-            # Now we need to use the file to produce a reformed image.
-            with self.open_file() as fsrc:
-                # No need to place the file, it can be stashed on a buffer
-                # Get a PIL Image
-                #pil_src = PILImage.open(fsrc)
-                reform_buff = ifilter_instance.process(fsrc, save_info_callback)
-                #print('pllow format read:')
-                #print(str(pil_src.format))
-                
-                # Before we pile in, good to know, need to decide, 
-                # through defaults and overrides, what the write 
-                # attributes will be e.g. destination format and jpeg 
-                # quality. 
-                # reform_write_attrs = self.reform_save_info(
-                    # src_info.format, 
-                    # ifilter,
-                    # )
-
-                
-                # Far as I know, PIL cant write to a Django File, and 
-                # a File can't process PIL buffer, either. But they can
-                # both deal with a generic Python buffer.
-                # reform_buff = filter_instance.run_to_buffer(
-                    # reform_write_attrs
-                    # )
-
-            # Something missing here is the filename to use. The 
+            # First, a destination filename. The 
             # field settings will handle the path, but we need a filename.                
             # 'name' is path relative to media/. Name only, pleaee.
             src_fname = os.path.basename(self.ifile.name)
             src_fname_no_extension, extension = os.path.splitext(src_fname)
             # <srcname> - <filtername> . <format> 
             # <srcname> - <filtername> is a near-unique key. Near enough.
-            dst_fname = "{}-{}.{}".format(
+            # dst_fname = "{}-{}.{}".format(
+                # src_fname_no_extension,
+                # filter_instance.human_path(),
+                # reform_write_attrs['format']
+            # )
+            # <srcname> - <filtername> is a near-unique key. Near enough.
+            dst_fname = "{}-{}".format(
                 src_fname_no_extension,
-                filter_instance.human_path(),
-                reform_write_attrs['format']
+                filter_instance.human_path()
             )
+                        
+            # Open the file then produce a reformed image.
+            with self.open_file() as fsrc:
+                (reform_buff, dst_fname) = filter_instance.process(fsrc, dst_fname, self.save_info_callback)
 
             # Right, lets make a Django ImageFile from that
             reform_file = ImageFile(reform_buff, name=dst_fname)            
@@ -305,9 +257,7 @@ class AbstractImage(models.Model):
 
         return reform
 
-    # def get_rect(self):
-        # return Rect(0, 0, self.width, self.height)
-        
+
     def is_portrait(self):
         return (self.width < self.height)
 

@@ -12,3 +12,16 @@ d = a.get_reform(ifilter)
 #reform = models.Reform(image = a, filter_spec = ifilter.path(), ifile = d.fp, width = d.width, height = d.height)
 models.Reform.objects.delete(filter_spec="thumb")
 models.Reform.objects.filter(filter_spec="thumb").delete()
+
+
+# filters
+import image
+image.get_filters()
+
+
+# registry
+import image
+image.autodiscover()
+image.autodiscover_noncore_modules('image_filters')
+image.registry._registry
+image.registry.list()

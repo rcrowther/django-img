@@ -1,7 +1,17 @@
 Save in right place
 Make reforms
+Why not registering app images on server run?
+Why is medium rezize wierd (cached?)
+Look over the process thing again. It's still an issue.
+
+Why decorator not working?
+https://docs.djangoproject.com/en/3.0/ref/contrib/admin/
 
 STATIC_oOR_URL
 and switch between them
 Classwide Congatants and names (or in Willow?)
 SVG tiff upload?
+
+Try wand
+http://docs.wand-py.org/en/0.5.9/
+http://docs.wand-py.org/en/0.5.9/guide/colorenhancement.html#evaluate-expression
