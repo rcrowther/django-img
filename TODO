@@ -3,6 +3,8 @@ Make reforms
 Why not registering app images on server run?
 Why is medium rezize wierd (cached?)
 Look over the process thing again. It's still an issue.
+Where JPG problems from?
+Must decide resolve the transparency issue
 
 Why decorator not working?
 https://docs.djangoproject.com/en/3.0/ref/contrib/admin/

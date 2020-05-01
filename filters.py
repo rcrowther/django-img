@@ -117,7 +117,14 @@ class Filter():
         # return out_buff
 
 class PillowMixin:
-    
+
+    # def ensure_save(self, pillow):
+        # if pillow.mode in ('RGBA', 'LA'):
+            # background = Image.new(pillow.mode[:-1], pillow.size, self.fill_color)
+            # background.paste(pillow, pillow.split()[-1])
+            # image = background
+            # im.convert("RGB")
+            
     def process(self, src_file, dst_name_no_extension, save_info_callback):
         src_image = PILImage.open(src_file)
         
@@ -144,7 +151,12 @@ class PillowMixin:
         # across different filters
         pil_dst = self.pillow_actions(src_image) or src_image
 
+        #! No transparency
+        pil_dst = pil_dst.convert("RGB")
+        write_attrs['quality'] = 85
+
         out_buff = BytesIO()
+
         pil_dst.save(
             out_buff,
             **write_attrs
@@ -161,7 +173,9 @@ class PillowMixin:
         
 
 class Format(PillowMixin, Filter):
-    '''Establish the format for an image. Stting iformat=None means the image is unchanged.'''
+    '''Establish the format for an image. 
+    Set iformat=None means the image is unchanged.
+    '''
     iformat = None
     
     def __new__(cls, *args, **kwargs):

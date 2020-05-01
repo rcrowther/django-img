@@ -11,7 +11,7 @@ from image.filters import (
 
 __all__ = [
     "Format", "Resize", "Crop", "ResizeSmart", "Thumb",
-    "register", "registry"
+    "register", "registry", "autodiscover"
     ]
 # See django.contrib.admin.__init__()
 #def autodiscover():

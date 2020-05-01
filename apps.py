@@ -9,6 +9,6 @@ class ImageConfig(AppConfig):
     label = 'image'
     verbose_name = _("Image handling")
 
-    #def ready(self):
-    #    from images.signal_handlers import register_signal_handlers
-    #    register_signal_handlers()
+    def ready(self):
+        super().ready()
+        self.module.autodiscover()
