@@ -10,6 +10,8 @@ from image.models import Image
 #tmp, until we have registry
 from image.image_filters import Small
 from image.registry import registry
+from image import utils
+
 
 register = template.Library()
 
@@ -24,43 +26,73 @@ Lookup an image by reform (filter) and title.
 If a view has already generated a context with models, this is not 
 a prefered method, as it will make an extra database lookup.
 '''
-@register.simple_tag
-def image_tag_by_title(img_title, ifilter, **kwargs):
+@register.simple_tag(takes_context=True)
+def image_tag_by_title(context, img_title, filter_path, **kwargs):
+    '''
+    Lookup an image by filter, and title.
+    If a view has already generated a context with models, this is the
+    prefered method.
+    @img_model reference to an image in the template context (NB 
+    templates can handle dotted notation e.g. page.image)
+    @filter_path string of module path to a Filter e.g. "image.Format". If 
+    the Filter is only named, the app location of the calling view is 
+    added e.g. if "Large" is called from a view in 'page', the filter 
+    become "page.Large" 
+    @kwargs added as attribut4es to the final tag.
+    ''' 
     print('image_tag_by_title:')
     print(str(img_title))
-    print(str(ifilter))
+    print(str(filter_path))
     #print('context in temlate tag:')
     #print(str(context))
     #img_title = 'phone'
+    
     im = Image.objects.get(title=img_title)
-    f = registry.get_instance(ifilter)
-    #f = Small()
+    # expand abreviated filter paths
+    if (filter_path.find('.') == -1):
+        view_path = context.get('view').__module__
+        #print(str(view_path))
+        filter_path = utils.module_path_append(utils.module_path_root(view_path), filter_path)
+        
+    f = registry.get_instance(filter_path)
     r = im.get_reform(f)
     return r.img_tag(kwargs)
 
 
-'''
-Lookup an image by reform (filter), context and reference.
-If a view has already generated a context with models, this is the
-prefered method.
-'''        
+       
 @register.simple_tag(takes_context=True)
-def image_tag(context, img_model, ifilter, **kwargs):
-    # split context reference to delve context?
-
-    print('image in temlate tag:')
-    print(str(img_model))
-    print('context in temlate tag:')
-    print(str(context))
+def image_tag(context, img_model, filter_path, **kwargs):
+    '''
+    Lookup an image by reform (filter), context and reference.
+    If a view has already generated a context with models, this is the
+    prefered method.
+    @img_model reference to an image in the template context (NB 
+    templates can handle dotted notation e.g. page.image)
+    @filter_path string of module path to a Filter e.g. "image.Format". If 
+    the Filter is only named, the app location of the calling view is 
+    added e.g. if "Large" is called from a view in 'page', the filter 
+    become "page.Large" 
+    @kwargs added as attribut4es to the final tag.
+    ''' 
+    #print('image in temlate tag:')
+    #print(str(img_model))
+    #print('context in temlate tag:')
+    #print(str(context))
     
     obj_key = 'object'
     obj = context[obj_key]
     im = obj.img
-    f = registry.get(ifilter)
-    #f = Small()
+    # expand abreviated filter paths
+    if (filter_path.find('.') == -1):
+        view_path = context.get('view').__module__
+        #print(str(view_path))
+        filter_path = utils.module_path_append(utils.module_path_root(view_path), filter_path)
+    #print('ifilter in temlate tag:')
+    #print(str(ifilter))        
+    f = registry.get_instance(filter_path)
     r = im.get_reform(f)
-    flatatt(kwargs)
-    return r.url()
+    #flatatt(kwargs)
+    return r.img_tag(kwargs)
         
 @register.simple_tag(takes_context=True)
 def image_url(context, img_model, ifilter):

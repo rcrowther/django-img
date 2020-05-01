@@ -1,14 +1,25 @@
+= Structure
 Save in right place
 Make reforms
+
+
 Why not registering app images on server run?
 Why is medium rezize wierd (cached?)
-Look over the process thing again. It's still an issue.
-Where JPG problems from?
-Must decide resolve the transparency issue
+Look over the process thing for FilePaths. It's still an issue.
+
+Must decide resolve the JPEG/Pillow transparency issue
+https://github.com/python-pillow/Pillow/issues/2609
+
+DRY tag ids of Filters
+Autodiscover more places, see template loaders
+Register, always want an instance?
 
 Why decorator not working?
 https://docs.djangoproject.com/en/3.0/ref/contrib/admin/
 
+Breakable template from tags
+
+= General
 STATIC_oOR_URL
 and switch between them
 Classwide Congatants and names (or in Willow?)
