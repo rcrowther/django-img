@@ -118,10 +118,23 @@ Then, it's a waste of the Wagtail setup, but you can summon the original in a te
         <caption>{{ article.img,title }}</caption>
 
 
-# All settings
+# Further
+## Settings
+Images accepts some settings. They look like the Django template setting,
+
+    IMAGES = [
+        {
+            'APP_DIRS': True,
+            # 'MEDIA_SUBPATH_ORIGINALS':
+            # 'MEDIA_SUBPATH_REFORMS':
+            'DIRS': [
+                        PROJECT_DIR,
+            ],
+        },
+    ]
 
 
 # Credits
-I take little credit for the upload and storage code. It has been ripped from the Wagtail CMS. Though I have responsibility for how I have treated the code.
+I take little credit for the upload and storage code. It was ripped from the Wagtail CMS. Though I have responsibility for how I have treated the code.
 
 [Wagtail documentation](https://docs.wagtail.io/en/v2.8.1/advanced_topics/images/index.html)

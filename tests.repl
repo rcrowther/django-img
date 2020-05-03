@@ -25,3 +25,21 @@ image.autodiscover()
 image.autodiscover_noncore_modules('image_filters')
 image.registry._registry
 image.registry.list()
+
+# utils
+from image import utils
+c = utils.ModulePath.from_str('droop.python.lookup')
+str(c)
+c.root
+c.branch
+c.branch().branch()
+c.extend('coop')
+
+
+from image import utils
+s = utils.Settings()
+s.dirs
+s.app_dirs
+s.media_subpath_originals
+s.media_subpath_reforms
+

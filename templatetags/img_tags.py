@@ -21,32 +21,27 @@ register = template.Library()
 - take an image title
 {% image_tag_by_title 'dirty_river', Large, class='header-image' %}
 ''' 
-'''
-Lookup an image by reform (filter) and title.
-If a view has already generated a context with models, this is not 
-a prefered method, as it will make an extra database lookup.
-'''
+
 @register.simple_tag(takes_context=True)
 def image_tag_by_title(context, img_title, filter_path, **kwargs):
     '''
     Lookup an image by filter, and title.
-    If a view has already generated a context with models, this is the
-    prefered method.
-    @img_model reference to an image in the template context (NB 
-    templates can handle dotted notation e.g. page.image)
-    @filter_path string of module path to a Filter e.g. "image.Format". If 
+    If a view has already generated a context with models, this is not 
+    a prefered method, as it makes a database lookup.
+    @img_title string reference to an image by title e.g. 'taunton_skyscraper'
+    @filter_path string module path to a Filter e.g. "image.Format". If 
     the Filter is only named, the app location of the calling view is 
     added e.g. if "Large" is called from a view in 'page', the filter 
     become "page.Large" 
     @kwargs added as attribut4es to the final tag.
     ''' 
-    print('image_tag_by_title:')
-    print(str(img_title))
-    print(str(filter_path))
-    #print('context in temlate tag:')
-    #print(str(context))
+    # print('image_tag_by_title:')
+    # print(str(img_title))
+    # print(str(filter_path))
+    # print('context in temlate tag:')
+    # print(str(img_title))
+    #! pass this in
     #img_title = 'phone'
-    
     im = Image.objects.get(title=img_title)
     # expand abreviated filter paths
     if (filter_path.find('.') == -1):
@@ -68,14 +63,16 @@ def image_tag(context, img_model, filter_path, **kwargs):
     prefered method.
     @img_model reference to an image in the template context (NB 
     templates can handle dotted notation e.g. page.image)
-    @filter_path string of module path to a Filter e.g. "image.Format". If 
+    @filter_path string module path to a Filter e.g. "image.Format". If 
     the Filter is only named, the app location of the calling view is 
     added e.g. if "Large" is called from a view in 'page', the filter 
     become "page.Large" 
     @kwargs added as attribut4es to the final tag.
     ''' 
-    #print('image in temlate tag:')
-    #print(str(img_model))
+    #! data recovery needs help
+    #! how template tags do dotted notation? Do they?
+    print('image in temlate tag:')
+    print(str(img_model))
     #print('context in temlate tag:')
     #print(str(context))
     
@@ -93,6 +90,7 @@ def image_tag(context, img_model, filter_path, **kwargs):
     r = im.get_reform(f)
     #flatatt(kwargs)
     return r.img_tag(kwargs)
+        
         
 @register.simple_tag(takes_context=True)
 def image_url(context, img_model, ifilter):
