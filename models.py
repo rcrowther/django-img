@@ -65,10 +65,13 @@ class AbstractImage(models.Model):
         height_field='height'
     )
     
+    #x
+    # Django uses pillow anyway to provide width and height
+    # can we autopopulate those from remote?
     width = models.PositiveIntegerField(verbose_name=_('width'), editable=False)
     height = models.PositiveIntegerField(verbose_name=_('height'), editable=False)
-    #! bytesize
-    # I think the orrible duplication is to cover remote loads?
+    #x 
+    # I think the orrible duplication with ImageField.size is to cover remote loads?
     size = models.PositiveIntegerField(null=True, editable=False)
 
 
@@ -85,7 +88,10 @@ class AbstractImage(models.Model):
 
             
     #? We have it or don't. Whats this for?
-    #! it saves on query. Lazy update. Do that for height and width, too?        
+    # This exists because, although Django Imagefield will autopopulate 
+    # width and height via Pillow, pillow will not find the filesize.
+    # That can be done by opening a file using Python.
+    #! get bytesize       
     def get_file_size(self):
         if self.size is None:
             try:
@@ -98,7 +104,7 @@ class AbstractImage(models.Model):
                 # storage being used.
                 raise SourceImageIOError(str(e))
 
-            self.save(update_fields=['file_size'])
+            self.save(update_fields=['size'])
 
         return self.size
 

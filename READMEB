@@ -127,15 +127,23 @@ Images accepts some settings. They look like the Django template setting,
             'APP_DIRS': True,
             # 'MEDIA_SUBPATH_ORIGINALS':
             # 'MEDIA_SUBPATH_REFORMS':
+            'TRUNCATE_PATHS' : True,
             'MODULES': [
                         "someSiteName",
             ],
         },
     ]
 
-''Modules' defines extra places to put modules. The above example suggests a sitewide filter collection in the site directory, same as the site-wide template collection most Djangos have in the same directory. The setting takes module paths, not filepaths, because the filter files are live code.
+APP_DIRS
+defines if image_filters will be sought for in apps. If false, the app only uses app-defined filters.
 
-''app_dirs' defines if image_filters will be sought for in apps. If false, the app only uses app-defined filters.
+TRUNCATE_PATHS
+Truncate filepaths. This is usually done by truncating the length of filenames (which can become very long on the web). This is because Django imposes a 
+
+MODULES
+defines extra places to put modules. The above example suggests a sitewide filter collection in the site directory, same as the site-wide template collection most Djangos have in the same directory. The setting takes module paths, not filepaths, because the filter files are live code.
+
+
 
 
 

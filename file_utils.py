@@ -12,11 +12,11 @@ def filename(path):
     only handle 255 char path lengths. 
     @path a pathlib Path 
     '''
-
     name = path.stem
-    if (not (image.settings.truncate_lengths)):
+    if (not (settings.truncate_paths)):
         return name
-    # Truncate filename to prevent it going over 100 chars,
+        
+    # truncate filename to prevent it going over 100 chars,
     # accounting for declared paths
     #! don't throw error, let other code handle?
-    return path[-image.settings.path_length_limit:]
+    return name[:settings.path_length_limit]
