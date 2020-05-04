@@ -127,11 +127,16 @@ Images accepts some settings. They look like the Django template setting,
             'APP_DIRS': True,
             # 'MEDIA_SUBPATH_ORIGINALS':
             # 'MEDIA_SUBPATH_REFORMS':
-            'DIRS': [
-                        PROJECT_DIR,
+            'MODULES': [
+                        "someSiteName",
             ],
         },
     ]
+
+''Modules' defines extra places to put modules. The above example suggests a sitewide filter collection in the site directory, same as the site-wide template collection most Djangos have in the same directory. The setting takes module paths, not filepaths, because the filter files are live code.
+
+''app_dirs' defines if image_filters will be sought for in apps. If false, the app only uses app-defined filters.
+
 
 
 # Credits

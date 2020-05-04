@@ -20,9 +20,9 @@ settings = utils.Settings()
 def autodiscover():
     utils.autodiscover(
         'image_filters', 
-        parents=settings.modules, 
-        find_in_apps=True, 
-        not_core_apps=True
+        parents = settings.modules, 
+        find_in_apps = settings.app_dirs, 
+        not_core_apps = True
         )
 
 # @functools.lru_cache(maxsize=None)

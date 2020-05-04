@@ -2,8 +2,9 @@ from image import image_processes
 from image.constants import IMAGE_FORMATS, FORMAT_APP_PILLOW, FORMAT_PILLOW_APP
 from PIL import Image as PILImage
 from io import BytesIO
-
-
+from image.utils import ModulePath
+from pathlib import Path
+        
         
 class Filter():
     '''
@@ -12,7 +13,7 @@ class Filter():
     As such, it is more than a static configuration. It is half-
     functional. takes an open Python file and returns a buffer. 
     The stock implementation uses Pillow, but this setup allows 
-    other codebases to bue used in a filler without cahnging calling 
+    other codebases to bue used in a filler without changing calling 
     code.
     '''
     #def __new__(cls, *args, **kwargs):
@@ -35,7 +36,7 @@ class Filter():
                 "'" + "', '".join(nulled) + "'")
             )           
 
-
+    
     def path_str(self):
         '''
         Return thhe dotted module and classname as a string.
@@ -44,7 +45,34 @@ class Filter():
         should persist across code versions.
         '''
         return self.__module__ + '.' + type(self).__name__
-
+    
+        
+    #! cached property?
+    def id_str_short(self):
+        '''
+        Id for a filter, usable for keys.
+        This is not guarenteed unique. IT depends on the filter being
+        placed in unique module packages. Which, in Django, they
+        would be, inside app names.
+        Currently formed as <module parent> + '_' + <filtername> 
+        '''
+        split_path = self.__module__.split('.')
+        l = len(split_path)
+        
+        # protect against no module path. 'image_filters' namespacing
+        # seems pointless
+        if (l < 2):
+            return type(self).__name__
+            
+        # Take the second-last element. The leaf element in the 
+        # surrounding system is always 'image_file', which is generic, 
+        # but the parent element is distinctive, often an appname, so 
+        # useful.
+        app_id = split_path[l - 2]
+        
+        # Add the filter name, which is unique to every module.
+        return app_id + '_' + type(self).__name__
+    
     
     def human_path(self):
         '''Return the surrounding module and class name as a human string.
@@ -67,6 +95,14 @@ class Filter():
 
         return classpath.lower()
 
+        
+    def file_name(self, base_name, extension):
+        '''
+        Generate a filename from a base string.
+        '''
+        return base_name + '-' + self.id_str_short() + '.' + extension
+
+        
     def process(self, src_file, save_info_callback):
         '''Wrap a Python file handle for processing a reform.
         Return should be a BytesIO buffer or similar. Some APIs do not
@@ -124,21 +160,22 @@ class PillowMixin:
             # background.paste(pillow, pillow.split()[-1])
             # image = background
             # im.convert("RGB")
+
             
     def process(self, src_file, dst_name_no_extension, save_info_callback):
         src_image = PILImage.open(src_file)
-        
+                
         # write_attrs currently {format, jpeg_quality}
         write_attrs = save_info_callback(
                     FORMAT_PILLOW_APP[src_image.format], 
                     self,
                     )
-                    
-        dst_fname = "{}.{}".format(
-            dst_name_no_extension,
-            write_attrs['format']
-            )
-
+        #! this wouldn't work for non-local files would it?
+        # dst_fname = self.file_name(
+                # Path(src_file.name).stem,
+                # write_attrs['format']
+            # )
+            
         # mods on the save data
         # convert the returned format to PIL
         write_attrs['format'] = FORMAT_APP_PILLOW[write_attrs['format']]

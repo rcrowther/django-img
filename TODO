@@ -1,6 +1,7 @@
 = Structure
 Save in right place
-Autodiscover more places, see template loaders
+Model field?
+How does cloud storage generate reforms?
 
 == Reforms
 Why is medium resize wierd (cached?)
@@ -10,6 +11,7 @@ Must decide resolve the JPEG/Pillow transparency issue
 https://github.com/python-pillow/Pillow/issues/2609
 
 == Filters
+For cloud, what to you get to make reforms? so what source goes into the filter?
 Register, always want an instance?
 
 Why decorator not working?
@@ -23,7 +25,7 @@ http://docs.wand-py.org/en/0.5.9/guide/colorenhancement.html#evaluate-expression
 
 == Sttings
 Put detection in utils.py
-Cach filefinding and the like
+Cache filefinding and the like
 
 = General
 STATIC_oOR_URL

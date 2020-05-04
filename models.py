@@ -84,7 +84,8 @@ class AbstractImage(models.Model):
             return False
 
             
-    #? We have it or don't. Whats this for?        
+    #? We have it or don't. Whats this for?
+    #! it saves on query. Lazy update. Do that for height and width, too?        
     def get_file_size(self):
         if self.size is None:
             try:
@@ -236,7 +237,11 @@ class AbstractImage(models.Model):
                         
             # Open the file then produce a reformed image.
             with self.open_file() as fsrc:
-                (reform_buff, dst_fname) = filter_instance.process(fsrc, dst_fname, self.save_info_callback)
+                (reform_buff, dst_fname) = filter_instance.process(
+                    fsrc, 
+                    dst_fname, 
+                    self.save_info_callback
+                )
 
             # Right, lets make a Django ImageFile from that
             reform_file = ImageFile(reform_buff, name=dst_fname)            
