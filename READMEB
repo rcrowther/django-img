@@ -106,16 +106,69 @@ That's it. Refresh the server and browser and you should see the image. To chang
 
 
 # Further
-
-== Filters
 Model field declaration is by foreign key. 
 
 With the image app you do most of your work in the app which uses the images, not the app itself.
 
 
+## Filters
+### Filter placement
+Files of filter definitions can be placed in any app. Start a file called 'image_filters.py' and off you go.
+
+This works for me---inside an app called Page I can have a file of filters e.g. Large/Medium/Small, made for Page styling. Inside an app called BlogPost, another set of filters Medium/Small/Thumb made for BlogPost styling.
+
+If you would prefer to gether all filters together in one place, define the settings to include,
+ 
+            'MODULES': [
+                        "someSiteName",
+            ],
+
+Then put a file in the 'sitename' directory. If you do this, you will probably need to namespace filters,
+
+    BlogPostLarge:
+        width : 256
+        height 256
+
+
+
+### Writing Filters
+Most of the filters you will need can be made by inheriting from the core filters in the app. There are,
+
+- Resize
+- Crop
+
+Both these fit the image within the bounding box given by the dimansions. Both fiters can result in images narrower or less in height than the given sizes.
+
+Two more filters,
+
+- SmartResize 
+- SmartCrop. 
+
+These filters fill out their results by placing on a background of given color so the results always match the given dimensions. Also, they will not attempt to work on images that are smaller than the bounding sizes.
+
+If you are inheriting from these filters, it's easy to produce another size. Put this in an 'image_filters.py' file somewhere,
+
+   from image import filters
+
+   class Large(filters.SmartResize):
+        width=382
+        height=256
+
+
+
+### Writing custom filter code
+Inherit from image.Filter. You will need to provide a 'process' method. Filter takes an open Python File and returns a ByteBufferIO and a filename. You can inherit from the PillowMixin or WandMixin to cover filehandling for those libraries. See the code for details.
+
+
+### Why can filters not be chained?
+Filters can not be chained, and there is no way to do that or present chaining to a user. Filters must be written in code, and do not accept parameters. You want a new resize filter, you write it.
+
+This is a deliberate decision. It makes life easy. If you want to produce a front-end that can lever the filters and chain them, that is another step. Possible, but further than this app will go.
+
+
+
 
 ## Admin
-
 The model has auto-slug() code. Declare this in admin.py to fill in suggestions automatically,
 
     class PageAdmin(admin.ModelAdmin):
@@ -123,19 +176,18 @@ The model has auto-slug() code. Declare this in admin.py to fill in suggestions 
 
 
 
-## Filters
- In the app, create image_filters.py containing filter declarations.e.g.
+## Management commands
+There are these
 
-   from image import filters
+image_create_bulk
+image_sync
+reform_delete
 
-   class Large(filters.Resize):
-        width=382
-        height=256
+They do what they say. 'image_sync' is particularly useful, it will attemt to make models for orphane files, delete orphaned files, or delete models with missing files.
 
-
-
+ 
 ## Template tags
-There is a tag to find images by title. Sometimes this will be useful, for . However, if you are already passing a model through a context, it is a database hit,
+There is a tag to find images by title. Sometimes this will be useful, for fixed or temporary decoration/banners etc. However, it is a database hit, unecessary if you are passing a model through a context,
 
         {{ image-tag-by-title image.Large titleOfImage }}
         <caption>{{ page.img,title }}</caption>
@@ -143,7 +195,7 @@ There is a tag to find images by title. Sometimes this will be useful, for . How
 
 
 ## Settings
-Images accepts some settings. They look like the Django template setting,
+Images accepts some settings. They look like the Django template settings,
 
     IMAGES = [
         {
@@ -158,13 +210,13 @@ Images accepts some settings. They look like the Django template setting,
     ]
 
 APP_DIRS
-defines if image_filters will be sought for in apps. If false, the app only uses app-defined filters.
+Defines if image_filters will be sought in apps. If false, the app only uses filters defined in the core app.
 
 TRUNCATE_PATHS
-Truncate filepaths. This is usually done by truncating the length of filenames (which can become very long on the web). This is because Django imposes a 
+Truncate filepaths. This is usually done by truncating the length of filenames (which can become very long on the web). This is because Django imposes limits on filepath lengths.
 
 MODULES
-defines extra places to put modules. The above example suggests a sitewide filter collection in the site directory, same as the site-wide template collection most Djangos have in the same directory. The setting takes module paths, not filepaths, because the filter files are live code.
+Defines extra places to put modules. The above example suggests a site-wide filter collection in the site directory, same as the site-wide template collection most Djangos have in the same directory. The setting takes module paths, not filepaths, because filter files are live code.
 
 # Other usages
  but for resons of ecomomy, Django doessn't automatically use full clean.. This to thoroughtly check the slug in a 

@@ -2,11 +2,15 @@
 Save in right place
 Model field?
 How does cloud storage generate reforms?
-Autto remove images
 Images Admin not removing files
+Decide/Fix model fields
+
+== Management
+Work on pks too
+How about a title list?
 
 == Reforms
-Why is medium resize wierd (cached?)
+Why is medium resize wierd (cached?) Seems to be on squashing.
 Look over the process thing for FilePaths. It's still an issue.
 
 Must decide resolve the JPEG/Pillow transparency issue
@@ -25,14 +29,15 @@ Try wand
 http://docs.wand-py.org/en/0.5.9/
 http://docs.wand-py.org/en/0.5.9/guide/colorenhancement.html#evaluate-expression
 
-== Sttings
+== Settings
 Put detection in utils.py
-Cache filefinding and the like
+Cache filefinding, and the like
 
 = General
-STATIC_oOR_URL
+STATIC_OR_URL
 and switch between them
 Classwide Congatants and names (or in Willow?)
-SVG tiff upload?
+SVG/tiff upload?
+Cleanup leftover files
 
 

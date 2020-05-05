@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models.signals import pre_delete, pre_save
 import os.path
 
+#x replace with image.settings
 from django.conf import settings
 
 from contextlib import contextmanager
@@ -16,8 +17,9 @@ from collections import OrderedDict
 from django.utils.functional import cached_property
 #from willow.image import Image as WillowImage
 #from PIL import Image as PILImage
-from image import filters
- 
+#from image.filters import Filter
+print('create models')
+
 #x
 from io import BytesIO
 from django.core.files.images import ImageFile
@@ -111,9 +113,11 @@ class AbstractImage(models.Model):
 
     def get_upload_to(self, filename):
         # Change, and settings.
+        #! replace with settings.media_subpath_originals
         folder_name = 'original_images'
         filename = self.ifile.field.storage.get_valid_name(filename)
 
+        #! replace with image.file_utils.filename
         # do a unidecode in the filename and then replace non-ascii 
         # characters in filename with _ , to sidestep issues with filesystem encoding
         filename = "".join((i if ord(i) < 128 else '_') for i in unidecode(filename))
@@ -170,49 +174,28 @@ class AbstractImage(models.Model):
         return cls.reforms.rel.related_model
 
 
-    def save_info_callback(self, src_format, ifilter):
-        '''
-        Gather and choose between configs about how to save filter results.
-        Probes into several settings. 
-        @ifilter instance of a Filter
-        '''
-        # defaults
-        iformat = src_format
-        jpeg_quality = '85'
-        
-        # Overrides of output format. Settings vetos.
-        if hasattr(ifilter, 'iformat') and ifilter.iformat:
-            iformat = ifilter.iformat
-        if hasattr(settings, 'IMG_FORMAT_OVERRIDE') and settings.IMG_FORMAT_FORCE:
-            iformat = settings.IMG_FORMAT_OVERRIDE
-            
-        if iformat == 'jpeg':
-            # Overrides of JPEG compression quality. Settings vetos.
-            if hasattr(ifilter, 'jpeg_quality'):
-                jpeg_quality = ifilter.jpeg_quality
-            if hasattr(settings, 'IMG_JPEG_QUALITY'):
-                jpeg_quality = settings.IMG_JPEG_QUALITY
-                
-        return {'format': iformat, 'quality': jpeg_quality}
 
 
-    def get_reform(self, ifilter):
+
+    def get_reform(self, filter_instance):
         '''ifilter can be class, instance or text for registry???
         '''
         #! what if filter is none?
-        filtername = None
-        filter_instance = None
+        #filtername = None
+        filter_instance = filter_instance
         #! registry?
-        if isinstance(ifilter, str):
-            filtername = ifilter
-            #filterinstance = make one from the name. But that means a registry?
-            #filter, created = Filter.objects.get_or_create(spec=filter)
-        elif isinstance(ifilter, filters.Filter):
-            filter_instance = ifilter            
-            filtername = ifilter.path_str()
-        else:
-            filter_instance = ifilter()
-            filtername = filter_instance.path_str()
+        # if isinstance(ifilter, str):
+            # filtername = ifilter
+            # #filterinstance = make one from the name. But that means a registry?
+            # #filter, created = Filter.objects.get_or_create(spec=filter)
+        # elif isinstance(ifilter, Filter):
+            # filter_instance = ifilter            
+            # filtername = ifilter.path_str()
+        # else:
+            # filter_instance = ifilter()
+            # filtername = filter_instance.path_str()
+        filtername = filter_instance.path_str()
+            
         #cache_key = filter.get_cache_key(self)
         Reform = self.get_reform_model()
 
@@ -245,8 +228,7 @@ class AbstractImage(models.Model):
             with self.open_file() as fsrc:
                 (reform_buff, dst_fname) = filter_instance.process(
                     fsrc, 
-                    dst_fname, 
-                    self.save_info_callback
+                    dst_fname,
                 )
 
             # Right, lets make a Django ImageFile from that

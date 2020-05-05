@@ -39,8 +39,8 @@ class ClassRegistry:
                 
     def register(self, class_or_iterable):
 
-        print('regestering')
-        print(str(class_or_iterable))
+        #print('regestering')
+        #print(str(class_or_iterable))
         if (not isinstance(class_or_iterable, Iterable)):
             model_or_iterable = [class_or_iterable]
         for klass in class_or_iterable:

@@ -1,10 +1,12 @@
-from image import image_processes
-from image.constants import IMAGE_FORMATS, FORMAT_APP_PILLOW, FORMAT_PILLOW_APP
 from PIL import Image as PILImage
 from io import BytesIO
 from image.utils import ModulePath
 from pathlib import Path
-        
+from image import image_processes
+from image.settings import settings
+from image.constants import IMAGE_FORMATS, FORMAT_APP_PILLOW, FORMAT_PILLOW_APP
+print('create filters')
+
         
 class Filter():
     '''
@@ -102,9 +104,35 @@ class Filter():
         '''
         return base_name + '-' + self.id_str_short() + '.' + extension
 
+
+    def save_info_callback(self, src_format):
+        '''
+        Gather and choose between configs about how to save filter results.
+        Probes into several settings. If present, settings file wins, 
+        filter config wins, discovered state. 
+        @ifilter instance of a Filter
+        '''
+        # defaults
+        iformat = src_format
+        jpeg_quality = settings.jpeg_quality
         
-    def process(self, src_file, save_info_callback):
-        '''Wrap a Python file handle for processing a reform.
+        # Overrides of output format. Filter wins.
+        if (settings.format_override):
+            iformat = settings.format_override
+        if hasattr(self, 'iformat') and self.iformat:
+            iformat = self.iformat
+
+        if iformat == 'jpeg':
+            # Overrides of JPEG compression quality. Filter wins.
+            if hasattr(self, 'jpeg_quality') and self.jpeg_quality:
+                jpeg_quality = self.jpeg_quality
+                
+        return {'format': iformat, 'quality': jpeg_quality}
+        
+        
+    def process(self, src_file):
+        '''
+        Wrap a Python file handle for processing a reform.
         Return should be a BytesIO buffer or similar. Some APIs do not
         include file saving, but most will deal with a generic Python
         buffer.
@@ -162,19 +190,18 @@ class PillowMixin:
             # im.convert("RGB")
 
             
-    def process(self, src_file, dst_name_no_extension, save_info_callback):
+    def process(self, src_file, dst_name_no_extension):
         src_image = PILImage.open(src_file)
                 
         # write_attrs currently {format, jpeg_quality}
-        write_attrs = save_info_callback(
-                    FORMAT_PILLOW_APP[src_image.format], 
-                    self,
+        write_attrs = self.save_info_callback(
+                    FORMAT_PILLOW_APP[src_image.format],
                     )
         #! this wouldn't work for non-local files would it?
-        # dst_fname = self.file_name(
-                # Path(src_file.name).stem,
-                # write_attrs['format']
-            # )
+        dst_fname = self.file_name(
+                Path(src_file.name).stem,
+                write_attrs['format']
+            )
             
         # mods on the save data
         # convert the returned format to PIL
@@ -213,17 +240,23 @@ class Format(PillowMixin, Filter):
     '''Establish the format for an image. 
     Set iformat=None means the image is unchanged.
     '''
-    iformat = None
+    iformat=None
+    jpeg_quality=None
     
     def __new__(cls, *args, **kwargs):
-        print('called Format new')          
-        if (not(cls.iformat in IMAGE_FORMATS)):
+        #print('called Format new')          
+        if (cls.iformat and (not(cls.iformat in IMAGE_FORMATS))):
             raise ValueError("Attribute 'iformat' returns unknown value: class '{}': val: '{}'\nAvailable formats:'{}'".format(
                 cls.__name__, 
                 cls.iformat,
-                "', '".join(IMAGE_FORMATS))
-            ) 
-            
+                "', '".join(IMAGE_FORMATS)
+            )) 
+
+        if (cls.jpeg_quality and (cls.jpeg_quality > 100 or cls.jpeg_quality < 1)):
+            raise ValueError("Attribute 'jpeg_quality' must be in range 1--100: class '{}': val: '{}'".format(
+                cls.__name__, 
+                cls.jpeg_quality
+            ))             
         return super().__new__(cls, *args, **kwargs)
 
             
@@ -340,28 +373,7 @@ class SmartCrop(Format):
             self.height
         )
         return pillow
-                        
-# class Large(image.ResizeFilter):
-    # width=513
-    # height=760
-    # iformat='jpg'
 
-
-# class Medium(image.ResizeFilter):
-    # width=630
-    # height=272
-    # iformat='jpg'
-
-        
-# class Small(image.ResizeFilter):
-    # width=220
-    # height=292
-    # iformat='jpg'
-        
-# class Thumb(image.ResizeFilter):
-    # width=98
-    # height=64
-    # iformat='png'
 
 class Thumb(ResizeSmart):
     width=64

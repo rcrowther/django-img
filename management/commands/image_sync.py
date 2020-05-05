@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from image.models import Image
 from pathlib import Path
-from image import settings
+from image.settings import settings
 
 
 

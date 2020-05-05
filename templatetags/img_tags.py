@@ -47,8 +47,8 @@ def image_tag_by_title(context, img_title, filter_path, **kwargs):
     if (filter_path.find('.') == -1):
         view_path = context.get('view').__module__
         #print(str(view_path))
-        filter_path = utils.module_path_append(utils.module_path_root(view_path), filter_path)
-        
+        #filter_path = utils.module_path_append(utils.module_path_root(view_path), filter_path)
+        filter_path = utils.ModulePath(view_path).root.extend(filter_path)
     f = registry.get_instance(filter_path)
     r = im.get_reform(f)
     return r.img_tag(kwargs)
@@ -83,7 +83,8 @@ def image_tag(context, img_model, filter_path, **kwargs):
     if (filter_path.find('.') == -1):
         view_path = context.get('view').__module__
         #print(str(view_path))
-        filter_path = utils.module_path_append(utils.module_path_root(view_path), filter_path)
+        #filter_path = utils.module_path_append(utils.module_path_root(view_path), filter_path)
+        filter_path = utils.ModulePath(view_path).root.extend(filter_path)
     #print('ifilter in temlate tag:')
     #print(str(ifilter))        
     f = registry.get_instance(filter_path)
