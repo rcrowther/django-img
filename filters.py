@@ -3,7 +3,8 @@ from io import BytesIO
 from image.utils import ModulePath
 from pathlib import Path
 from image import image_processes
-from image.settings import settings
+from image.settings import settings, check_jpeg_quality, check_image_formats
+#x IMAGE_FORMATS
 from image.constants import IMAGE_FORMATS, FORMAT_APP_PILLOW, FORMAT_PILLOW_APP
 print('create filters')
 
@@ -244,19 +245,20 @@ class Format(PillowMixin, Filter):
     jpeg_quality=None
     
     def __new__(cls, *args, **kwargs):
-        #print('called Format new')          
-        if (cls.iformat and (not(cls.iformat in IMAGE_FORMATS))):
-            raise ValueError("Attribute 'iformat' returns unknown value: class '{}': val: '{}'\nAvailable formats:'{}'".format(
-                cls.__name__, 
-                cls.iformat,
-                "', '".join(IMAGE_FORMATS)
-            )) 
-
-        if (cls.jpeg_quality and (cls.jpeg_quality > 100 or cls.jpeg_quality < 1)):
-            raise ValueError("Attribute 'jpeg_quality' must be in range 1--100: class '{}': val: '{}'".format(
-                cls.__name__, 
-                cls.jpeg_quality
-            ))             
+        print('called Format new')          
+        # if (cls.iformat and (not(cls.iformat in IMAGE_FORMATS))):
+            # raise ValueError("Attribute 'iformat' returns unknown value: class '{}': val: '{}'\nAvailable formats:'{}'".format(
+                # cls.__name__, 
+                # cls.iformat,
+                # "', '".join(IMAGE_FORMATS)
+            # )) 
+        check_image_formats(cls.__name__, 'iformat', cls.iformat)
+        # if (cls.jpeg_quality and (cls.jpeg_quality > 100 or cls.jpeg_quality < 1)):
+            # raise ValueError("Attribute 'jpeg_quality' must be in range 1--100: class '{}': val: '{}'".format(
+                # cls.__name__, 
+                # cls.jpeg_quality
+            # ))      
+        check_jpeg_quality(cls.__name__, 'jpeg_quality', cls.jpeg_quality)       
         return super().__new__(cls, *args, **kwargs)
 
             

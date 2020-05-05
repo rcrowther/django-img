@@ -45,10 +45,10 @@ class ModulePath():
         
 
 def autodiscover(
-    *module_names, 
-    parents=[], 
-    find_in_apps=True, 
-    not_core_apps=False
+        *module_names, 
+        parents=[], 
+        find_in_apps=True, 
+        not_core_apps=False
     ):
     """
     Auto-discover modules on module pathss.
@@ -67,7 +67,7 @@ def autodiscover(
     if (not_core_apps):
         app_modules = [p for p in app_modules if (not p.startswith('django'))]
     module_parents = [*parents, *app_modules]
-    print('module load ')
+    #print('module load ')
     #print(str(module_parents))
     r = []
     for module_parent in module_parents:

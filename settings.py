@@ -2,11 +2,47 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.functional import cached_property
 from pathlib import Path
+from image.constants import IMAGE_FORMATS
 
 print('create settings')
 
 
 
+# These are used in filters and site-wide Django settings.
+# So gathered here.
+def check_media_subpath(class_name, setting_name, v):
+    if (v and (len(v) > 24)):
+        raise ImproperlyConfigured(
+            "In {}, '{}' value '{}' exceeds 24 chars."
+            "Reset or set TRUNCATE_PATHS = False"
+            " Path len (in chars): {}".format(
+            class_name,
+            setting_name,
+            v,
+            len(v),
+        ))     
+
+def check_image_formats(class_name, setting_name, v):
+    if (v and (not(v in IMAGE_FORMATS))):
+        raise ImproperlyConfigured(
+            "In {}, '{}' value '{}' is unrecognised."
+            " Recognised image formats: '{}'".format(
+            class_name,
+            setting_name,
+            v,
+            "', '".join(IMAGE_FORMATS),
+        ))
+        
+def check_jpeg_quality(class_name, setting_name, v):
+    if (v and (v < 1 or v > 100)):
+        raise ImproperlyConfigured(
+            "In {}, '{}' smust be 1--100."
+            " Value: {}".format(
+            class_name, 
+            setting_name, 
+            v
+        ))    
+    
 class Settings():
     '''
     Gather settings from the settings file.
@@ -83,26 +119,29 @@ class Settings():
                 self.modules = isettings['MODULES']
              
         # Tests
-        # impose 32 char limit on filepath (Django, 100 char overall path default)
-        # include '/media/'
-        if (self.truncate_paths and (len(self.media_subpath_originals) > 24)):
-            raise ImproperlyConfigured(
-                "Path in MEDIA_SUBPATH_ORIGINALS in IMAGES setting exceeds 24 chars."
-                "Reset or set TRUNCATE_PATHS = False"
-                " Path len:'{}'".format(len(self.media_subpath_originals)))     
-                    
-        if (self.truncate_paths and (len(self.media_subpath_reforms) > 24)):
-            raise ImproperlyConfigured(
-                "Path in MEDIA_SUBPATH_REFORMS in IMAGES setting exceeds 24 chars."
-                "Reset or set TRUNCATE_PATHS = False"
-                " Path len:'{}'".format(len(self.media_subpath_reforrms)))
-                  
-        # notdir_paths = [path for path in self.dirs if (not os.path.isdir(path))]
-        # if (notdir_paths):
-            # raise ImproperlyConfigured(
-                # "Path(s) in DIR in IMAGES setting are not directories."
-                # " Path(s):'{}'".format("', '".join(notdir_paths)))            
-        
+        check_image_formats(
+            'Django settings', 
+            'IMG_FORMAT_OVERRIDE',
+            self.format_override 
+        )
+        # impose short limit on filepath (Django, 100 char overall path default)
+        # includes '/media/', so just 24 chars
+        check_media_subpath(
+            'Django settings', 
+            'MEDIA_SUBPATH_REFORMS',  
+            self.media_subpath_originals
+        )                            
+        check_media_subpath(
+            'Django settings', 
+            'MEDIA_SUBPATH_ORIGINALS',  
+            self.media_subpath_reforms
+        )
+        check_jpeg_quality(
+            'Django settings', 
+            'IMG_JPEG_QUALITY', 
+            self.jpeg_quality
+        )
+      
         
     def __str__(self):
         return "Settings({}, {}, {}, {}, {})".format(
@@ -112,6 +151,8 @@ class Settings():
             self.media_subpath_reforms,
             self.truncate_paths,
         )
+
+
 
 # set one up
 settings = Settings()
