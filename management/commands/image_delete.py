@@ -1,6 +1,8 @@
 from django.core.management.base import BaseCommand, CommandError
 from image.models import Image, Reform
 
+
+
 class Command(BaseCommand):
     help = 'Automatically/bulk delete images'
     output_transaction = True

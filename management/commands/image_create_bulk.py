@@ -16,14 +16,14 @@ class Command(BaseCommand):
         src_path = options['src_path']
         src_dir = Path(src_path)
         if (not(src_dir.is_dir())):
-            raise CommandError("Source provided is not a directory. path: '{}'".format(src_path))
+            raise CommandError("Source provided is not recognised as a directory. path: '{}'".format(src_path))
         
         # get paths of files in the src dir
         src_filepaths = [f.resolve() for f in src_dir.iterdir() if f.is_file()]
        
         # build models and save
-        # I think we can not use bulk_create because.... 
-        # ???
+        # I think we can not use bulk_create because we want to be 
+        # causious as suceed as much as possible
         count = 0
         fail = []
         for path in src_filepaths:

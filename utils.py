@@ -4,6 +4,7 @@ from django.utils.functional import cached_property
 from django.apps import apps
 from django.utils.functional import cached_property
 from importlib import import_module
+from pathlib import Path
 import os.path
 
 #x
@@ -134,22 +135,40 @@ class Settings():
     '''
     def __init__(self):
         # defaults
+        self.media_root = None
         self.modules = []
         self.app_dirs = False
         self.media_subpath_originals = 'originals'
         self.media_subpath_reforms = 'reforms'
         self.truncate_paths = True
         self.populate()
-
+        
     @cached_property
     def path_length_limit(self):
         '''
         Length the settingss will allow for filenames.
         '''
         return (100 - max(len(self.media_subpath_originals), len(self.media_subpath_reforms)))
-                
+              
+    @property
+    def image_local_path(self):
+        '''
+        Full path to the image directory.
+        This is for original image uploads, not reforms.
+        '''
+        #! put back
+        #return Path(settings.MEDIA_ROOT) / self.media_subpath_originals
+        return Path(settings.MEDIA_ROOT) / "original_images"
+        
+
     #@cached_property
     def populate(self):
+        
+        #!? Ummm not for cloud storage
+        if (not(hasattr(settings, 'MEDIA_ROOT'))):
+            raise ImproperlyConfigured('The image app requires MEDIA_ROOT to be defined in settings.')
+        self.media_root = settings.MEDIA_ROOT
+            
         #AttributeError
         print('settings')
         if (hasattr(settings, 'IMAGES')):
