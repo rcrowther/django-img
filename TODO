@@ -10,7 +10,6 @@ Work on pks too
 How about a title list?
 
 == Reforms
-Why is medium resize wierd (cached?) Seems to be on squashing.
 Look over the process thing for FilePaths. It's still an issue.
 
 Must decide resolve the JPEG/Pillow transparency issue
@@ -31,6 +30,7 @@ http://docs.wand-py.org/en/0.5.9/guide/colorenhancement.html#evaluate-expression
 
 == Utils
 Any othr to_str accidents?
+
 == Settings
 Put detection in utils.py
 Cache filefinding, and the like

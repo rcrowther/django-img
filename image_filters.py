@@ -3,7 +3,7 @@ import image
 
 # Register your models here.
 #@image.register
-class Large(image.ResizeSmart):
+class Large(image.CropSmart):
     width=513
     height=760
  

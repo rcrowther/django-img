@@ -39,25 +39,37 @@ def crop(pillow, width, height):
     current_width = b[2] - b[0]
     current_height = b[3] - b[1]
     
+    width_reduce = current_width - width
+    height_reduce = current_height - height
+
     # Only crop if the image is too big
-    if ((current_width > width) or (current_height > height)):
-        ratio = (current_width - width)
-        if (x < 0):
-            x = 0
-            x1 = current_width
-        else:
-            x = ratio >> 1
+    if ((width_reduce > 0) or (height_reduce > 0)):
+        x = 0
+        x1 = current_width
+        y = 0
+        y1 = current_height
+        if (width_reduce > 0):
+            x = width_reduce >> 1
             x1 = x + width
-        ratio = (current_height - height)
-        if (y < 0):
-            y = 0
-            y1 = current_height
-        else:
-            y = ratio >> 1
+        if (height_reduce > 0):
+            y = height_reduce >> 1
             y1 = y + height
         # Crop!
-        pillow = pillow.crop(x, y, x1, y1)
+        pillow = pillow.crop((x, y, x1, y1))
     return pillow
+
+
+def crop_smart(pillow, width, height, fill_color="white"):
+    '''Fit the given image to the given size.
+    A general-purpose transformation.
+    If the image is too large, it is shrunk to fit then, if necessary,
+    filled to size.
+    If too small, image is filled to size
+    @return image of the given dimensions.
+    '''
+    rs = crop(pillow, width, height)
+    f = fill(rs, width, height, fill_color)
+    return f
 
 
 def resize_aspect(pillow, width, height):
@@ -75,10 +87,11 @@ def resize_aspect(pillow, width, height):
     height_reduce = current_height - height
   
     if (width_reduce > height_reduce and width_reduce > 0):
-        h = round((width/current_width) * height)
+        # is 655 * 393 within 513*768  became 513*595
+        h = round((width/current_width) * current_height)
         return pillow.resize((width, h))        
     elif (height_reduce > width_reduce and height_reduce > 0):
-        w = round((height/current_height) * width)
+        w = round((height/current_height) * current_width)
         return pillow.resize((w, height))
     else:
         return pillow
@@ -95,14 +108,5 @@ def resize_smart(pillow, width, height, fill_color="white"):
     f = fill(rs, width, height, fill_color)
     return f
 
-def crop_smart(pillow, width, height, fill_color="white"):
-    '''Fit the given image to the given size.
-    A general-purpose transformation.
-    If the image is too large, it is shrunk to fit then, if necessary,
-    filled to size.
-    If too small, image is filled to size
-    @return image of the given dimensions.
-    '''
-    rs = crop(pillow, width, height)
-    f = fill(rs, width, height, fill_color)
-    return f
+
+

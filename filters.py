@@ -51,12 +51,14 @@ class Filter():
     
         
     #! cached property?
+    #! put the pk in?
     def id_str_short(self):
         '''
         Id for a filter, usable for keys.
-        This is not guarenteed unique. It depends on the filter being
-        placed in unique module packages. Which, in Django, they
-        would be, inside app names.
+        This is not guarenteed unique. it is to be concisely different 
+        so avoid provoking the storage backends, It depends on the 
+        filter being placed in unique module packages. Which, in Django,
+        they would be, inside app names.
         Currently formed as <module parent> + '_' + <filtername> 
         '''
         p = ModulePath.from_str(self.__module__)
@@ -312,7 +314,7 @@ class Crop(Format):
         return pillow
 
 
-class SmartCrop(Format):
+class CropSmart(Format):
     '''Resize and maybe re-format an image.
     A base class e.g.
         class Large(image.CropFilter):
@@ -330,7 +332,7 @@ class SmartCrop(Format):
         return super().__new__(cls, *args, **kwargs)
         
     def pillow_actions(self, pillow):
-        pillow = image_processes.crop(
+        pillow = image_processes.crop_smart(
             pillow, 
             self.width, 
             self.height

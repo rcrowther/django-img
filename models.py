@@ -245,11 +245,9 @@ class AbstractImage(models.Model):
                 filter_instance, 
                 iformat
             )
-            # Right, lets make a Django ImageFile from that
-            reform_file = ImageFile(reform_buff, name=dst_fname)            
             
-            print('dst_fname')
-            print(dst_fname)
+            # Right, lets make a Django ImageFile from that
+            reform_file = ImageFile(reform_buff, name=dst_fname)
             
             # We got everything Django likes. A model save should 
             # generate a Reform DB entry and the file itself.

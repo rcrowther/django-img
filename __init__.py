@@ -7,11 +7,11 @@ print('create __init__')
 
 
 from image.filters import (
-    Filter , Format, Resize, Crop, ResizeSmart, Thumb
+    Filter, Format, Resize, Crop, ResizeSmart, CropSmart, Thumb
 )
 
 __all__ = [
-    "Format", "Resize", "Crop", "ResizeSmart", "Thumb",
+    "Format", "Resize", "Crop", "ResizeSmart", "CropSmart", "Thumb",
     "register", "registry", "autodiscover"
     ]
 
