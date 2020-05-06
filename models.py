@@ -18,6 +18,8 @@ from django.utils.functional import cached_property
 #from willow.image import Image as WillowImage
 #from PIL import Image as PILImage
 #from image.filters import Filter
+from image.utils import image_save_path, reform_filename, reform_save_path
+#from image.settings import settings
 print('create models')
 
 #x
@@ -112,26 +114,40 @@ class AbstractImage(models.Model):
 
 
     def get_upload_to(self, filename):
-        # Change, and settings.
+        print('image upload_to:')
+        print(str(filename))
+        # Incoming filename comes from upload machinery, and needs 
+        # treatment. Also, path needs appending.
         #! replace with settings.media_subpath_originals
         folder_name = 'original_images'
+        
+        #  storage.get_valid_name():
+        # Quote stock local file implementation:
+        # Return the given string converted to a string that can be used for a clean
+        # filename. Remove leading and trailing spaces; convert other spaces to
+        # underscores; and remove anything that is not an alphanumeric, dash,
+        # underscore, or dot.
         filename = self.ifile.field.storage.get_valid_name(filename)
-
+        print('image upload_to:')
+        print(str(filename))
         #! replace with image.file_utils.filename
         # do a unidecode in the filename and then replace non-ascii 
         # characters in filename with _ , to sidestep issues with filesystem encoding
-        filename = "".join((i if ord(i) < 128 else '_') for i in unidecode(filename))
+        # filename = "".join((i if ord(i) < 128 else '_') for i in unidecode(filename))
 
-        # Truncate filename so it fits in the 100 character limit
-        # https://code.djangoproject.com/ticket/9893
-        full_path = os.path.join(folder_name, filename)
-        if len(full_path) >= 95:
-            chars_to_trim = len(full_path) - 94
-            prefix, extension = os.path.splitext(filename)
-            filename = prefix[:-chars_to_trim] + extension
-            full_path = os.path.join(folder_name, filename)
+        # # Truncate filename so it fits in the 100 character limit
+        # # https://code.djangoproject.com/ticket/9893
+        # full_path = os.path.join(folder_name, filename)
+        # if len(full_path) >= 95:
+            # chars_to_trim = len(full_path) - 94
+            # prefix, extension = os.path.splitext(filename)
+            # filename = prefix[:-chars_to_trim] + extension
+            # full_path = os.path.join(folder_name, filename)
 
-        return full_path
+        filename = image_save_path(filename)
+        #full_path = os.path.join(folder_name, filename)
+        
+        return filename
 
         
     @contextmanager
@@ -182,7 +198,7 @@ class AbstractImage(models.Model):
         '''
         #! what if filter is none?
         #filtername = None
-        filter_instance = filter_instance
+        #filter_instance = filter_instance
         #! registry?
         # if isinstance(ifilter, str):
             # filtername = ifilter
@@ -209,8 +225,8 @@ class AbstractImage(models.Model):
             # First, a destination filename. The 
             # field settings will handle the path, but we need a filename.                
             # 'name' is path relative to media/. Name only, pleaee.
-            src_fname = os.path.basename(self.ifile.name)
-            src_fname_no_extension, extension = os.path.splitext(src_fname)
+            #src_fname = os.path.basename(self.ifile.name)
+            #src_fname_no_extension, extension = os.path.splitext(src_fname)
             # <srcname> - <filtername> . <format> 
             # <srcname> - <filtername> is a near-unique key. Near enough.
             # dst_fname = "{}-{}.{}".format(
@@ -219,18 +235,16 @@ class AbstractImage(models.Model):
                 # reform_write_attrs['format']
             # )
             # <srcname> - <filtername> is a near-unique key. Near enough.
-            dst_fname = "{}-{}".format(
-                src_fname_no_extension,
-                filter_instance.human_path()
-            )
                         
             # Open the file then produce a reformed image.
             with self.open_file() as fsrc:
-                (reform_buff, dst_fname) = filter_instance.process(
-                    fsrc, 
-                    dst_fname,
-                )
+                (reform_buff, iformat) = filter_instance.process(fsrc)
 
+            dst_fname = reform_filename( 
+                self.ifile.name,
+                filter_instance, 
+                iformat
+            )
             # Right, lets make a Django ImageFile from that
             reform_file = ImageFile(reform_buff, name=dst_fname)            
             
@@ -466,10 +480,17 @@ class AbstractReform(models.Model):
         return self.img_tag()
 
     def get_upload_to(self, filename):
+        # Incoming filename comes from get_reform() in Image, and  
+        # only needs path appending.
+        print('reform upload_to:')
+        print(str(filename))
         folder_name = 'reforms'
         filename = self.ifile.field.storage.get_valid_name(filename)
-        return os.path.join(folder_name, filename)
-
+        # print('reform upload_to:')
+        # print(str(filename))
+        # return os.path.join(folder_name, filename)
+        return reform_save_path(filename)
+        
     @classmethod
     def check(cls, **kwargs):
         errors = super(AbstractReform, cls).check(**kwargs)

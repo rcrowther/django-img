@@ -54,29 +54,29 @@ class Filter():
     def id_str_short(self):
         '''
         Id for a filter, usable for keys.
-        This is not guarenteed unique. IT depends on the filter being
+        This is not guarenteed unique. It depends on the filter being
         placed in unique module packages. Which, in Django, they
         would be, inside app names.
         Currently formed as <module parent> + '_' + <filtername> 
         '''
-        split_path = self.__module__.split('.')
-        l = len(split_path)
+        p = ModulePath.from_str(self.__module__)
         
         # protect against no module path. 'image_filters' namespacing
         # seems pointless
-        if (l < 2):
-            return type(self).__name__
-            
+        if (p.size < 2):
+            return type(self).__name__.lower()
+
         # Take the second-last element. The leaf element in the 
         # surrounding system is always 'image_file', which is generic, 
         # but the parent element is distinctive, often an appname, so 
-        # useful.
-        app_id = split_path[l - 2]
+        # useful.                  
+        s = p.branch.leaf.str + '_' + type(self).__name__
         
         # Add the filter name, which is unique to every module.
-        return app_id + '_' + type(self).__name__
-    
-    
+        return s.lower()
+                    
+
+    #x ?
     def human_path(self):
         '''Return the surrounding module and class name as a human string.
         
@@ -139,47 +139,17 @@ class Filter():
         buffer.
                  
         'save_info_callback' makes decisions about how the resulting 
-        buffer should be saved. Opening a file in most APIs will supply 
-        useful information, currently the file format, which may be 
-        regarded as more definitive than either Python or Django can 
-        provide. There is no need to call this funtion for dev, but 
-        final versions should respect the environment by calling it and 
-        acting on the results. Current implementation needs the source 
-        format and filter itself, then return decisions on 'format' and 
-        'jpeg_quality'.
+        buffer should be saved. There is no need to call this function 
+        for dev, but final versions should respect the environment by 
+        calling it and acting on the results. Current implementation 
+        needs the source format, then checks with overall and filter 
+        settings, then returns decisions on 'format' and 'jpeg_quality'.
                 
         @src_file an open Python file handle 
-        @save_info_callback external function that returns dictionary
-        of decisions based on file/filter details and environment 
-        settings
         @return a BytesIO or similar
         '''
         raise NotImplementedError
         
-
-
-    # def run_to_buffer(self, write_attrs):
-        # """
-        # Run a image processing src through filters into a buffer.
-        # dest can be any file-like object
-        # write info is any extra params for PIL writing e.g. (jeeg/) quality optomise, etc. 
-        # return a bytebuffer containing the finished, written image.
-        # """
-        # # Add some general write attributes. PIL ignores the unusable.
-        # write_attrs['progressive'] = True  
-        # write_attrs['optimize'] = True
-        
-        # # convert the format to PIL
-        # write_attrs['format'] = FORMAT_APP_PILLOW[write_attrs['format']]
-                
-        # pil_dst = self.process(self._src_image) or self._src_image
-
-        # out_buff = BytesIO()
-        # pil_dst.save(
-            # out_buff,
-            # **write_attrs
-        # )
-        # return out_buff
 
 class PillowMixin:
 
@@ -191,21 +161,23 @@ class PillowMixin:
             # im.convert("RGB")
 
             
-    def process(self, src_file, dst_name_no_extension):
+    def process(self, src_file):
         src_image = PILImage.open(src_file)
-                
+        
         # write_attrs currently {format, jpeg_quality}
         write_attrs = self.save_info_callback(
                     FORMAT_PILLOW_APP[src_image.format],
                     )
-        #! this wouldn't work for non-local files would it?
-        dst_fname = self.file_name(
-                Path(src_file.name).stem,
-                write_attrs['format']
-            )
+        #! this wouldn't work for non-local files would it? AFAIK yes,
+        # given storage backends
+        # dst_fname = self.file_name(
+                # Path(src_file.name).stem,
+                # write_attrs['format']
+            # )
             
         # mods on the save data
         # convert the returned format to PIL
+        app_format = write_attrs['format']
         write_attrs['format'] = FORMAT_APP_PILLOW[write_attrs['format']]
         
         # Add some general write attributes. Pillow ignores the unusable.        
@@ -227,7 +199,7 @@ class PillowMixin:
             **write_attrs
         )
         
-        return (out_buff, dst_fname)
+        return (out_buff, app_format)
 
 
     def pillow_actions(self, pillow):
@@ -245,19 +217,8 @@ class Format(PillowMixin, Filter):
     jpeg_quality=None
     
     def __new__(cls, *args, **kwargs):
-        print('called Format new')          
-        # if (cls.iformat and (not(cls.iformat in IMAGE_FORMATS))):
-            # raise ValueError("Attribute 'iformat' returns unknown value: class '{}': val: '{}'\nAvailable formats:'{}'".format(
-                # cls.__name__, 
-                # cls.iformat,
-                # "', '".join(IMAGE_FORMATS)
-            # )) 
-        check_image_formats(cls.__name__, 'iformat', cls.iformat)
-        # if (cls.jpeg_quality and (cls.jpeg_quality > 100 or cls.jpeg_quality < 1)):
-            # raise ValueError("Attribute 'jpeg_quality' must be in range 1--100: class '{}': val: '{}'".format(
-                # cls.__name__, 
-                # cls.jpeg_quality
-            # ))      
+        #print('called Format new')
+        check_image_formats(cls.__name__, 'iformat', cls.iformat)    
         check_jpeg_quality(cls.__name__, 'jpeg_quality', cls.jpeg_quality)       
         return super().__new__(cls, *args, **kwargs)
 

@@ -8,8 +8,8 @@ print('create settings')
 
 
 
-# These are used in filters and site-wide Django settings.
-# So gathered here.
+# These settings checks are used in filters and site-wide Django 
+# settings. So gathered here.
 def check_media_subpath(class_name, setting_name, v):
     if (v and (len(v) > 24)):
         raise ImproperlyConfigured(
@@ -43,6 +43,8 @@ def check_jpeg_quality(class_name, setting_name, v):
             v
         ))    
     
+    
+#! some confusion over avalue of settings here.
 class Settings():
     '''
     Gather settings from the settings file.
@@ -89,7 +91,7 @@ class Settings():
         '''
         #! put back
         #return Path(settings.MEDIA_ROOT) / self.media_subpath_originals
-        return Path(settings.MEDIA_ROOT) / "original_images"
+        return Path(self.media_root) / "original_images"
         
 
     #@cached_property

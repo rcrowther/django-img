@@ -29,6 +29,8 @@ Try wand
 http://docs.wand-py.org/en/0.5.9/
 http://docs.wand-py.org/en/0.5.9/guide/colorenhancement.html#evaluate-expression
 
+== Utils
+Any othr to_str accidents?
 == Settings
 Put detection in utils.py
 Cache filefinding, and the like
