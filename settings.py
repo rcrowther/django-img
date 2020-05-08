@@ -7,7 +7,6 @@ from image.constants import IMAGE_FORMATS
 print('create settings')
 
 
-
 # These settings checks are used in filters and site-wide Django 
 # settings. So gathered here.
 def check_media_subpath(class_name, setting_name, v):
@@ -33,17 +32,49 @@ def check_image_formats(class_name, setting_name, v):
             "', '".join(IMAGE_FORMATS),
         ))
         
+# keep it, but make it value range
 def check_jpeg_quality(class_name, setting_name, v):
     if (v and (v < 1 or v > 100)):
         raise ImproperlyConfigured(
             "In {}, '{}' smust be 1--100."
-            " Value: {}".format(
+            " value: {}".format(
             class_name, 
             setting_name, 
             v
         ))    
     
-    
+def check_value_range(class_name, setting_name, v, min, max):
+    if (v and (v > min or v > max)):
+        raise ValueError(
+            "In {}, '{}' smust be {}--{}."
+            " value: {}".format(
+            class_name, 
+            setting_name, 
+            min,
+            max,
+            v
+        )) 
+         
+def check_positive(class_name, setting_name, v):
+    if (v and (v < 0)):
+        raise ValueError(
+            "In {}, '{}' must be a positive number."
+            " value: {}".format(
+            class_name, 
+            setting_name, 
+            v
+        )) 
+
+def check_boolean(class_name, setting_name, v):
+    if (v and (not(type(v)==bool))):
+        raise ValueError(
+            "In {}, '{}' must be a boolean value."
+            " value: {}".format(
+            class_name, 
+            setting_name, 
+            v
+        ))         
+        
 #! some confusion over avalue of settings here.
 class Settings():
     '''

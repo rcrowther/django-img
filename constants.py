@@ -26,6 +26,9 @@ ALLOWED_FILE_EXTENSIONS = {**_FORMAT_FILE_EXTENSIONS_BASE, **_UPPER_EXTENSIONS}
 
 
 # returns the Pillow format key for this apps keys.
+# Will do for wand, too
+# identify -list format
+#? So call...? PilWan
 FORMAT_APP_PILLOW = {
     'bmp' : 'BMP',
     'jpg' : 'JPEG',

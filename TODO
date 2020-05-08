@@ -5,9 +5,11 @@ How does cloud storage generate reforms?
 Images Admin not removing files
 Decide/Fix model fields
 
+IMG_FORMAT_OVERRIDE No, REFORM_FORMAT Yes
+IMG_JPEG_QUALITY No, REFORM_JPEG_QUALITY yes
+
 == Management
 Work on pks too
-How about a title list?
 
 == Reforms
 Look over the process thing for FilePaths. It's still an issue.
@@ -29,7 +31,7 @@ http://docs.wand-py.org/en/0.5.9/
 http://docs.wand-py.org/en/0.5.9/guide/colorenhancement.html#evaluate-expression
 
 == Utils
-Any othr to_str accidents?
+Any othr ModulePath.from_str accidents?
 
 == Settings
 Put detection in utils.py

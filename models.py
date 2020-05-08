@@ -55,14 +55,16 @@ def get_reform_upload_to(instance, filename):
 
 
 class AbstractImage(models.Model):
-        
+    #! upload_date
     cdate = models.DateTimeField(_("Date of upload"),
         auto_now_add=True,
         db_index=True
     )
+    
     title = models.CharField(_('title'),
         max_length=255,
     )
+    
     ifile = models.ImageField(_('file'), 
         upload_to=get_upload_to, 
         width_field='width', 
@@ -255,8 +257,11 @@ class AbstractImage(models.Model):
                 image = self,
                 filter_spec = filter_instance.path_str(),
                 ifile = reform_file,
-                width = filter_instance.width,
-                height = filter_instance.height,
+                #! can't guarentee these, can we? unless preset in filter?
+                #width = filter_instance.width,
+                #height = filter_instance.height,
+                width = 0,
+                height = 0,
             )
             reform.save()
 

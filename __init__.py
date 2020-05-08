@@ -6,12 +6,13 @@ from image import utils
 print('create __init__')
 
 
-from image.filters import (
-    Filter, Format, Resize, Crop, ResizeSmart, CropSmart, Thumb
+from image.filters_pillow import (
+    #Filter, 
+    Format, Resize, Crop, ResizeSmart, CropSmart
 )
 
 __all__ = [
-    "Format", "Resize", "Crop", "ResizeSmart", "CropSmart", "Thumb",
+    "Format", "Resize", "Crop", "ResizeSmart", "CropSmart",
     "register", "registry", "autodiscover"
     ]
 

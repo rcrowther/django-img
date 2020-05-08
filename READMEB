@@ -19,6 +19,8 @@ Unidecode
 
 Optionally, the fron-end can work with other image librarties such as Wand and OpenCV.
 
+sudo apt-get install libmagickwand-dev
+pip install wand
 
 # General structure
 Images are tracked in the database. Each uploaded image is recorded by an entry in a database table ''image'. Each original image can generate derivivate images. These are tracked in a seperate table called ''reform'. Widths, heights and bytesize are recorded, in case the storage media is not local files but cloud provision.
@@ -112,6 +114,13 @@ With the image app you do most of your work in the app which uses the images, no
 
 
 ## Filters
+<div style="background-color=pink; border:1px solid red;"><
+*Warning*: This app does not let you write filters with parameters other than a filter name into templates.
+/div>
+
+You write a filter, then reference it in templates. It's easier this way, and I don't write variable into templates any more than I would hard-set inline CSS. I tell you this now, in case this app, in it's basic state, is not for you.
+
+
 ### Filter placement
 Files of filter definitions can be placed in any app. Start a file called 'image_filters.py' and off you go.
 
@@ -137,14 +146,14 @@ Most of the filters you will need can be made by inheriting from the core filter
 - Resize
 - Crop
 
-Both these fit the image within the bounding box given by the dimansions. Both fiters can result in images narrower or less in height than the given sizes.
+Both these fit the image within the bounding box given by the dimansions. Both filters can result in images narrower or less in height than the given sizes.
 
-Two more filters,
+Two more core filters,
 
 - SmartResize 
-- SmartCrop. 
+- SmartCrop
 
-These filters fill out their results by placing on a background of given color so the results always match the given dimensions. Also, they will not attempt to work on images that are smaller than the bounding sizes.
+These filters fill the bounding box by placing on a background of a given color so the results always match the given dimensions. Also, they will not attempt to work on images that are smaller than the bounding sizes. They center the image in the fill color.
 
 If you are inheriting from these filters, it's easy to produce another size. Put this in an 'image_filters.py' file somewhere,
 
@@ -153,17 +162,23 @@ If you are inheriting from these filters, it's easy to produce another size. Put
    class Large(filters.SmartResize):
         width=382
         height=256
-
+        # optional
+        background_colour="#34578"
+        # optional
+        iformat='png'
 
 
 ### Writing custom filter code
-Inherit from image.Filter. You will need to provide a 'process' method. Filter takes an open Python File and returns a ByteBufferIO and a filename. You can inherit from the PillowMixin or WandMixin to cover filehandling for those libraries. See the code for details.
+Inherit from image.Filter. You will need to provide a 'process' method. Filter takes an open Python File and returns a ByteBufferIO and a filename. 
+
+You can inherit from the PillowMixin or WandMixin to cover filehandling for those libraries. See the code for details.
 
 
 ### Why can filters not be chained?
-Filters can not be chained, and there is no way to do that or present chaining to a user. Filters must be written in code, and do not accept parameters. You want a new resize filter, you write it.
+Filters can not be chained, and there is no way to do that or present chaining to a user. Filters must be written in code, and do not accept parameters. You want a new size filter, you write it.
 
 This is a deliberate decision. It makes life easy. If you want to produce a front-end that can lever the filters and chain them, that is another step. Possible, but further than this app will go.
+
 
 
 
@@ -177,21 +192,21 @@ The model has auto-slug() code. Declare this in admin.py to fill in suggestions 
 
 
 ## Management commands
-There are these
+There are these,
 
-image_create_bulk
-image_sync
-reform_delete
+- image_create_bulk
+- image_sync
+- image_list
+- reform_delete
 
-They do what they say. 'image_sync' is particularly useful, it will attemt to make models for orphane files, delete orphaned files, or delete models with missing files.
+They do what they say. 'image_sync' is particularly useful, it will attempt to make models for orphaned files, or delete orphaned files, or delete models with missing files. All of these actions are useful for dev, too.
 
  
 ## Template tags
-There is a tag to find images by title. Sometimes this will be useful, for fixed or temporary decoration/banners etc. However, it is a database hit, unecessary if you are passing a model through a context,
+There is a tag to find images by title. Sometimes this will be useful, for fixed or temporary decoration/banners etc. However, it uses a database query, so is unnecessary if you are passing a model through a context,
 
         {{ image-tag-by-title image.Large titleOfImage }}
         <caption>{{ page.img,title }}</caption>
-
 
 
 ## Settings
@@ -203,6 +218,9 @@ Images accepts some settings. They look like the Django template settings,
             # 'MEDIA_SUBPATH_ORIGINALS':
             # 'MEDIA_SUBPATH_REFORMS':
             'TRUNCATE_PATHS' : True,
+        #'IMG_FORMAT_OVERRIDE': 'jpg',
+        #'IMG_JPEG_QUALITY': 85,
+
             'MODULES': [
                         "someSiteName",
             ],
@@ -215,8 +233,16 @@ Defines if image_filters will be sought in apps. If false, the app only uses fil
 TRUNCATE_PATHS
 Truncate filepaths. This is usually done by truncating the length of filenames (which can become very long on the web). This is because Django imposes limits on filepath lengths.
 
+IMG_FORMAT_OVERRIDE
+Set a preferred image format. Locality wins in the discussion between settings. So, if a filter sets an 'iformat' attribute, that wins. If the filter's 'iformat' attribute is missing or None, and if this setting is present, it wins. If this setting is not present (and no 'iformat' attribute), the filter will attempt to make the file in whatever format it originally detected.
+
+IMG_JPEG_QUALITY
+Quality of reform JPGs. Basic is '85' of '100', which is very high quality. You can go down to '28', say, and get a vast reduction in file sizes.
+
+Locality wins in the discussion between settings. So, if a filter sets a 'jpeg_quality' attribute, that wins. If the filter's 'jpeg_quality' attribute is missing or None, and if this setting is present, it wins. Otherwise, the quality is '85'.
+
 MODULES
-Defines extra places to put modules. The above example suggests a site-wide filter collection in the site directory, same as the site-wide template collection most Djangos have in the same directory. The setting takes module paths, not filepaths, because filter files are live code.
+Defines extra places to put modules. The above example suggests a site-wide filter collection in the site directory, same as the site-wide template and CSS collections most Djangos have in the same directory. The setting takes module paths, not filepaths, because filter files are live code.
 
 # Other usages
  but for resons of ecomomy, Django doessn't automatically use full clean.. This to thoroughtly check the slug in a 

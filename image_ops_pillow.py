@@ -59,19 +59,6 @@ def crop(pillow, width, height):
     return pillow
 
 
-def crop_smart(pillow, width, height, fill_color="white"):
-    '''Fit the given image to the given size.
-    A general-purpose transformation.
-    If the image is too large, it is shrunk to fit then, if necessary,
-    filled to size.
-    If too small, image is filled to size
-    @return image of the given dimensions.
-    '''
-    rs = crop(pillow, width, height)
-    f = fill(rs, width, height, fill_color)
-    return f
-
-
 def resize_aspect(pillow, width, height):
     '''Resize if the image is too big.
     Preserves aspect ratio.
@@ -96,7 +83,20 @@ def resize_aspect(pillow, width, height):
     else:
         return pillow
 
-           
+
+def crop_smart(pillow, width, height, fill_color="white"):
+    '''Fit the given image to the given size.
+    A general-purpose transformation.
+    If the image is too large, it is shrunk to fit then, if necessary,
+    filled to size.
+    If too small, image is filled to size
+    @return image of the given dimensions.
+    '''
+    rs = crop(pillow, width, height)
+    f = fill(rs, width, height, fill_color)
+    return f
+
+    
 def resize_smart(pillow, width, height, fill_color="white"):
     '''Resize to the given dimensions.
     If the image is too large, it is shrunk to fit then, if necessary,
