@@ -49,8 +49,9 @@ class PillowProcess:
 
         #! No transparency
         pil_dst = pil_dst.convert("RGB")
+        
         #! test. I think that;s the name.
-        write_attrs['quality'] = 85
+        write_attrs['quality'] = write_attrs['jpeg_quality']
 
         out_buff = BytesIO()
 
@@ -63,20 +64,19 @@ class PillowProcess:
 
 
     def modify(self, lib_image):
-        # '''
-        # Modify the image.
-        # 'process hadles the image load and save. 'process' calls this 
-        # method to transform the image. Basely this is the only method
-        # that needs to be changed, even for a filter that performs a 
-        # new kind of transformation (no need to change the load and save 
-        # in 'process).
-        # The method should usually call super() to enable builtin code.
+        '''
+        Modify the image.
+        'process hadles the image load and save. 'process' calls this 
+        method to transform the image. Basely this is the only method
+        that needs to be changed, even for a filter that performs a 
+        new kind of transformation (no need to change the load and save 
+        in 'process).
+        Enabled methods should usually call super() to enable inherited 
+        code.
         
-        # @lib_image the class used by the library to wrap image data
-        # @return the same kind of class
-        # '''
-        print('  modify!bbbbbbbb')
-        #raise NotImplementedError
+        @lib_image the class used by the library to wrap image data
+        '''
+        # simple return. PIL usees returns
         return lib_image
         
         

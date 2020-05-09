@@ -15,8 +15,6 @@ from django.forms.utils import flatatt
 from django.urls import reverse
 from collections import OrderedDict
 from django.utils.functional import cached_property
-#from willow.image import Image as WillowImage
-#from PIL import Image as PILImage
 #from image.filters import Filter
 from image.utils import image_save_path, reform_filename, reform_save_path
 #from image.settings import settings

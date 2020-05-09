@@ -17,10 +17,11 @@ So far, I have not considrered,
 Pillow
 Unidecode
 
-Optionally, the fron-end can work with other image librarties such as Wand and OpenCV.
+Optionally, the code API can work with other image librarties such as Wand and OpenCV. Wand filters are built-in. On Debian-based distros,
 
 sudo apt-get install libmagickwand-dev
 pip install wand
+
 
 # General structure
 Images are tracked in the database. Each uploaded image is recorded by an entry in a database table ''image'. Each original image can generate derivivate images. These are tracked in a seperate table called ''reform'. Widths, heights and bytesize are recorded, in case the storage media is not local files but cloud provision.
@@ -90,7 +91,7 @@ Sync the DB to the updated model,
 
 Now, through Django admin, you can upload a image. Upload one and give it a title (you can delete too, so don't worry about getting other settings to your preference).
  
-However, I don't know about you, if I have a new app I'd like to try with some substancial data. If you have a collection of test images somewhere,
+However, I don't know about you, if I have a new app I'd like to try with a bulk of data. If you have a collection of test images somewhere,
 
     ./manage.py image_create_bulk pathToMyDirectory
 
@@ -124,12 +125,12 @@ You write a filter, then reference it in templates. It's easier this way, and I 
 ### Filter placement
 Files of filter definitions can be placed in any app. Start a file called 'image_filters.py' and off you go.
 
-This works for me---inside an app called Page I can have a file of filters e.g. Large/Medium/Small, made for Page styling. Inside an app called BlogPost, another set of filters Medium/Small/Thumb made for BlogPost styling.
+This works for me---inside an app called Page I can have a file of filters e.g. Large/Medium/Small, made for Page styling. Inside an app called BlogPost, I can place another set of filters Medium/Small/Thumb, made for BlogPost styling.
 
 If you would prefer to gether all filters together in one place, define the settings to include,
  
             'MODULES': [
-                        "someSiteName",
+                        "siteName",
             ],
 
 Then put a file in the 'sitename' directory. If you do this, you will probably need to namespace filters,
@@ -138,6 +139,42 @@ Then put a file in the 'sitename' directory. If you do this, you will probably n
         width : 256
         height 256
 
+
+### Wand filters
+The filters in the Wand filter set have more attributes available. The attributes are,
+
+    pop = False
+    greyscale=False
+    night= False
+    warm = False
+    strong = False
+    no = False
+    watermark = None #'/srv/images/watermark.png'
+
+The effects are available on every filter. If you enable more than one effect, they will chain.
+
+It is probably worth saying again that you can not change the parameters, the strengths of these effects, or not without copying source code. 
+
+I have to admit I lost my way with these. There is no 'blur', no 'rotate', no 'waves'. There is,
+
+pop
+Tightens leveling of black and white
+greyscale
+A fast imitation
+night
+Pretend the picture is from a movie
+warm
+A small shift in hue to compensate for a common photography white-balance issue. 
+strong
+Oversaturate image colors (like everyone does on the web). This will not flatten blacks and whites, like 'pop', which you may or may not prefer. 
+no
+Draw a red cross across the image
+watermark
+Deserves some explanation. This does not draw on the image, as handling text metrics is unreliable. You provide a filepath to a template image,
+
+    watermark = '/www/data/images/watermark.png'
+
+The template is scaled to the image-to-be-watermarked, then compsited over the main image by a 'disolve'. So the watermark is customisable, can be used on most sizes of image, and is usually readale since aspect ratio is preserved, 
 
 
 ### Writing Filters
@@ -153,7 +190,7 @@ Two more core filters,
 - SmartResize 
 - SmartCrop
 
-These filters fill the bounding box by placing on a background of a given color so the results always match the given dimensions. Also, they will not attempt to work on images that are smaller than the bounding sizes. They center the image in the fill color.
+These filters fill the bounding box by placing on a background of a given color so the results match the given dimensions. Also, they will not attempt to work on images which are smaller than the bounding sizes. They center the image in the fill color.
 
 If you are inheriting from these filters, it's easy to produce another size. Put this in an 'image_filters.py' file somewhere,
 
@@ -169,7 +206,7 @@ If you are inheriting from these filters, it's easy to produce another size. Put
 
 
 ### Writing custom filter code
-Inherit from image.Filter. You will need to provide a 'process' method. Filter takes an open Python File and returns a ByteBufferIO and a filename. 
+Inherit from image.Filter. You will need to provide a 'process' method. Filter.process() takes an open Python File and returns a ByteBufferIO and a filename.
 
 You can inherit from the PillowMixin or WandMixin to cover filehandling for those libraries. See the code for details.
 

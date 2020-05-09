@@ -32,7 +32,7 @@ class WandProcess():
         # set the format
         image.format = FORMAT_APP_PILLOW[write_attrs['format']]
         
-        # set JPEG quality?
+        # set JPEG and others quality
         image.compression_quality = write_attrs['jpeg_quality']
         
         #! No transparency
@@ -40,7 +40,6 @@ class WandProcess():
         #write_attrs['quality'] = 85
 
         out_buff = BytesIO()
-        print(str(image.format))
 
         image.save(
             out_buff,
@@ -48,24 +47,25 @@ class WandProcess():
         
         return (out_buff,  write_attrs['format'])
 
+
     def modify(self, lib_image):
-        # '''
-        # Modify the image.
-        # 'process hadles the image load and save. 'process' calls this 
-        # method to transform the image. Basely this is the only method
-        # that needs to be changed, even for a filter that performs a 
-        # new kind of transformation (no need to change the load and save 
-        # in 'process).
-        # The method should usually call super() to enable builtin code.
+        '''
+        Modify the image.
+        'process hadles the image load and save. 'process' calls this 
+        method to transform the image. Basely this is the only method
+        that needs to be changed, even for a filter that performs a 
+        new kind of transformation (no need to change the load and save 
+        in 'process).
+        Enabled methods should usually call super() to enable inherited 
+        code.
         
-        # @lib_image the class used by the library to wrap image data
-        # @return the same kind of class
-        # '''
-        #raise NotImplementedError
+        @lib_image the class used by the library to wrap image data
+        '''
+        # no return. Wand can alter in-place
         pass
 
 
-#class Format(WandProcess, PhotoFXBase, FormatBase):
+
 class Format(PhotoFXMixin, FormatMixin, WandProcess, Filter):
     '''Establish the format for an image. 
     Set iformat=None means the image is unchanged.
@@ -80,16 +80,9 @@ class Format(PhotoFXMixin, FormatMixin, WandProcess, Filter):
             self.warm, 
             self.night, 
             self.strong, 
-            self.film,
             self.no,
             self.watermark,
         )
-    
-
-# class Format(WandProcess, FormatBase):
-    # '''Establish the format for an image. 
-    # Set iformat=None means the image is unchanged.
-    # '''
     
     
                         
@@ -145,7 +138,6 @@ class ResizeSmart(ResizeCropSmartMixin, Format):
     '''
         
     def modify(self, lib_image):
-        print('wand resizesmart')
         image_ops_wand.resize_smart(
             lib_image, 
             self.width, 

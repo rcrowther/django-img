@@ -51,19 +51,18 @@ class Filter():
         '''
         p = ModulePath.from_str(self.__module__)
         
-        # protect against no module path. 'image_filters' namespacing
-        # seems pointless
-        if (p.size < 2):
-            return type(self).__name__.lower()
+        # protect against no module path, as generic 'app'
+        md_str = 'app'
 
         # Take the second-last element. The leaf element in the 
         # surrounding system is always 'image_file', which is generic, 
         # but the parent element is distinctive, often an appname, so 
         # useful.                  
-        s = p.branch.leaf.str + '_' + type(self).__name__
+        if (p.size > 1):
+            md_str = p.branch.leaf.str 
         
         # Add the filter name, which is unique to every module.
-        return s.lower()
+        return md_str + '_' + type(self).__name__.lower()
                     
 
     #x ?
@@ -141,25 +140,10 @@ class Filter():
         '''
         raise NotImplementedError
         
-
-    # def modify(self, lib_image):
-        # '''
-        # Modify the image.
-        # 'process hadles the image load and save. 'process' calls this 
-        # method to transform the image. Basely this is the only method
-        # that needs to be changed, even for a filter that performs a 
-        # new kind of transformation (no need to change the load and save 
-        # in 'process).
-        # The method should usually call super() to enable builtin code.
-        
-        # @lib_image the class used by the library to wrap image data
-        # @return the same kind of class
-        # '''
-        # print('  modify!bbbbbbbb')
-        # raise NotImplementedError
-        # #return lib_image
         
         
+# Class code here on is mixins. They estabish attributes and checks, 
+# skeletons to hang image-processing code on.
 
 class FormatMixin():
     '''Establish the format for an image. 
@@ -173,12 +157,6 @@ class FormatMixin():
         check_image_formats(cls.__name__, 'format', cls.format)    
         check_jpeg_quality(cls.__name__, 'jpeg_quality', cls.jpeg_quality)  
         return super().__new__(cls, *args, **kwargs)
-
-    #def process(self, src_file):
-
-    # def modify(self, lib_image):
-        # print('  modify!bbbbbbbb')
-        # return lib_image
 
 
 

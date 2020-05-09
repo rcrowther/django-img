@@ -10,12 +10,11 @@ from image import filters_wand, registry
 class Large(filters_wand.ResizeSmart):
     width=513
     height=760
-    pop = False
+    pop = True
     greyscale=False
     night= False
     warm = False
     strong = False
-    film = False
     no = False
     watermark = None #'/srv/images/watermark.png'
     fill_color="goldenrod"
@@ -51,7 +50,7 @@ class Format(filters_wand.Format):
     #format ='jpg'
     jpeg_quality = 85
     pop = False
-    greyscale=True
+    greyscale=False
     cool= False
     warm = False
     strong = False

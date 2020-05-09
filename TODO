@@ -25,10 +25,8 @@ Why decorator not working?
 https://docs.djangoproject.com/en/3.0/ref/contrib/admin/
 
 Breakable template from tags
-Chrome filter?
-Try wand
-http://docs.wand-py.org/en/0.5.9/
-http://docs.wand-py.org/en/0.5.9/guide/colorenhancement.html#evaluate-expression
+Get rid of output transparency?
+Stop filters applying effects to fills.
 
 == Utils
 Any othr ModulePath.from_str accidents?
