@@ -189,7 +189,7 @@ class PhotoFXMixin():
     '''
     pop=False
     greyscale=False    
-    cool=False
+    night=False
     warm=False
     strong=False
     film=False
@@ -199,7 +199,7 @@ class PhotoFXMixin():
     def __new__(cls, *args, **kwargs):
         check_boolean(cls.__name__, 'pop', cls.pop)    
         check_boolean(cls.__name__, 'greyscale', cls.greyscale)    
-        check_boolean(cls.__name__, 'cool', cls.cool)    
+        check_boolean(cls.__name__, 'night', cls.night)    
         check_boolean(cls.__name__, 'warm', cls.warm)    
         check_boolean(cls.__name__, 'strong', cls.strong)    
         check_boolean(cls.__name__, 'film', cls.film)    

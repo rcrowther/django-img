@@ -78,7 +78,7 @@ class Format(PhotoFXMixin, FormatMixin, WandProcess, Filter):
             self.pop, 
             self.greyscale, 
             self.warm, 
-            self.cool, 
+            self.night, 
             self.strong, 
             self.film,
             self.no,

@@ -12,12 +12,12 @@ class Large(filters_wand.ResizeSmart):
     height=760
     pop = False
     greyscale=False
-    cool= False
+    night= False
     warm = False
     strong = False
-    film = True
+    film = False
     no = False
-    watermark = '/srv/images/watermark.png'
+    watermark = None #'/srv/images/watermark.png'
     fill_color="goldenrod"
   
  
