@@ -7,13 +7,14 @@ from image.settings import (
     check_value_range, 
     check_positive,
     check_boolean,
+    check_file,
 )
 
 print('create filters')
 
 
         
-class FilterBase():
+class Filter():
     '''
     A filter defines how to transorm a image with a spec into 
     a derivative with a different spec.
@@ -160,7 +161,7 @@ class FilterBase():
         
         
 
-class FormatBase():
+class FormatMixin():
     '''Establish the format for an image. 
     Set format=None means the image is unchanged.
     Most filters will contain and build from this base class.
@@ -181,7 +182,7 @@ class FormatBase():
 
 
 
-class PhotoFXBase():
+class PhotoFXMixin():
     '''Establish the format for an image. 
     Set format=None means the image is unchanged.
     Most filters will contain and build from this base class.
@@ -192,6 +193,8 @@ class PhotoFXBase():
     warm=False
     strong=False
     film=False
+    no=False
+    watermark=''
     
     def __new__(cls, *args, **kwargs):
         check_boolean(cls.__name__, 'pop', cls.pop)    
@@ -200,11 +203,13 @@ class PhotoFXBase():
         check_boolean(cls.__name__, 'warm', cls.warm)    
         check_boolean(cls.__name__, 'strong', cls.strong)    
         check_boolean(cls.__name__, 'film', cls.film)    
+        check_boolean(cls.__name__, 'no', cls.no)    
+        check_file(cls.__name__, 'watermark', cls.watermark)    
         return super().__new__(cls, *args, **kwargs)
                    
                    
                                 
-class ResizeBase():
+class ResizeCropMixin():
     '''Resize n image.
     Shrinks inside the box defined by the given args. So the result will
     usually be smaller width or height than the given box.
@@ -218,15 +223,9 @@ class ResizeBase():
         check_positive(cls.__name__, 'height', cls.height)
         return super().__new__(cls, *args, **kwargs)
         
-
-        
-class CropBase(ResizeBase):
-    '''Crop an image.
-    A base class
-    '''
         
                                     
-class ResizeSmartBase(ResizeBase):
+class ResizeCropSmartMixin(ResizeCropMixin):
     '''Resize an image.
     This resize lays the image on a background of ''fill-color'.
     So the result always matches the given sizes.
@@ -238,20 +237,4 @@ class ResizeSmartBase(ResizeBase):
     def __new__(cls, *args, **kwargs):
         #? No test for color
         return super().__new__(cls, *args, **kwargs)
-        
-
-    
-class CropSmartBase(CropBase):
-    '''Resize and maybe re-format an image.
-    A base class
-    '''
-    fill_color="white"
-
-    
-    def __new__(cls, *args, **kwargs):
-        #? No test for color
-        return super().__new__(cls, *args, **kwargs)
-
-
-
 

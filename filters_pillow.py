@@ -1,11 +1,10 @@
 from PIL import Image as PILImage
 from io import BytesIO
-from image.filter_base import (
-    FormatBase,
-    ResizeBase,
-    CropBase,
-    ResizeSmartBase,
-    CropSmartBase
+from image.filters import (
+    Filter,
+    FormatMixin,
+    ResizeCropMixin,
+    ResizeCropSmartMixin,
 )
 from image import image_ops_pillow
 from image.constants import FORMAT_APP_PILLOW, FORMAT_PILLOW_APP
@@ -15,7 +14,7 @@ print('create filters')
 
 
 
-class PillowMixin:
+class PillowProcess:
 
     # def ensure_save(self, pillow):
         # if pillow.mode in ('RGBA', 'LA'):
@@ -62,17 +61,34 @@ class PillowMixin:
         
         return (out_buff, app_format)
 
+
+    def modify(self, lib_image):
+        # '''
+        # Modify the image.
+        # 'process hadles the image load and save. 'process' calls this 
+        # method to transform the image. Basely this is the only method
+        # that needs to be changed, even for a filter that performs a 
+        # new kind of transformation (no need to change the load and save 
+        # in 'process).
+        # The method should usually call super() to enable builtin code.
+        
+        # @lib_image the class used by the library to wrap image data
+        # @return the same kind of class
+        # '''
+        print('  modify!bbbbbbbb')
+        #raise NotImplementedError
+        return lib_image
+        
         
 
-
-class Format(PillowMixin, FormatBase):
+class Format(FormatMixin, PillowProcess, Filter):
     '''Establish the format for an image. 
     Set iformat=None means the image is unchanged.
     '''
     
     
                         
-class Resize(PillowMixin, ResizeBase, FormatBase):
+class Resize(ResizeCropMixin, Format):
     '''Resize n image.
     Shrinks inside the box defined by the given args. So the result will
     usually be smaller width or height than the given box.
@@ -86,13 +102,14 @@ class Resize(PillowMixin, ResizeBase, FormatBase):
     def modify(self, lib_image):
         lib_image = image_ops_pillow.resize_aspect(
             lib_image, 
-            self.width, 
+            self.width,
             self.height
         )
-        return lib_image
+        return super().modify(lib_image)
+
         
 
-class Crop(PillowMixin, CropBase, FormatBase):
+class Crop(ResizeCropMixin, Format):
     '''Resize and maybe re-format an image.
     A base class e.g.
         class Large(image.Crop):
@@ -107,10 +124,11 @@ class Crop(PillowMixin, CropBase, FormatBase):
             self.width,
             self.height
         )
-        return lib_image
+        return super().modify(lib_image)
+
                 
                                     
-class ResizeSmart(PillowMixin, ResizeSmartBase, FormatBase):
+class ResizeSmart(ResizeCropSmartMixin, Format):
     '''Resize an image.
     This resize lays the image on a background of ''fill-color'.
     So the result always matches the given sizes.
@@ -129,11 +147,12 @@ class ResizeSmart(PillowMixin, ResizeSmartBase, FormatBase):
             self.height, 
             self.fill_color
         )
-        return lib_image
+        return super().modify(lib_image)
 
 
 
-class CropSmart(PillowMixin, CropSmartBase, FormatBase):
+
+class CropSmart(ResizeCropSmartMixin, Format):
     '''Resize and maybe re-format an image.
     A base class e.g.
         class Large(image.CropSmart):
@@ -149,7 +168,7 @@ class CropSmart(PillowMixin, CropSmartBase, FormatBase):
             self.width, 
             self.height
         )
-        return lib_image
+        return super().modify(lib_image)
 
 
 

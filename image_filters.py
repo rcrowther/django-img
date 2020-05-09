@@ -7,10 +7,17 @@ from image import filters_wand, registry
     # width=513
     # height=760
 
-class Large(filters_wand.Resize):
+class Large(filters_wand.ResizeSmart):
     width=513
     height=760
-    pop=True
+    pop = False
+    greyscale=False
+    cool= False
+    warm = False
+    strong = False
+    film = True
+    no = False
+    watermark = '/srv/images/watermark.png'
     fill_color="goldenrod"
   
  

@@ -74,6 +74,17 @@ def check_boolean(class_name, setting_name, v):
             setting_name, 
             v
         ))         
+
+def check_file(class_name, setting_name, v):
+    
+    if (v and (not(Path(v).is_file()))):
+        raise ValueError(
+            "In {}, '{}' can not be deetected as an existing file"
+            " value: {}".format(
+            class_name, 
+            setting_name, 
+            v
+        ))  
         
 #! some confusion over avalue of settings here.
 class Settings():

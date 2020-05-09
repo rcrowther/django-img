@@ -1,5 +1,6 @@
 from wand.image import Image
 from wand.color import Color
+from wand.drawing import Drawing
 
 
 def resize_aspect(wand, width, height):
@@ -23,7 +24,7 @@ def resize_aspect(wand, width, height):
     
 # http://docs.wand-py.org/en/0.5.9/index.html
 # https://www.imagemagick.org/Usage/color_mods/#contrast-stretch    
-def photoFX(wand, pop, grayscale, warm, cool, strong, film):
+def photoFX(wand, pop, grayscale, warm, cool, strong, film, no, watermark):
     print('  photoFX op!')
     if (pop):
         wand.level(0.2, 0.9, gamma=1.1)
@@ -47,7 +48,14 @@ def photoFX(wand, pop, grayscale, warm, cool, strong, film):
           [0.15, 0.15, 0.7]]
         wand.color_matrix(matrix)
     if (strong):
-        wand.modulate(brightness=100.0, saturation=20.0, hue=100.0)
+        wand.modulate(brightness=100.0, saturation=120.0, hue=100.0)
+    if (no):
+        with Drawing() as draw: 
+            draw.stroke_color = Color('red')
+            draw.stroke_width = 12
+            draw.line((0, wand.height), (wand.width, 0))
+            draw.line((0, 0), (wand.width, wand.height))        
+            draw(wand)        
     if (film):
         print('  film')
         # frequency = 1
@@ -55,10 +63,22 @@ def photoFX(wand, pop, grayscale, warm, cool, strong, film):
         # amplitude = 0.02
         # bias = 0.8
         # wand.function('sinusoid', [frequency, phase_shift, amplitude, bias])
-        # percentage
-        wand.modulate(brightness=100.0, saturation=20.0, hue=100.0)
-        #normalize()
+        # convert test.png  -fx '(1/(1+exp(10*(.5-u)))-0.006693)*1.013567' \
+        #      sigmoidal.png
+            #normalize()
         #resize(width=None, height=None,
+        #wand = wand.fx(fx_filter)
+    if (watermark):
+        with Image(filename=watermark) as overlay:
+            wand.composite(
+            overlay, 
+            left=None, 
+            top=None, 
+            operator='dissolve', 
+            arguments='35', 
+            gravity='center'
+            )
+        
     return wand
 
 

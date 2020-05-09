@@ -1,13 +1,11 @@
 from wand.image import Image
 from io import BytesIO
-from image.filter_base import (
-    FilterBase,
-    FormatBase,
-    PhotoFXBase,
-    ResizeBase,
-    CropBase,
-    ResizeSmartBase,
-    CropSmartBase
+from image.filters import (
+    Filter,
+    FormatMixin,
+    PhotoFXMixin,
+    ResizeCropMixin,
+    ResizeCropSmartMixin,
 )
 from image import image_ops_wand
 from image.constants import FORMAT_APP_PILLOW, FORMAT_PILLOW_APP
@@ -15,9 +13,11 @@ from image.constants import FORMAT_APP_PILLOW, FORMAT_PILLOW_APP
 
 
 class WandProcess():
-    
+    '''
+    Not: Imagemagik/Wand modifies in place, so there is no need for 
+    returns from on modify() or image_ops.
+    '''
     def process(self, src_file):
-        print('  process!')
         image = Image(file=src_file)
  
         # write_attrs currently {format, jpeg_quality}
@@ -27,9 +27,7 @@ class WandProcess():
  
         # break out processing, it's the only action that changes
         # across different filters
-        print('  process2!')
         self.modify(image) or image
-        print('  process3!')
         
         # set the format
         image.format = FORMAT_APP_PILLOW[write_attrs['format']]
@@ -63,29 +61,29 @@ class WandProcess():
         # @lib_image the class used by the library to wrap image data
         # @return the same kind of class
         # '''
-        print('  modify!bbbbbbbb')
         #raise NotImplementedError
-        return wand
+        pass
 
 
 #class Format(WandProcess, PhotoFXBase, FormatBase):
-class Format(PhotoFXBase, FormatBase, WandProcess, FilterBase):
+class Format(PhotoFXMixin, FormatMixin, WandProcess, Filter):
     '''Establish the format for an image. 
     Set iformat=None means the image is unchanged.
     '''
 
     def modify(self, lib_image):
-        print('  photoFX!')
-        return image_ops_wand.photoFX(
+        super().modify(lib_image)
+        image_ops_wand.photoFX(
             lib_image, 
             self.pop, 
             self.greyscale, 
             self.warm, 
             self.cool, 
             self.strong, 
-            self.film
+            self.film,
+            self.no,
+            self.watermark,
         )
-        return lib_image
     
 
 # class Format(WandProcess, FormatBase):
@@ -95,7 +93,7 @@ class Format(PhotoFXBase, FormatBase, WandProcess, FilterBase):
     
     
                         
-class Resize(ResizeBase, Format):
+class Resize(ResizeCropMixin,  Format):
     '''Resize n image.
     Shrinks inside the box defined by the given args. So the result will
     usually be smaller width or height than the given box.
@@ -107,16 +105,15 @@ class Resize(ResizeBase, Format):
     '''
     
     def modify(self, lib_image):
-        super()
-        print('  resize!')        
         image_ops_wand.resize_aspect(
             lib_image,
             self.width,
             self.height
             )
+        super().modify(lib_image)
 
         
-class Crop(WandProcess, CropBase, FormatBase):
+class Crop(ResizeCropMixin, Format):
     '''Resize and maybe re-format an image.
     A base class e.g.
         class Large(image.Crop):
@@ -131,10 +128,11 @@ class Crop(WandProcess, CropBase, FormatBase):
             self.width,
             self.height
         )
+        super().modify(lib_image)
 
 
 
-class ResizeSmart(WandProcess, ResizeSmartBase, FormatBase):
+class ResizeSmart(ResizeCropSmartMixin, Format):
     '''Resize an image.
     This resize lays the image on a background of ''fill-color'.
     So the result always matches the given sizes.
@@ -154,10 +152,11 @@ class ResizeSmart(WandProcess, ResizeSmartBase, FormatBase):
             self.height, 
             self.fill_color
         )
+        super().modify(lib_image)
 
 
 
-class CropSmart(WandProcess, CropSmartBase, FormatBase):
+class CropSmart(ResizeCropSmartMixin, Format):
     '''Resize and maybe re-format an image.
     A base class e.g.
         class Large(image.CropSmart):
@@ -173,4 +172,5 @@ class CropSmart(WandProcess, CropSmartBase, FormatBase):
             self.width, 
             self.height
         )
+        super().modify(lib_image)
         
