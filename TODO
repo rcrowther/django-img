@@ -3,13 +3,15 @@ Save in right place
 Model field?
 How does cloud storage generate reforms?
 Images Admin not removing files
-Decide/Fix model fields
 
-IMG_FORMAT_OVERRIDE No, REFORM_FORMAT Yes
-IMG_JPEG_QUALITY No, REFORM_JPEG_QUALITY yes
 
 == Management
 Work on pks too
+Image sync again
+URL solutions?
+
+== Images
+Optional delete-on-removal admin would be awesome.
 
 == Reforms
 Look over the process thing for FilePaths. It's still an issue.
@@ -17,9 +19,10 @@ Look over the process thing for FilePaths. It's still an issue.
 Must decide resolve the JPEG/Pillow transparency issue
 https://github.com/python-pillow/Pillow/issues/2609
 
+
 == Filters
 For cloud, what to you get to make reforms? so what source goes into the filter?
-Register, always want an instance?
+Register, want an instance? Admin want Model?
 
 Why decorator not working?
 https://docs.djangoproject.com/en/3.0/ref/contrib/admin/
@@ -28,19 +31,24 @@ Breakable template from tags
 Get rid of output transparency?
 Stop filters applying effects to fills.
 
-'Not found' and 'watermark' files and on URLs
+'Not found' and 'watermark' files on URLs
+
 
 == Utils
 Any othr ModulePath.from_str accidents?
 
+
 == Settings
 Put detections in utils.py
 Cache filefinding, and the like
+
 
 = General
 STATIC_OR_URL
 and switch between them
 SVG upload?
 Cleanup leftover WT files
+Performance
+
 
 

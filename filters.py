@@ -1,7 +1,6 @@
 from image.utils import ModulePath
-#x check_jpeg_quality
-from image.settings import (
-    settings, 
+
+from image.configuration_checks import (
     check_jpeg_quality, 
     check_image_formats, 
     check_value_range, 
@@ -94,32 +93,32 @@ class Filter():
         '''
         return base_name + '-' + self.id_str_short() + '.' + extension
 
-
-    def save_info_callback(self, src_format):
-        '''
-        Gather and choose between configs about how to save filter results.
-        Probes into several settings. If present, settings file wins, 
-        filter config wins, discovered state. 
-        @ifilter instance of a Filter
-        '''
-        # defaults
-        iformat = src_format
-        jpeg_quality = settings.reforms.jpeg_quality
+    # #? should not be here?
+    # def save_info_callback(self, src_format):
+        # '''
+        # Gather and choose between configs abbout how to save filter results.
+        # Probes into several settings. If present, settings file wins, 
+        # filter config wins, discovered state. 
+        # @ifilter instance of a Filter
+        # '''
+        # # defaults
+        # iformat = src_format
+        # jpeg_quality = settings.reforms.jpeg_quality
         
-        # Overrides of output format. Settings first...
-        if (settings.reforms.format_override):
-            iformat = settings.reforms.format_override
+        # # Overrides of output format. Settings first...
+        # if (settings.reforms.format_override):
+            # iformat = settings.reforms.format_override
 
-        #,,,but Filter wins.
-        if hasattr(self, 'format') and self.format:
-            iformat = self.format
+        # #,,,but Filter wins.
+        # if hasattr(self, 'format') and self.format:
+            # iformat = self.format
 
-        if iformat == 'jpg':
-            # Overrides of JPEG compression quality. Filter wins.
-            if hasattr(self, 'jpeg_quality') and self.jpeg_quality:
-                jpeg_quality = self.jpeg_quality
+        # if iformat == 'jpg':
+            # # Overrides of JPEG compression quality. Filter wins.
+            # if hasattr(self, 'jpeg_quality') and self.jpeg_quality:
+                # jpeg_quality = self.jpeg_quality
                 
-        return {'format': iformat, 'jpeg_quality': jpeg_quality}
+        # return {'format': iformat, 'jpeg_quality': jpeg_quality}
         
         
     def process(self, src_file):

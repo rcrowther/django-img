@@ -93,7 +93,8 @@ def autodiscover(
             
     return r
 
-#! sould add .media_subpath_originals too?
+    
+#? should be in decisions?
 def image_save_path(filename):
     '''
     Get the full path from a filepath.
@@ -147,13 +148,12 @@ def reform_save_path(filename):
     p = Path(filename)
     
     # upload_to recieves a filename, no path.
-    safer_stem = p.stem
+    stem = p.stem
     if (settings.truncate_paths):
         # truncate filename to prevent it going over 100 chars,
         # accounting for declared paths
         # https://code.djangoproject.com/ticket/9893        
-        safer_stem = safer_stem[:settings.path_length_limit]
+        stem = stem[:settings.path_length_limit]
         
     # This needs the full path building.
-    return os.path.join(settings.media_subpath_reforms, safer_stem)  + '.' + p.suffix
-
+    return os.path.join(settings.media_subpath_reforms, stem)  + '.' + p.suffix

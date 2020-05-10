@@ -13,7 +13,11 @@ from django.urls import reverse
 from collections import OrderedDict
 from django.utils.functional import cached_property
 #from image.filters import Filter
-from image.utils import image_save_path, reform_filename, reform_save_path
+from image.utils import (
+    image_save_path, 
+    reform_filename, 
+    reform_save_path
+)
 #from django.conf import settings
 #from image.settings import settings
 print('create models')
@@ -48,7 +52,21 @@ def get_reform_upload_to(instance, filename):
 
 
 class AbstractImage(models.Model):
-    #! upload_date
+    # Delete policy
+    DELETE_UNSET = 0
+    DELETE_NO = 1
+    DELETE_YES = 2
+    DELETE_POLICIES = [
+        (DELETE_UNSET, 'None'),
+        (DELETE_NO, 'No'),
+        (DELETE_YES, 'Yes'),
+    ]
+    delete_policies = {
+        DELETE_UNSET: None,
+        DELETE_NO: False,
+        DELETE_YES: True,
+    }
+
     upload_date = models.DateTimeField(_("Date of upload"),
         auto_now_add=True,
         db_index=True
@@ -69,6 +87,11 @@ class AbstractImage(models.Model):
         height_field='height'
     )
     
+    auto_delete = models.PositiveSmallIntegerField(_("Delete uploaded files on item deletion"), 
+        choices=DELETE_UNSET,
+        default=DELETE_UNSET,
+    )    
+
     # Django uses pillow anyway to provide width and height
     # I think the 'orrible duplication is for cloud storage, to spare
     # web hits.
@@ -116,7 +139,7 @@ class AbstractImage(models.Model):
         # Incoming filename comes from upload machinery, and needs 
         # treatment. Also, path needs appending.
         #! replace with settings.media_subpath_originals
-        folder_name = 'original_images'
+        #folder_name = 'original_images'
         
         #  storage.get_valid_name():
         # Quote stock local file implementation:
@@ -366,7 +389,7 @@ class AbstractReform(models.Model):
         # only needs path appending.
         print('reform upload_to:')
         print(str(filename))
-        folder_name = 'reforms'
+        #folder_name = 'reforms'
         filename = self.src.field.storage.get_valid_name(filename)
         # print('reform upload_to:')
         # print(str(filename))
