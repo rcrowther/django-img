@@ -8,7 +8,7 @@ from image.models import Image
 # template?
 # as url/static
 #tmp, until we have registry
-from image.image_filters import Small
+#from image.image_filters import Small
 from image.registry import registry
 from image import utils
 
@@ -94,8 +94,14 @@ def image_tag(context, img_model, filter_path, **kwargs):
         
         
 @register.simple_tag(takes_context=True)
-def image_url(context, img_model, ifilter):
+def image_url(context, img_model, filter_path):
     im = context['review'].img
+    if (filter_path.find('.') == -1):
+        view_path = context.get('view').__module__
+        #print(str(view_path))
+        #filter_path = utils.module_path_append(utils.module_path_root(view_path), filter_path)
+        filter_path = utils.ModulePath(view_path).root.extend(filter_path)    
+    f = registry.get_instance(filter_path)
     r = im.get_reform(Small())
     return r.url()
         

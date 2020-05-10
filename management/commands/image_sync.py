@@ -4,7 +4,7 @@ from pathlib import Path
 from image.settings import settings
 
 
-
+# https://www.algotech.solutions/blog/python/deleting-unused-django-media-files/
 class Command(BaseCommand):
     help = 'Resync local image files to the database. The default (no options) adds models for orphan files.'
     output_transaction = True
@@ -34,7 +34,7 @@ class Command(BaseCommand):
         Read all image model paths
         @return full-path Paths
         '''
-        val_list = Image.objects.values_list('ifile', flat=True)
+        val_list = Image.objects.values_list('src', flat=True)
         media_full_path = Path(settings.media_root)
         
         return [media_full_path / rel_path for rel_path in val_list]
@@ -45,10 +45,11 @@ class Command(BaseCommand):
         Read all image models for pk, title and file
         @return object list supplemented with 'full_path' key referencing a Path
         '''
-        val_list = Image.objects.values('pk', 'title', 'ifile')
+        val_list = Image.objects.values('pk', 'title', 'src')
+        # do fullpath with src.name?
         media_full_path = Path(settings.media_root)
         for e in val_list:
-            e['full_path']  = media_full_path / e['ifile']
+            e['full_path']  = media_full_path / e['src']
         
         return  val_list  
 
@@ -117,7 +118,7 @@ class Command(BaseCommand):
                 # Paths, only strings
                 i = Image(
                     title = path.stem,
-                    ifile = str(path),
+                    src = str(path),
                 ) 
 
                 try:

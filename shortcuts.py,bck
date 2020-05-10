@@ -1,20 +1,21 @@
 from wagtail.images.models import SourceImageIOError
 
 
-def get_reform_or_not_found(image, specs):
+def get_reform_or_not_found(image, filter_id):
     """
     Tries to get / create the reform for the image or renders a not-found image if it does not exist.
-    :param image: AbstractImage
+    :param image: AbstractImage instance
     :param specs: str or Filter
     :return: Reform
     """
     try:
-        return image.get_reform(specs)
+        return image.get_reform(filter_id)
     except SourceImageIOError:
         # Image file is (probably) missing from /media/original_images - generate a dummy
         # reform so that we just output a broken image, rather than crashing out completely
         # during rendering.
-        Reform = image.reforms.model  # pick up any custom Image / Reform classes that may be in use
-        reform = Reform(image=image, width=0, height=0)
-        reform.file.name = 'not-found'
+        # pick up any custom Image / Reform classes that may be in use
+        Reform = image.reforms.model  
+        reform = Reform(src=image)
+        reform.src.name = 'unfound'
         return reform

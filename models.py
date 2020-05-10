@@ -2,9 +2,6 @@ from django.db import models
 from django.db.models.signals import pre_delete, pre_save
 import os.path
 
-#x replace with image.settings
-from django.conf import settings
-
 from contextlib import contextmanager
 from django.utils.translation import gettext_lazy as _
 from django.utils.functional import cached_property
@@ -17,11 +14,9 @@ from collections import OrderedDict
 from django.utils.functional import cached_property
 #from image.filters import Filter
 from image.utils import image_save_path, reform_filename, reform_save_path
+#from django.conf import settings
 #from image.settings import settings
 print('create models')
-
-#x
-from io import BytesIO
 from django.core.files.images import ImageFile
  
  
@@ -32,7 +27,6 @@ class SourceImageIOError(IOError):
     pass
     
 
-
 def get_upload_to(instance, filename):
     """
     Obtain a valid upload path for an image file.
@@ -41,6 +35,7 @@ def get_upload_to(instance, filename):
     subclasses can override it.
     """
     return instance.get_upload_to(filename)
+    
     
 def get_reform_upload_to(instance, filename):
     """
@@ -54,7 +49,7 @@ def get_reform_upload_to(instance, filename):
 
 class AbstractImage(models.Model):
     #! upload_date
-    cdate = models.DateTimeField(_("Date of upload"),
+    upload_date = models.DateTimeField(_("Date of upload"),
         auto_now_add=True,
         db_index=True
     )
@@ -63,20 +58,23 @@ class AbstractImage(models.Model):
         max_length=255,
     )
     
-    ifile = models.ImageField(_('file'), 
+    # A note about the name. Even if possible, using the word 'file'
+    # triggers my, and probably other, IDEs. Again, even if possible,
+    # naming this the same as the model is not a good idea, if only due 
+    # to confusion in relations, let alone stray attribute manipulation 
+    # in Python code. So, like HTML, it is 'src' 
+    src = models.ImageField(_('image_file'), 
         upload_to=get_upload_to, 
         width_field='width', 
         height_field='height'
     )
     
-    #x
     # Django uses pillow anyway to provide width and height
-    # can we autopopulate those from remote?
+    # I think the 'orrible duplication is for cloud storage, to spare
+    # web hits.
     width = models.PositiveIntegerField(verbose_name=_('width'), editable=False)
     height = models.PositiveIntegerField(verbose_name=_('height'), editable=False)
-    #x 
-    # I think the orrible duplication with ImageField.size is to cover remote loads?
-    size = models.PositiveIntegerField(null=True, editable=False)
+    bytesize = models.PositiveIntegerField(null=True, editable=False)
 
 
     def is_stored_locally(self):
@@ -84,22 +82,21 @@ class AbstractImage(models.Model):
         Returns True if the image is hosted on the local filesystem
         """
         try:
-            self.ifile.path
-
+            self.src.path
             return True
+            
         except NotImplementedError:
             return False
 
             
-    #? We have it or don't. Whats this for?
+    #? We have it or don't. What's this for?
     # This exists because, although Django Imagefield will autopopulate 
     # width and height via Pillow, pillow will not find the filesize.
     # That can be done by opening a file using Python.
-    #! get bytesize       
-    def get_file_size(self):
-        if self.size is None:
+    def get_bytesize(self):
+        if self.bytesize is None:
             try:
-                self.size = self.ifile.size
+                self.bytesize = self.src.size
             except Exception as e:
                 # File not found
                 #
@@ -108,9 +105,9 @@ class AbstractImage(models.Model):
                 # storage being used.
                 raise SourceImageIOError(str(e))
 
-            self.save(update_fields=['size'])
+            self.save(update_fields=['bytesize'])
 
-        return self.size
+        return self.bytesize
 
 
     def get_upload_to(self, filename):
@@ -127,10 +124,10 @@ class AbstractImage(models.Model):
         # filename. Remove leading and trailing spaces; convert other spaces to
         # underscores; and remove anything that is not an alphanumeric, dash,
         # underscore, or dot.
-        filename = self.ifile.field.storage.get_valid_name(filename)
+        filename = self.src.field.storage.get_valid_name(filename)
         print('image upload_to:')
         print(str(filename))
-        #! replace with image.file_utils.filename
+        #! replace with src.file_utils.filename
         # do a unidecode in the filename and then replace non-ascii 
         # characters in filename with _ , to sidestep issues with filesystem encoding
         # filename = "".join((i if ord(i) < 128 else '_') for i in unidecode(filename))
@@ -151,36 +148,36 @@ class AbstractImage(models.Model):
 
         
     @contextmanager
-    def open_file(self):
+    def open_src(self):
         # Open file if it is closed
-        close_file = False
+        close_src = False
         try:
-            image_file = self.ifile
+            src = self.src
 
-            if self.ifile.closed:
+            if self.src.closed:
                 # Reopen the file
                 if self.is_stored_locally():
-                    self.ifile.open('rb')
+                    self.src.open('rb')
                 else:
                     # Some external storage backends don't allow reopening
                     # the file. Get a fresh file instance. #1397
-                    storage = self._meta.get_field('file').storage
-                    image_file = storage.open(self.ifile.name, 'rb')
+                    storage = self._meta.get_field('src').storage
+                    src = storage.open(self.src.name, 'rb')
 
-                close_file = True
+                close_src = True
         except IOError as e:
             # re-throw this as a SourceImageIOError so that calling code can distinguish
             # these from IOErrors elsewhere in the process
             raise SourceImageIOError(str(e))
 
         # Seek to beginning
-        image_file.seek(0)
+        src.seek(0)
 
         try:
-            yield image_file
+            yield src
         finally:
-            if close_file:
-                image_file.close()
+            if close_src:
+                src.close()
 
             
     @classmethod
@@ -194,7 +191,9 @@ class AbstractImage(models.Model):
 
 
     def get_reform(self, filter_instance):
-        '''ifilter can be class, instance or text for registry???
+        ''' Generate a reform for this image.
+        @ifilter instance of a filter, to generate the reform. 
+        can be class, instance or text for registry???
         '''
         #! what if filter is none?
         #filtername = None
@@ -217,7 +216,7 @@ class AbstractImage(models.Model):
 
         try:
             reform = self.reforms.get(
-                filter_spec=filtername,
+                filter_id=filtername,
             )
         except Reform.DoesNotExist:
             # make a new, reformed image and record for Reform DB table            
@@ -225,7 +224,7 @@ class AbstractImage(models.Model):
             # First, a destination filename. The 
             # field settings will handle the path, but we need a filename.                
             # 'name' is path relative to media/. Name only, pleaee.
-            #src_fname = os.path.basename(self.ifile.name)
+            #src_fname = os.path.basename(self.src.name)
             #src_fname_no_extension, extension = os.path.splitext(src_fname)
             # <srcname> - <filtername> . <format> 
             # <srcname> - <filtername> is a near-unique key. Near enough.
@@ -241,7 +240,7 @@ class AbstractImage(models.Model):
                 (reform_buff, iformat) = filter_instance.process(fsrc)
 
             dst_fname = reform_filename( 
-                self.ifile.name,
+                self.src.name,
                 filter_instance, 
                 iformat
             )
@@ -252,14 +251,15 @@ class AbstractImage(models.Model):
             # We got everything Django likes. A model save should 
             # generate a Reform DB entry and the file itself.
             reform = Reform(
-                image = self,
-                filter_spec = filter_instance.path_str(),
-                ifile = reform_file,
+                reform = reform_file,
+                filter_id = filter_instance.path_str(),
+                src = self,
                 #! can't guarentee these, can we? unless preset in filter?
+                #? needed at all?
                 #width = filter_instance.width,
                 #height = filter_instance.height,
-                width = 0,
-                height = 0,
+                #width = 0,
+                #height = 0,
             )
             reform.save()
 
@@ -274,21 +274,29 @@ class AbstractImage(models.Model):
         
     @property
     def filename(self):
-        return os.path.basename(self.ifile.name)
+        return os.path.basename(self.src.name)
         
     @property
     def default_alt_text(self):
-        # by default the alt text field (used in rich text insertion) is populated
-        # from the title. Subclasses might provide a separate alt field, and
+        # by default the alt text field is populated from the title. 
+        # Subclasses might provide a separate alt field, and
         # override this
         return self.title
         
+    #? Not convinved about having this here.
     def img_tag(self, extra_attributes={}):
-        '''return html for the original upload'''
-        attrs = {'src': self.ifile.url, 'alt': self.default_alt_text}
+        '''@return html for the original upload'''
+        attrs = {'src': self.src.url, 'alt': self.default_alt_text}
         attrs.update(extra_attributes)
         return mark_safe('<img{}>'.format(flatatt(attrs)))
-        
+
+    def __repr__(self):
+        return "Reform(upload_date: {}, title:'{}', src:'{}')".format(
+            self.upload_date,
+            self.title,
+            self.src,
+        )                
+
     def __str__(self):
         return self.title
 
@@ -298,164 +306,39 @@ class AbstractImage(models.Model):
         
         
 class Image(AbstractImage):
-    # admin_form_fields = (
-        # 'title',
-        # 'file',
-        # 'collection',
-        # 'tags',
-        # 'focal_point_x',
-        # 'focal_point_y',
-        # 'focal_point_width',
-        # 'focal_point_height',
-    # )
 
     class Meta:
         verbose_name = _('image')
         verbose_name_plural = _('images')
 
 
-#x remove all
-class Filter:
-    """
-    Represents one or more operations that can be applied to an Image to produce a reform
-    appropriate for final display on the website. Usually this would be a resize operation,
-    but could potentially involve colour processing, etc.
-    """
-
-    def __init__(self, spec=None):
-        # The spec pattern is operation1-var1-var2|operation2-var1
-        self.spec = spec
-
-    @cached_property
-    def operations(self):
-        # Search for operations
-        self._search_for_operations()
-
-        # Build list of operation objects
-        operations = []
-        for op_spec in self.spec.split('|'):
-            op_spec_parts = op_spec.split('-')
-
-            if op_spec_parts[0] not in self._registered_operations:
-                raise InvalidFilterSpecError("Unrecognised operation: %s" % op_spec_parts[0])
-
-            op_class = self._registered_operations[op_spec_parts[0]]
-            operations.append(op_class(*op_spec_parts))
-        return operations
-
-    def run(self, image, output):
-        with image.get_willow_image() as willow:
-            original_format = willow.format_name
-
-            # Fix orientation of image
-            willow = willow.auto_orient()
-
-            env = {
-                'original-format': original_format,
-            }
-            for operation in self.operations:
-                willow = operation.run(willow, image, env) or willow
-
-            # Find the output format to use
-            if 'output-format' in env:
-                # Developer specified an output format
-                output_format = env['output-format']
-            else:
-                # Convert bmp and webp to png by default
-                default_conversions = {
-                    'bmp': 'png',
-                    'webp': 'png',
-                }
-
-                # Convert unanimated GIFs to PNG as well
-                if not willow.has_animation():
-                    default_conversions['gif'] = 'png'
-
-                # Allow the user to override the conversions
-                conversion = getattr(settings, 'IMAGE_FORMAT_CONVERSIONS', {})
-                default_conversions.update(conversion)
-
-                # Get the converted output format falling back to the original
-                output_format = default_conversions.get(
-                    original_format, original_format)
-
-            if output_format == 'jpeg':
-                # Allow changing of JPEG compression quality
-                if 'jpeg-quality' in env:
-                    quality = env['jpeg-quality']
-                elif hasattr(settings, 'IMAGE_JPEG_QUALITY'):
-                    quality = settings.IMAGE_JPEG_QUALITY
-                else:
-                    quality = 85
-
-                # If the image has an alpha channel, give it a white background
-                if willow.has_alpha():
-                    willow = willow.set_background_color_rgb((255, 255, 255))
-
-                return willow.save_as_jpeg(output, quality=quality, progressive=True, optimize=True)
-            elif output_format == 'png':
-                return willow.save_as_png(output, optimize=True)
-            elif output_format == 'gif':
-                return willow.save_as_gif(output)
-            elif output_format == 'webp':
-                return willow.save_as_webp(output)
-
-    def get_cache_key(self, image):
-        vary_parts = []
-
-        for operation in self.operations:
-            for field in getattr(operation, 'vary_fields', []):
-                value = getattr(image, field, '')
-                vary_parts.append(str(value))
-
-        vary_string = '-'.join(vary_parts)
-
-        # Return blank string if there are no vary fields
-        if not vary_string:
-            return ''
-
-        return hashlib.sha1(vary_string.encode('utf-8')).hexdigest()[:8]
-
-    _registered_operations = None
-
-    @classmethod
-    def _search_for_operations(cls):
-        if cls._registered_operations is not None:
-            return
-
-        operations = []
-        for fn in hooks.get_hooks('register_image_operations'):
-            operations.extend(fn())
-
-        cls._registered_operations = dict(operations)
-
 
 class AbstractReform(models.Model):
-    #! change to filter_id
-    filter_spec = models.CharField(max_length=255, db_index=True)
-    ifile = models.ImageField(
+    # For naming, see the note in AbstractImage
+    src = models.FileField(
         upload_to=get_reform_upload_to, 
-        width_field='width', 
-        height_field='height'
+        #width_field='width', 
+        #height_field='height'
         )
-    # get rid of these. You can use ifile.width
-    # or not?
-    width = models.IntegerField(editable=False)
-    height = models.IntegerField(editable=False)
+    filter_id = models.CharField(max_length=255, db_index=True)
+    # get rid of these. You can use src.width
+    # or not? Never used them.
+    #width = models.IntegerField(editable=False)
+    #height = models.IntegerField(editable=False)
     #Should this not have a sbytesize then?
     
     @property
     def url(self):
-        return self.ifile.url
+        return self.src.url
 
     @property
     def alt(self):
-        return self.image.title
+        return self.src.title
 
     @property
     def attrs(self):
         """
-        The src, width, height, and alt attributes for an <img> tag, as a HTML
+        The src and alt attributes for an <img> tag, as a HTML
         string
         """
         return flatatt(self.attrs_dict)
@@ -463,12 +346,10 @@ class AbstractReform(models.Model):
     @property
     def attrs_dict(self):
         """
-        A dict of the src, width, height, and alt attributes for an <img> tag.
+        A dict of the src and alt attributes for an <img> tag.
         """
         return OrderedDict([
             ('src', self.url),
-            ('width', self.width),
-            ('height', self.height),
             ('alt', self.alt),
         ])
 
@@ -486,7 +367,7 @@ class AbstractReform(models.Model):
         print('reform upload_to:')
         print(str(filename))
         folder_name = 'reforms'
-        filename = self.ifile.field.storage.get_valid_name(filename)
+        filename = self.src.field.storage.get_valid_name(filename)
         # print('reform upload_to:')
         # print(str(filename))
         # return os.path.join(folder_name, filename)
@@ -497,15 +378,15 @@ class AbstractReform(models.Model):
         errors = super(AbstractReform, cls).check(**kwargs)
         if not cls._meta.abstract:
             if not any(
-                #set(constraint) == set(['image', 'filter_spec', 'focal_point_key'])
-                set(constraint) == set(['image', 'filter_spec'])
+                #set(constraint) == set(['src', 'filter_idc', 'focal_point_key'])
+                set(constraint) == set(['src', 'filter_id'])
                 for constraint in cls._meta.unique_together
             ):
                 errors.append(
                     checks.Error(
                         "Custom reform model %r has an invalid unique_together setting" % cls,
                         hint="Custom reform models must include the constraint "
-                        "('image', 'filter_spec') in their unique_together definition.",
+                        "('src', 'filter_id') in their unique_together definition.",
                         obj=cls,
                         id='images.E001',
                     )
@@ -517,29 +398,31 @@ class AbstractReform(models.Model):
         abstract = True
 
 
+
 class Reform(AbstractReform):
-    image = models.ForeignKey(Image, related_name='reforms', on_delete=models.CASCADE)
+    src = models.ForeignKey(Image, related_name='reforms', on_delete=models.CASCADE)
 
     def __repr__(self):
-        return "Reform(image:'{}', ifile:'{}', filter_spec:'{}', width={}, height={})".format(
+        return "Reform(image:'{}', src:'{}', filter_id:'{}')".format(
             self.image,
-            self.ifile,
-            self.filter_spec,
-            self.width,
-            self.height,
+            self.src,
+            self.filter_id,
         )
-        return s
     
     def __str__(self):
-        return self.ifile.name
+        # Source name includes filter id, so not bad?
+        #? or ???-self.filter.id_str_short()
+        return self.src.name
+         
          
     class Meta:
         unique_together = (
-            ('image', 'filter_spec'),
+            ('src', 'filter_id'),
         )
 
-# Receive the pre_delete signal and delete the file associated with the model instance.
-@receiver(pre_delete, sender=Reform)
-def reform_delete(sender, instance, **kwargs):
-    # Pass false so FileField doesn't save the model.
-    instance.ifile.delete(False)
+
+# # Receive the pre_delete signal and delete the file associated with the model instance.
+# @receiver(pre_delete, sender=Reform)
+# def reform_delete(sender, instance, **kwargs):
+    # # Pass false so FileField doesn't save the model.
+    # instance.src.delete(False)

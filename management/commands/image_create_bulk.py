@@ -31,7 +31,7 @@ class Command(BaseCommand):
                 fname = file_utils.filename(path) 
                 i = Image(
                     title = fname,
-                    ifile = ImageFile(f, name=fname + path.suffix),
+                    src = ImageFile(f, name=fname + path.suffix),
                 ) 
                 try:
                     i.save()

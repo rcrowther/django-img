@@ -8,7 +8,7 @@ from image.filters import (
     ResizeCropSmartMixin,
 )
 from image import image_ops_wand
-from image.constants import FORMAT_APP_PILLOW, FORMAT_PILLOW_APP
+from image.constants import FORMAT_APP_UCLIB, FORMAT_UCLIB_APP
 
 
 
@@ -22,7 +22,7 @@ class WandProcess():
  
         # write_attrs currently {format, jpeg_quality}
         write_attrs = self.save_info_callback(
-                    FORMAT_PILLOW_APP[image.format],
+                    FORMAT_UCLIB_APP[image.format],
                     )
  
         # break out processing, it's the only action that changes
@@ -30,7 +30,7 @@ class WandProcess():
         self.modify(image) or image
         
         # set the format
-        image.format = FORMAT_APP_PILLOW[write_attrs['format']]
+        image.format = FORMAT_APP_UCLIB[write_attrs['format']]
         
         # set JPEG and others quality
         image.compression_quality = write_attrs['jpeg_quality']

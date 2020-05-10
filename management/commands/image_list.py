@@ -39,7 +39,7 @@ class Command(BaseCommand):
             if (options["weeks_back"] > week_num_now or options["weeks_back"] < 0):
                 raise CommandError("Value of --weeks_back option cant be negative or larger than the year. Today is in week {}".format(week_num_now))             
             week_num_back = week_num_now - options["weeks_back"]
-            qs = qs.filter(cdate__week__gte=week_num_back)
+            qs = qs.filter(upload_date__week__gte=week_num_back)
                 
         qs = qs.values_list('pk', 'title', named=True)
         for e in qs:

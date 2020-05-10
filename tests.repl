@@ -5,13 +5,13 @@ a=models.Image.objects.get(title='phone')
 ifilter=filters.Thumb()
 d = a.get_reform(ifilter)
 #import os
-#in_path = os.path.basename(a.ifile.name)
+#in_path = os.path.basename(a.image.name)
 #in_no_extension, in_extension = os.path.splitext(in_path)
 #out_path_no_extension = in_no_extension + ifilter.path()
 #a.reform_file_generate(out_path_no_extension , ifilter)
-#reform = models.Reform(image = a, filter_spec = ifilter.path(), ifile = d.fp, width = d.width, height = d.height)
-models.Reform.objects.delete(filter_spec="thumb")
-models.Reform.objects.filter(filter_spec="thumb").delete()
+#reform = models.Reform(image = a, filter_id = ifilter.path(), reform = d.fp, width = d.width, height = d.height)
+models.Reform.objects.delete(filter_id="thumb")
+models.Reform.objects.filter(filter_id="thumb").delete()
 
 
 # filters

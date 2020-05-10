@@ -1,4 +1,8 @@
-# Definitive list of formats accepted, in the form used in the app.
+'''
+Formats accepted.
+This list is used throughout the app, and is definitive.
+The entries can be used for new file extensions.
+'''
 IMAGE_FORMATS = [
     'bmp',
     'jpg',
@@ -20,16 +24,19 @@ _FORMAT_FILE_EXTENSIONS_BASE = {
 
 _UPPER_EXTENSIONS = {k.upper():v for k,v in _FORMAT_FILE_EXTENSIONS_BASE.items()}
 
-# Map of file extensions -> format key
-# allows uppercase
+
+'''
+Map of allowed file extensions -> format key
+Includes upper and lower case entries, and variations in spelling 
+e.g. 'jpg'/'jpeg'
+'''
 ALLOWED_FILE_EXTENSIONS = {**_FORMAT_FILE_EXTENSIONS_BASE, **_UPPER_EXTENSIONS}
 
 
-# returns the Pillow format key for this apps keys.
-# Will do for wand, too
-# identify -list format
-#? So call...? PilWan
-FORMAT_APP_PILLOW = {
+'''Map of app formats -> uppercase format keys.
+This map will work for both Pillow and Wand libraries.
+'''
+FORMAT_APP_UCLIB = {
     'bmp' : 'BMP',
     'jpg' : 'JPEG',
     'png' : 'PNG',
@@ -38,5 +45,9 @@ FORMAT_APP_PILLOW = {
     'webp' : 'WEBP',
 }
 
-# returns this apps format key for a Pillow keys.
-FORMAT_PILLOW_APP = {v:k for k,v in FORMAT_APP_PILLOW.items()}
+
+'''
+Map of uppercase format keys -> app formats.
+This map will work for both Pillow and Wand libraries.
+'''
+FORMAT_UCLIB_APP = {v:k for k,v in FORMAT_APP_UCLIB.items()}

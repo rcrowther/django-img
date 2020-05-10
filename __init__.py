@@ -6,14 +6,14 @@ from image import utils
 print('create __init__')
 
 
-from image.filters_pillow import (
-    #Filter, 
-    Format, Resize, Crop, ResizeSmart, CropSmart
-)
+# from image.filters_pillow import (
+    # #Filter, 
+    # Format, Resize, Crop, ResizeSmart, CropSmart
+# )
 
 __all__ = [
-    "Format", "Resize", "Crop", "ResizeSmart", "CropSmart",
-    "register", "registry", "autodiscover"
+    # "Format", "Resize", "Crop", "ResizeSmart", "CropSmart",
+    # "register", "registry", "autodiscover"
     ]
 
 
@@ -25,4 +25,4 @@ def autodiscover():
         parents = settings.modules, 
         find_in_apps = settings.app_dirs, 
         not_core_apps = True
-        )
+    )

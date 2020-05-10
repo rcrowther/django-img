@@ -28,18 +28,19 @@ Breakable template from tags
 Get rid of output transparency?
 Stop filters applying effects to fills.
 
+'Not found' and 'watermark' files and on URLs
+
 == Utils
 Any othr ModulePath.from_str accidents?
 
 == Settings
-Put detection in utils.py
+Put detections in utils.py
 Cache filefinding, and the like
 
 = General
 STATIC_OR_URL
 and switch between them
-Classwide Congatants and names (or in Willow?)
-SVG/tiff upload?
-Cleanup leftover files
+SVG upload?
+Cleanup leftover WT files
 
 

@@ -7,4 +7,4 @@ from image.models import Reform
 
 class ReformCreate(CreateView):
     model = Reform
-    fields = ['filter_spec', 'width', 'height']
+    fields = ['filter_id', 'width', 'height']
