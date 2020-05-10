@@ -104,12 +104,13 @@ class Filter():
         '''
         # defaults
         iformat = src_format
-        jpeg_quality = settings.jpeg_quality
+        jpeg_quality = settings.reforms.jpeg_quality
         
-        # Overrides of output format. Filter wins.
-        if (settings.format_override):
-            iformat = settings.format_override
-            
+        # Overrides of output format. Settings first...
+        if (settings.reforms.format_override):
+            iformat = settings.reforms.format_override
+
+        #,,,but Filter wins.
         if hasattr(self, 'format') and self.format:
             iformat = self.format
 

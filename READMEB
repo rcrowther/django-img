@@ -254,35 +254,42 @@ Images accepts some settings. They look like the Django template settings,
             'APP_DIRS': True,
             # 'MEDIA_SUBPATH_ORIGINALS':
             # 'MEDIA_SUBPATH_REFORMS':
-            'TRUNCATE_PATHS' : True,
-        #'IMG_FORMAT_OVERRIDE': 'jpg',
-        #'IMG_JPEG_QUALITY': 85,
-
+        'AUTO_DELETE': True,
+        'REFORMS': [
+            #'FORMAT_OVERRIDE': 'jpg',
+            #'JPEG_QUALITY': 28,
+            'TRUNCATE_PATHS': True,
+        ],
             'MODULES': [
                         "someSiteName",
             ],
         },
     ]
 
+
+### General settings
 APP_DIRS
-Defines if image_filters will be sought in apps. If false, the app only uses filters defined in the core app.
-
-TRUNCATE_PATHS
-Truncate filepaths. This is usually done by truncating the length of filenames (which can become very long on the web). This is because Django imposes limits on filepath lengths.
-
-IMG_FORMAT_OVERRIDE
-Set a preferred image format. Locality wins in the discussion between settings. So, if a filter sets an 'iformat' attribute, that wins. If the filter's 'iformat' attribute is missing or None, and if this setting is present, it wins. If this setting is not present (and no 'iformat' attribute), the filter will attempt to make the file in whatever format it originally detected.
-
-IMG_JPEG_QUALITY
-Quality of reform JPGs. Basic is '85' of '100', which is very high quality. You can go down to '28', say, and get a vast reduction in file sizes.
-
-Locality wins in the discussion between settings. So, if a filter sets a 'jpeg_quality' attribute, that wins. If the filter's 'jpeg_quality' attribute is missing or None, and if this setting is present, it wins. Otherwise, the quality is '85'.
+Defines if 'image_filters.py' files will be sought in apps. If false, the app only uses filters defined in the core app.
 
 MODULES
 Defines extra places to put modules. The above example suggests a site-wide filter collection in the site directory, same as the site-wide template and CSS collections most Djangos have in the same directory. The setting takes module paths, not filepaths, because filter files are live code.
 
+
+### Reform settings
+FORMAT_OVERRIDE
+Set a preferred image format. Locality wins. If a filter sets an 'iformat' attribute, that wins. After, if this site-wide setting is present, it wins. After, the filter will attempt to make the file in whatever format it originally detected.
+
+JPEG_QUALITY
+Quality of reform JPGs. Basic is '85' of '100', which is high quality. You can go down to '28', say, and get a vast reduction in file sizes.
+
+Locality wins. If a filter sets a 'jpeg_quality' attribute, that wins. After, if this site-wide setting is present, it wins. Otherwise, the quality defaults to '85'.
+
+TRUNCATE_PATHS
+Truncate filepaths. This is usually done by truncating the length of filenames (which can become very long on the web). This is because Django limits filepath lengths to 100 chars, to fit in the database fields on FileFields (which must declare length), and to maintain compatibility with some filesystems. Default True. If you switch this setting off, be aware you will also need to expicitly declare longer db fields.
+
+
 # Other usages
- but for resons of ecomomy, Django doessn't automatically use full clean.. This to thoroughtly check the slug in a 
+ but for resons of ecomomy, Django doesn't automatically use full clean.. This to thoroughtly check the slug in a 
 
  So maybe a DetailView,
 

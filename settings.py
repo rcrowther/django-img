@@ -1,3 +1,4 @@
+from types import SimpleNamespace
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.functional import cached_property
@@ -113,11 +114,16 @@ class Settings():
         self.app_dirs = False
         self.media_subpath_originals = 'originals'
         self.media_subpath_reforms = 'reforms'
-        self.format_override = None
-        self.jpeg_quality = 85
-        self.truncate_paths = True
+        
+        self.reforms = SimpleNamespace()
+        self.reforms.format_override = None
+        self.reforms.jpeg_quality = 85
+        self.reforms.truncate_paths = True
+        
+        self.auto_delete = False
         self.populate()
         
+    #? could return none, if freed up in settings?
     @cached_property
     def path_length_limit(self):
         '''
@@ -129,7 +135,7 @@ class Settings():
     def image_local_path(self):
         '''
         Full path to the image directory.
-        This is for original image uploads, not reforms.
+        For original image uploads, not reforms.
         '''
         #! put back
         #return Path(settings.MEDIA_ROOT) / self.media_subpath_originals
@@ -153,21 +159,21 @@ class Settings():
                 self.media_subpath_originals = isettings['MEDIA_SUBPATH_ORIGINALS']
             if ('MEDIA_SUBPATH_REFORMS' in isettings):
                 self.media_subpath_reforms = isettings['MEDIA_SUBPATH_REFORMS']
-            if ('IMG_FORMAT_OVERRIDE' in isettings):
-                self.format_override = isettings['IMG_FORMAT_OVERRIDE']
-            if ('IMG_JPEG_QUALITY' in isettings):
-                self.jpeg_quality = isettings['IMG_JPEG_QUALITY']
-            if ('TRUNCATE_PATHS' in isettings):
-                self.truncate_paths = isettings['TRUNCATE_PATHS']                
+            if ('REFORMS' in isettings):
+                reforms = isettings['REFORMS']
+                if ('FORMAT_OVERRIDE' in reforms):
+                    self.reforms.format_override = reforms['FORMAT_OVERRIDE']
+                if ('JPEG_QUALITY' in reforms):
+                    self.reforms.jpeg_quality = reforms['JPEG_QUALITY']
+                if ('TRUNCATE_PATHS' in reforms):
+                    self.reforms.truncate_paths = reforms['TRUNCATE_PATHS']    
+            if ('AUTO_DELETE' in isettings):
+                self.auto_delete = isettings['AUTO_DELETE']                             
             if ('MODULES' in isettings):
                 self.modules = isettings['MODULES']
              
         # Tests
-        check_image_formats(
-            'Django settings', 
-            'IMG_FORMAT_OVERRIDE',
-            self.format_override 
-        )
+
         # impose short limit on filepath (Django, 100 char overall path default)
         # includes '/media/', so just 24 chars
         check_media_subpath(
@@ -180,20 +186,24 @@ class Settings():
             'MEDIA_SUBPATH_ORIGINALS',  
             self.media_subpath_reforms
         )
+        check_image_formats(
+            'Django settings', 
+            'REFORMS[FORMAT_OVERRIDE]',
+            self.reforms.format_override 
+        )      
         check_jpeg_quality(
             'Django settings', 
-            'IMG_JPEG_QUALITY', 
-            self.jpeg_quality
+            'REFORMS[JPEG_QUALITY]', 
+            self.reforms.jpeg_quality
         )
-      
-        
-    def __str__(self):
-        return "Settings({}, {}, {}, {}, {})".format(
+                
+    def __repr__(self):
+        return "Settings( app_dirs:{}, modules:{}, {}, {}, reform_settings:{})".format(
+            self.app_dirs,
             self.modules,
-            ", ".join(self.app_dirs),
             self.media_subpath_originals,
             self.media_subpath_reforms,
-            self.truncate_paths,
+            self.reforms,
         )
 
 

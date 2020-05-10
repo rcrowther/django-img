@@ -420,9 +420,3 @@ class Reform(AbstractReform):
             ('src', 'filter_id'),
         )
 
-
-# # Receive the pre_delete signal and delete the file associated with the model instance.
-# @receiver(pre_delete, sender=Reform)
-# def reform_delete(sender, instance, **kwargs):
-    # # Pass false so FileField doesn't save the model.
-    # instance.src.delete(False)

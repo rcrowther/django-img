@@ -12,3 +12,5 @@ class ImageConfig(AppConfig):
     def ready(self):
         super().ready()
         self.module.autodiscover()
+        from image.signals import register_signal_handlers
+        register_signal_handlers()

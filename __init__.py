@@ -13,7 +13,7 @@ print('create __init__')
 
 __all__ = [
     # "Format", "Resize", "Crop", "ResizeSmart", "CropSmart",
-    # "register", "registry", "autodiscover"
+    "settings", # "register", "registry", "autodiscover"
     ]
 
 
