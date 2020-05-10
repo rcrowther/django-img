@@ -7,17 +7,13 @@ from image.configuration_checks import (
     check_media_subpath,
     check_image_formats,
     check_jpeg_quality,
-    #check_value_range,
-    #check_positive,
-    #check_boolean,
-    #check_file,
+    check_positive,
 )
 
 print('create settings')
 
 
         
-#! some confusion over avalue of settings here.
 class Settings():
     '''
     Gather settings from the settings file.
@@ -42,6 +38,7 @@ class Settings():
         self.media_root = None
         self.modules = []
         self.app_dirs = False
+        self.max_upload_size = None
         self.media_subpath_originals = 'originals'
         self.media_subpath_reforms = 'reforms'
         
@@ -85,6 +82,8 @@ class Settings():
             isettings = settings.IMAGES[0]
             if ('APP_DIRS' in isettings):
                 self.app_dirs = isettings['APP_DIRS']
+            if ('MAX_UPLOAD_SIZE' in isettings):
+                self.max_upload_size = isettings['MAX_UPLOAD_SIZE']
             if ('MEDIA_SUBPATH_ORIGINALS' in isettings):
                 self.media_subpath_originals = isettings['MEDIA_SUBPATH_ORIGINALS']
             if ('MEDIA_SUBPATH_REFORMS' in isettings):
@@ -110,7 +109,12 @@ class Settings():
             'Django settings', 
             'MEDIA_SUBPATH_REFORMS',  
             self.media_subpath_originals
-        )                            
+        )           
+        check_positive(
+            'Django settings', 
+            'MAX_UPLOAD_SIZE', 
+            self.max_upload_size   
+        )             
         check_media_subpath(
             'Django settings', 
             'MEDIA_SUBPATH_ORIGINALS',  

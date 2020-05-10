@@ -202,7 +202,7 @@ class AbstractImage(models.Model):
             if close_src:
                 src.close()
 
-            
+    #x unused
     @classmethod
     def get_reform_model(cls):
         """ Get the Reform models for this Image model """
