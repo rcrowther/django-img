@@ -22,7 +22,7 @@ from image.utils import (
 #from image.settings import settings
 print('create models')
 from django.core.files.images import ImageFile
- 
+from image.validators import validate_file_size, validate_image_file_extension
  
 class SourceImageIOError(IOError):
     """
@@ -84,7 +84,11 @@ class AbstractImage(models.Model):
     src = models.ImageField(_('image_file'), 
         upload_to=get_upload_to, 
         width_field='width', 
-        height_field='height'
+        height_field='height',
+        validators = [
+            validate_file_size,
+            validate_image_file_extension
+        ]
     )
     
     auto_delete = models.PositiveSmallIntegerField(_("Delete uploaded files on item deletion"), 
@@ -416,14 +420,14 @@ class AbstractReform(models.Model):
                 )
 
         return errors
-
+  
     class Meta:
         abstract = True
 
 
 
 class Reform(AbstractReform):
-    src = models.ForeignKey(Image, related_name='reforms', on_delete=models.CASCADE)
+    image = models.ForeignKey(Image, related_name='reforms', on_delete=models.CASCADE)
 
     def __repr__(self):
         return "Reform(image:'{}', src:'{}', filter_id:'{}')".format(

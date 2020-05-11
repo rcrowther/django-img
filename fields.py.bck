@@ -9,6 +9,7 @@ from image.constants import IMAGE_FORMATS, ALLOWED_FILE_EXTENSIONS
 from image import settings
 
 
+# Form field for Images
 class ImgField(ImageField):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

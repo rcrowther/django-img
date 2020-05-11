@@ -38,7 +38,7 @@ class Settings():
         self.media_root = None
         self.modules = []
         self.app_dirs = False
-        self.max_upload_size = None
+        self._max_upload_size = None
         self.media_subpath_originals = 'originals'
         self.media_subpath_reforms = 'reforms'
         
@@ -68,7 +68,12 @@ class Settings():
         #return Path(settings.MEDIA_ROOT) / self.media_subpath_originals
         return Path(self.media_root) / "original_images"
         
-
+    @property
+    def max_upload_size(self):
+        # Convert figure to MB
+        return self._max_upload_size * 10 * 1024 * 1024
+        
+        
     #@cached_property
     def populate(self):
         
@@ -83,7 +88,7 @@ class Settings():
             if ('APP_DIRS' in isettings):
                 self.app_dirs = isettings['APP_DIRS']
             if ('MAX_UPLOAD_SIZE' in isettings):
-                self.max_upload_size = isettings['MAX_UPLOAD_SIZE']
+                self._max_upload_size = isettings['MAX_UPLOAD_SIZE']
             if ('MEDIA_SUBPATH_ORIGINALS' in isettings):
                 self.media_subpath_originals = isettings['MEDIA_SUBPATH_ORIGINALS']
             if ('MEDIA_SUBPATH_REFORMS' in isettings):
@@ -113,7 +118,7 @@ class Settings():
         check_positive(
             'Django settings', 
             'MAX_UPLOAD_SIZE', 
-            self.max_upload_size   
+            self._max_upload_size   
         )             
         check_media_subpath(
             'Django settings', 

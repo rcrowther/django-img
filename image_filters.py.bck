@@ -1,7 +1,8 @@
 from image import filters_pillow
 from image import filters_wand, registry
 
-# Register your models here.
+# Register models here,
+#! Probably only Thumb makes any sense....
 #@image.register
 # class Large(filters_pillow.CropSmart):
     # width=513

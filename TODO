@@ -1,6 +1,5 @@
 = Structure
 Save in right place
-Model field?
 How does cloud storage generate reforms?
 Images Admin not removing files
 
@@ -42,6 +41,9 @@ Any othr ModulePath.from_str accidents?
 Put detections in utils.py
 Cache filefinding, and the like
 
+== Forms
+USe the ImgField in admin (set on model?)
+Should maxsize work on the model, or the form?
 
 = General
 STATIC_OR_URL
