@@ -1,6 +1,6 @@
 #from image.decorators import register
 from  image.settings import settings
-from image.registry import registry
+from image.registry import registry #, register
 from image import utils
 
 print('create __init__')
@@ -13,7 +13,8 @@ print('create __init__')
 
 __all__ = [
     # "Format", "Resize", "Crop", "ResizeSmart", "CropSmart",
-    # "register", "registry", "autodiscover"
+    #"Thumb",
+    #"register", "registry", "autodiscover"
     ]
 
 

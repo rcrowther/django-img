@@ -111,7 +111,7 @@ def image_save_path(filename):
     # characters in filename with _ , to sidestep issues with filesystem encoding
     safer_stem = "".join((i if ord(i) < 128 else '_') for i in unidecode(p.stem))
         
-    if (settings.truncate_paths):
+    if (settings.reforms.truncate_paths):
         # truncate filename to prevent it going over 100 chars,
         # accounting for declared paths
         # https://code.djangoproject.com/ticket/9893        

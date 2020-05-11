@@ -49,6 +49,7 @@ def image_tag_by_title(context, img_title, filter_id, **kwargs):
         view_path = context.get('view').__module__
         #print(str(view_path))
         filter_id = utils.ModulePath(view_path).root.extend(filter_id)
+    #! call
     ifilter = registry.get_instance(filter_id)
     r = get_reform_or_not_found(im, ifilter)
     return r.img_tag(kwargs)

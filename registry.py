@@ -42,7 +42,7 @@ class ClassRegistry:
         #print('regestering')
         #print(str(class_or_iterable))
         if (not isinstance(class_or_iterable, Iterable)):
-            model_or_iterable = [class_or_iterable]
+            class_or_iterable = [class_or_iterable]
         for klass in class_or_iterable:
             #if klass._meta.abstract:
             #    raise ImproperlyConfigured(
@@ -80,7 +80,18 @@ class ClassRegistry:
                 raise NotRegistered('Class can not be unregistered {}'.format( model.__name__))
             del self._registry[path]
 
-
+    def __call__(self, filter_id_path):
+        f = None
+        try:
+            f = self._registry[filter_id_path]()
+        except KeyError:
+            raise NotRegistered("Filter definition requested but not found. Filter id:{} registered: {}".format(
+            filter_id_path,
+            ", ".join(self.list().keys()),
+            ))
+        return f   
+              
+    #x for __call__
     def get_instance(self, filter_id_path):
         f = None
         try:

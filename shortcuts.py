@@ -1,4 +1,4 @@
-from wagtail.images.models import SourceImageIOError
+from image.models import SourceImageIOError
 import os.path
 
 # cache

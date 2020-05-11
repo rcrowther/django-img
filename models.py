@@ -92,16 +92,20 @@ class AbstractImage(models.Model):
     )
     
     auto_delete = models.PositiveSmallIntegerField(_("Delete uploaded files on item deletion"), 
-        choices=DELETE_UNSET,
+        choices=DELETE_POLICIES,
         default=DELETE_UNSET,
     )    
 
-    # Django uses pillow anyway to provide width and height
-    # I think the 'orrible duplication is for cloud storage, to spare
-    # web hits.
+    # Django uses Pillow anyway to provide width and height. So why?
+    # The 'orrible duplication is for cloud storage, to spare web hits. 
+    # Also to stop opening and closing the file, which is how file 
+    # storage attributes are loaded. Sure, they will be cached, but 
+    # let's get this sorted here.
     width = models.PositiveIntegerField(verbose_name=_('width'), editable=False)
     height = models.PositiveIntegerField(verbose_name=_('height'), editable=False)
-    bytesize = models.PositiveIntegerField(null=True, editable=False)
+    # Not autopoulated by the storage, so funny name.
+    # See the property further down.
+    _bytesize = models.PositiveIntegerField(null=True, editable=False)
 
 
     def is_stored_locally(self):
@@ -120,10 +124,12 @@ class AbstractImage(models.Model):
     # This exists because, although Django Imagefield will autopopulate 
     # width and height via Pillow, pillow will not find the filesize.
     # That can be done by opening a file using Python.
-    def get_bytesize(self):
-        if self.bytesize is None:
+    #! cache
+    @property
+    def bytesize(self):
+        if self._bytesize is None:
             try:
-                self.bytesize = self.src.size
+                self._bytesize = self.src.size
             except Exception as e:
                 # File not found
                 #
@@ -132,9 +138,9 @@ class AbstractImage(models.Model):
                 # storage being used.
                 raise SourceImageIOError(str(e))
 
-            self.save(update_fields=['bytesize'])
+            self.save(update_fields=['_bytesize'])
 
-        return self.bytesize
+        return self._bytesize
 
 
     def get_upload_to(self, filename):
@@ -172,7 +178,7 @@ class AbstractImage(models.Model):
         #full_path = os.path.join(folder_name, filename)
         
         return filename
-
+        
         
     @contextmanager
     def open_src(self):
@@ -193,8 +199,9 @@ class AbstractImage(models.Model):
 
                 close_src = True
         except IOError as e:
-            # re-throw this as a SourceImageIOError so that calling code can distinguish
-            # these from IOErrors elsewhere in the process
+            # re-throw this as a SourceImageIOError so that calling code
+            # can distinguish these from IOErrors elsewhere in the 
+            # process e.g. currently causes a broken-image display.
             raise SourceImageIOError(str(e))
 
         # Seek to beginning
@@ -212,9 +219,6 @@ class AbstractImage(models.Model):
         """ Get the Reform models for this Image model """
         #return get_related_model(cls.reforms.related)
         return cls.reforms.rel.related_model
-
-
-
 
 
     def get_reform(self, filter_instance):
