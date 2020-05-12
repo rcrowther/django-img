@@ -32,13 +32,14 @@ class Filter():
     '''
       
     #? cache
-    def _module_path_human(self):
+    @classmethod
+    def _module_path_human(cls):
         ''' 
         Human readable module path.
         Used to refer to a filter in the registry and templates. 
         Currently based on the module path and classname.
         '''
-        mp = self.__module__.split('.')
+        mp = cls.__module__.split('.')
         
         # We encourage users to place filters in a 
         # module called image_filters'. This would involve a lot of
@@ -49,21 +50,21 @@ class Filter():
             del(mp[-1])
         else:
             raise PlacementError("Please locate Filters to be registered in an 'image filters' module: {}.{}".format(
-                self.__module__,
-                self.__class__.__name__
+                cls.__module__,
+                cls.__name__
             ))        
         return mp
         
-    @property
-    def human_id(self):
+    @classmethod
+    def human_id(cls):
         ''' 
         id for the filter.
         Used to refer in the registry and templates, so is human 
         readable. 
         Currently based on the module path and classname.
         '''
-        p = self._module_path_human()
-        p.append( type(self).__name__ )
+        p = cls._module_path_human()
+        p.append( cls.__name__ )
         # That is unique, but we encourage users to place filters in a 
         # module called image_filters'. This would involve a lot of
         # repetition in template code. At the risk of a collision with

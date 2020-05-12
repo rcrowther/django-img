@@ -3,8 +3,6 @@ import unittest
 from django.test import TestCase
 from image.models import Image, Reform, SourceImageIOError
 from .utils import Image, get_test_image_file
-from image.registry import registry, AlreadyRegistered
-from image.filters_pillow import ResizeSmart
 
 
 # ./manage.py test image.tests
@@ -37,16 +35,16 @@ from image.image_filters import Thumb
 
 class TestFilters(TestCase):
     def setUp(self):
-        # Create an Filter for running tests on
+        # Create Filters for running tests on
         self.filter = Filter()
         self.filterthumb = Thumb()
 
     def test_human_id(self):
-        self.assertEqual(self.filterthumb.human_id, 'image.Thumb')
+        self.assertEqual(self.filterthumb.human_id(), 'image.Thumb')
         
     def test_path_info_on_non_image_filter_module_raises_placementerror(self):
         with self.assertRaises(PlacementError):
-            self.filter.human_id
+            self.filter.human_id()
             
     def test_filename(self):
         basename = 'test'
@@ -54,37 +52,54 @@ class TestFilters(TestCase):
         self.assertEqual(self.filterthumb.filename(basename, extension), 'test-image_thumb.png')
 
 
-from image.registry import ClassRegistry
+from image.registry import (
+    FilterRegistry, 
+    Unregisterable, 
+    AlreadyRegistered, 
+    NotRegistered
+)
 
-# class TestClassRegistry(TestCase):
-    # def setUp(self):
-        # # Create a Registy for running tests on
-        # self.registry = ClassRegistry('test')
-        # # mock class to enter
-        # self.filter = Filter()
-        # self.filter1 = Crop()
-        # self.filter2 = ResizeSmart()
+#from image.filters_pillow import Crop, ResizeSmart
+
+class NonFilter():
+    pass
+    
+class TestClassRegistry(TestCase):
+    def setUp(self):
+        # Create a Registy for running tests on
+        self.registry = FilterRegistry('test')
+
+        # mock class to enter. NB, classes not instances
+        self.filter = Thumb
+        self.non_filter = NonFilter
         
-    # def test_register(self):
-        # self.registry.register(self.filter)
-        # self.assertEqual(self.registry.size == 1)
+    def test_register(self):
+        self.registry.register(self.filter)
+        self.assertEqual(self.registry.size, 1)
 
-    # def test_register_with_iterable(self):
-        # self.registry.register([self.filter1, self.filter2])
-        # self.assertEqual(self.registry.size == 3)
+    def test_register_with_iterable(self):
+        self.registry.register([self.filter])
+        self.assertEqual(self.registry.size, 1)
                 
-    # def test_register_on_duplicate_key_raises_AlreadyRegistered(self):
-        # with self.assertRaises(AlreadyRegistered):
-            # self.registry.register(self.filter)
+    def test_register_non_filter_raises_unregisterable(self):
+        with self.assertRaises(Unregisterable):
+            self.registry.register(self.non_filter)
 
-    # def test_call(self):
-        # r = self.registry(self.filter.human_id)
-        # # assert is instance of filter?
-        # self.assertTrue(isinstance(Filter, r))        
+    def test_register_on_duplicate_key_raises_alreadyRegistered(self):
+        self.registry.register(self.filter)
+        with self.assertRaises(AlreadyRegistered):
+            self.registry.register(self.filter)
+
+    def test_call(self):
+        self.registry.register(self.filter)
+        r = self.registry(self.filter.human_id())
+        # assert return is instance of filter?
+        self.assertTrue(isinstance(r, Thumb))        
                 
-    # def test_unregister(self):
-        # self.registry.unregister(self.filter.human_id)
-        # self.assertEqual(self.registry.size == 2)
+    def test_unregister(self):
+        self.registry.register(self.filter)
+        self.registry.unregister(self.filter)
+        self.assertEqual(self.registry.size, 0)
 
     # # def test_filename(self):
         # # self.registry.module_path(klass)

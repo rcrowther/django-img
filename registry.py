@@ -1,13 +1,15 @@
 from collections import Iterable 
 
 
-class AlreadyRegistered(Exception):
+class AlreadyRegistered(KeyError):
     pass
 
 
-class NotRegistered(Exception):
+class NotRegistered(KeyError):
     pass
-
+    
+class Unregisterable(Exception):
+    pass
 
 class ClassRegistry:
     '''
@@ -17,67 +19,41 @@ class ClassRegistry:
     Because you may wish to refer to code by string names. This is 
     relevant when code needs to be accessed from Django templates,
     where parameters are (mostly) strings.
-    Because
-    Why not use a cahed property?
-    Why use decorators? 
+    - Why not use a cached property?
+    - Use decorators? 
     Because this allows targeted classes, so other code can be put in 
     the targetted modules.
     Does not handle permissions. 
     '''
     def __init__(self, name):
-         # model_class class -> admin_class instance
+        # key -> class (not instance)
         self._registry = {} 
         self.name = name
-
-    #def preload(self, ):
-    def module_path(self, klass):
-        return "{}.{}".format(klass.__module__, klass.__name__)
-        
-    def id_path(self, klass):
-        app_path = klass.__module__[:klass.__module__.index('.')]
-        return "{}.{}".format(app_path, klass.__name__)
                 
-    def register(self, class_or_iterable):
-        #print('regestering')
-        #print(str(class_or_iterable))
-        if (not isinstance(class_or_iterable, Iterable)):
-            class_or_iterable = [class_or_iterable]
-        for klass in class_or_iterable:
-            if klass in self._registry:
-                registered_admin = str(self._registry[klass])
-                msg = 'The model %s is already registered ' % klass.__name__
-                # if registered_admin.endswith('.ModelAdmin'):
-                    # # Most likely registered without a ModelAdmin subclass.
-                    # msg += 'in app %r.' % re.sub(r'\.ModelAdmin$', '', registered_admin)
-                # else:
-                    # msg += 'with %r.' % registered_admin
-                raise AlreadyRegistered(msg)
+    def register(self, k, klass):
+        if k in self._registry:
+            raise AlreadyRegistered('Already registered in {}. path:{}.{}'.format(
+                self.name,
+                klass.__module__,
+                klass.__name__
+            ))
 
-            # Ignore the registration if the model has been
-            # swapped out.
-            #if not klass._meta.swapped:
-                # Instantiate the admin class to save in the registry
-            # <path> => code
-            self._registry[self.id_path(klass)] = klass
+        self._registry[k] = klass
                 
-    def unregister(self, class_or_iterable):
+    def unregister(self, k):
         """
         Unregister the given model(s).
 
         If a model isn't already registered, raise NotRegistered.
         """
-        if isinstance(class_or_iterable, ModelBase):
-            class_or_iterable = [class_or_iterable]
-        for klass in class_or_iterable:
-            path = self.module_path(klass)
-            if path not in self._registry:
-                raise NotRegistered('Class can not be unregistered {}'.format( model.__name__))
-            del self._registry[path]
+        if k not in self._registry:
+            raise NotRegistered('Class can not be unregistered {}'.format(k))
+        del self._registry[k]
 
-    def __call__(self, **kwargs):
+    def __call__(self, k, **kwargs):
         f = None
         try:
-            f = self._registry[k]()
+            f = self._registry[k]
         except KeyError:
             raise NotRegistered("Class instance requested but not found. key:{} registered: {}".format(
             k,
@@ -88,9 +64,31 @@ class ClassRegistry:
     def list(self):
         return self._registry
     
+    @property
     def size(self):
         return len(self._registry)    
         
         
 print('create registry')
-registry = ClassRegistry('image.Filters')
+
+import image.filters
+
+class FilterRegistry(ClassRegistry):
+    def register(self, class_or_iterable):
+        if (not isinstance(class_or_iterable, Iterable)):
+            class_or_iterable = [class_or_iterable]
+        for filter_class in class_or_iterable:
+            if (not (issubclass(filter_class, image.filters.Filter))):
+                raise Unregisterable("Is not a subclass of Filter class:{}.{}".format(
+                    filter_class.__module__,
+                    filter_class.__name__
+                ))
+            super().register(filter_class.human_id(), filter_class)
+
+    def unregister(self, class_or_iterable):
+        if (not isinstance(class_or_iterable, Iterable)):
+            class_or_iterable = [class_or_iterable]
+        for filter_class in class_or_iterable:
+            super().unregister(filter_class.human_id())
+      
+registry = FilterRegistry('image.Filters')
