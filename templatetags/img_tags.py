@@ -50,7 +50,7 @@ def image_tag_by_title(context, img_title, filter_id, **kwargs):
         #print(str(view_path))
         filter_id = utils.ModulePath(view_path).root.extend(filter_id)
     #! call
-    ifilter = registry.get_instance(filter_id)
+    ifilter = registry(filter_id)
     r = get_reform_or_not_found(im, ifilter)
     return r.img_tag(kwargs)
 
@@ -87,7 +87,7 @@ def image_tag(context, img_model, filter_id, **kwargs):
         filter_id = utils.ModulePath(view_path).root.extend(filter_id)
     #print('ifilter in temlate tag:')
     #print(str(ifilter))        
-    ifilter = registry.get_instance(filter_id)
+    ifilter = registry(filter_id)
     r = get_reform_or_not_found(im, ifilter)
     return r.img_tag(kwargs)
         
@@ -99,8 +99,8 @@ def image_url(context, img_model, filter_id):
         view_path = context.get('view').__module__
         #print(str(view_path))
         filter_id = utils.ModulePath(view_path).root.extend(filter_id)    
-    f = registry.get_instance(filter_id)
-    ifilter = registry.get_instance(filter_id)
+    f = registry(filter_id)
+    ifilter = registry(filter_id)
     r = get_reform_or_not_found(im, ifilter)
     return r.url()
         

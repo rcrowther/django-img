@@ -24,7 +24,7 @@ class ClassRegistry:
     the targetted modules.
     Does not handle permissions. 
     '''
-    def __init__(self, name='admin'):
+    def __init__(self, name):
          # model_class class -> admin_class instance
         self._registry = {} 
         self.name = name
@@ -38,17 +38,11 @@ class ClassRegistry:
         return "{}.{}".format(app_path, klass.__name__)
                 
     def register(self, class_or_iterable):
-
         #print('regestering')
         #print(str(class_or_iterable))
         if (not isinstance(class_or_iterable, Iterable)):
             class_or_iterable = [class_or_iterable]
         for klass in class_or_iterable:
-            #if klass._meta.abstract:
-            #    raise ImproperlyConfigured(
-            #        'A class is abstract, so it cannot be registered. Classname: {}'.format(klass.__name__)
-            #    )
-
             if klass in self._registry:
                 registered_admin = str(self._registry[klass])
                 msg = 'The model %s is already registered ' % klass.__name__
@@ -80,33 +74,23 @@ class ClassRegistry:
                 raise NotRegistered('Class can not be unregistered {}'.format( model.__name__))
             del self._registry[path]
 
-    def __call__(self, filter_id_path):
+    def __call__(self, **kwargs):
         f = None
         try:
-            f = self._registry[filter_id_path]()
+            f = self._registry[k]()
         except KeyError:
-            raise NotRegistered("Filter definition requested but not found. Filter id:{} registered: {}".format(
-            filter_id_path,
+            raise NotRegistered("Class instance requested but not found. key:{} registered: {}".format(
+            k,
             ", ".join(self.list().keys()),
             ))
-        return f   
-              
-    #x for __call__
-    def get_instance(self, filter_id_path):
-        f = None
-        try:
-            f = self._registry[filter_id_path]()
-        except KeyError:
-            raise NotRegistered("Filter definition requested but not found. Filter id:{} registered: {}".format(
-            filter_id_path,
-            ", ".join(self.list().keys()),
-            ))
-        return f 
-        
-        
+        return f(**kwargs)   
+    
     def list(self):
         return self._registry
+    
+    def size(self):
+        return len(self._registry)    
         
         
 print('create registry')
-registry = ClassRegistry()
+registry = ClassRegistry('image.Filters')

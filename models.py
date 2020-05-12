@@ -240,14 +240,14 @@ class AbstractImage(models.Model):
         # else:
             # filter_instance = ifilter()
             # filtername = filter_instance.path_str()
-        filtername = filter_instance.path_str()
+        #filtername = filter_instance.human_id()
             
         #cache_key = filter.get_cache_key(self)
         Reform = self.get_reform_model()
 
         try:
             reform = self.reforms.get(
-                filter_id=filtername,
+                filter_id=filter_instance.human_id(),
             )
         except Reform.DoesNotExist:
             # make a new, reformed image and record for Reform DB table            
@@ -267,7 +267,7 @@ class AbstractImage(models.Model):
             # <srcname> - <filtername> is a near-unique key. Near enough.
                         
             # Open the file then produce a reformed image.
-            with self.open_file() as fsrc:
+            with self.open_src() as fsrc:
                 (reform_buff, iformat) = filter_instance.process(fsrc)
 
             dst_fname = reform_filename( 
@@ -283,7 +283,7 @@ class AbstractImage(models.Model):
             # generate a Reform DB entry and the file itself.
             reform = Reform(
                 reform = reform_file,
-                filter_id = filter_instance.path_str(),
+                filter_id = filter_instance.human_id(),
                 src = self,
                 #! can't guarentee these, can we? unless preset in filter?
                 #? needed at all?
@@ -441,8 +441,7 @@ class Reform(AbstractReform):
         )
     
     def __str__(self):
-        # Source name includes filter id, so not bad?
-        #? or ???-self.filter.id_str_short()
+        # Source name includes filter id, so unique
         return self.src.name
          
          

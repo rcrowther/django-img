@@ -9,7 +9,7 @@ from image.filters import (
 )
 from image import image_ops_wand
 from image.constants import FORMAT_APP_UCLIB, FORMAT_UCLIB_APP
-import image.decisions
+from image.decisions import reform_save_info
 
 
 
@@ -22,7 +22,8 @@ class WandProcess():
         image = Image(file=src_file)
  
         # write_attrs currently {format, jpeg_quality}
-        write_attrs = decisions.reform_save_info(
+        write_attrs = reform_save_info(
+                    self,
                     FORMAT_UCLIB_APP[image.format],
                     )
  

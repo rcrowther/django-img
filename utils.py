@@ -30,16 +30,19 @@ class ModulePath():
         
     @property
     def leaf(self):
-        return ModulePath(self.path[-1])
+        return self.path[-1]
                
     @property
     def root(self):
-        return ModulePath(self.path[0])
+        return self.path[0]
         
     @property
     def branch(self):
-        return ModulePath(*self.path[0:-1])
-
+        if (self.size > 1):
+            return ModulePath(*self.path[0:-1])
+        else:
+            raise IndexError('Can not return branch when length is one. elem:{}'.format(root))
+            
     def extend(self, new_leaf):
         return ModulePath(*self.path, new_leaf)
         
@@ -134,14 +137,7 @@ def reform_filename(path, filter_instance, extension):
     # Then we need to put the extension on, which may have been changed 
     # in the filter.
     p = Path(path)
-
-    dst_fname = "{}-{}.{}".format(
-        p.stem,
-        filter_instance.id_str_short(),
-        extension
-    )
-
-    return dst_fname
+    return filter_instance.filename(p.stem, p.extension)
     
     
 def reform_save_path(filename):

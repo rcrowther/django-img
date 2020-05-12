@@ -12,6 +12,13 @@ from image.configuration_checks import (
 print('create filters')
 
 
+class PlacementError(Exception):
+    """
+    Custom exception for attempted registration of Filters not in an 'image_filers' module
+    """
+    pass
+
+
         
 class Filter():
     '''
@@ -22,103 +29,63 @@ class Filter():
     The stock implementation uses Pillow, but this setup allows 
     other codebases to bue used in a filler without changing calling 
     code.
-    '''         
-
-    #! cached property?
-    def path_str(self):
+    '''
+      
+    #? cache
+    def _module_path_human(self):
+        ''' 
+        Human readable module path.
+        Used to refer to a filter in the registry and templates. 
+        Currently based on the module path and classname.
         '''
-        Return the dotted module and classname as a string.
+        mp = self.__module__.split('.')
         
-        Should be unique, and work as an id for the class. Moreover, it 
-        should persist across code versions.
+        # We encourage users to place filters in a 
+        # module called image_filters'. This would involve a lot of
+        # repetition in template code. So an 'image_filters' element is removed from the path.
+        # That risks a collision with
+        # filters placed in the root of an app, so insist on placement in 'image filters'.
+        if (mp[-1] == 'image_filters'):
+            del(mp[-1])
+        else:
+            raise PlacementError("Please locate Filters to be registered in an 'image filters' module: {}.{}".format(
+                self.__module__,
+                self.__class__.__name__
+            ))        
+        return mp
         
-        Used for id purposes in the registry.
+    @property
+    def human_id(self):
+        ''' 
+        id for the filter.
+        Used to refer in the registry and templates, so is human 
+        readable. 
+        Currently based on the module path and classname.
         '''
-        return self.__module__ + '.' + type(self).__name__
-    
+        p = self._module_path_human()
+        p.append( type(self).__name__ )
+        # That is unique, but we encourage users to place filters in a 
+        # module called image_filters'. This would involve a lot of
+        # repetition in template code. At the risk of a collision with
+        # filters placed in the root of an app, we remove that part of 
+        # the path.
+        return ".".join(p)
         
-    #! cached property?
-    #! put the pk in?
-    def id_str_short(self):
-        '''
-        Id for a filter, usable for keys.
-        This is not guarenteed unique. it is to be concisely different 
-        so avoid provoking storage backends, It depends on the 
-        filter being placed in unique module packages. Which, in Django,
-        they would be, inside app names.
-        Currently formed as <module parent> + '_' + <filtername> 
-        '''
-        p = ModulePath.from_str(self.__module__)
-        
-        # protect against no module path, as generic 'app'
-        md_str = 'app'
-
-        # Take the second-last element. The leaf element in the 
-        # surrounding system is always 'image_file', which is generic, 
-        # but the parent element is distinctive, often an appname, so 
-        # useful.                  
-        if (p.size > 1):
-            md_str = p.branch.leaf.str 
-        
-        # Add the filter name, which is unique to every module.
-        return md_str + '_' + type(self).__name__.lower()
-                    
-
-    #x ?
-    def human_path(self):
-        '''Return the surrounding module and class name as a human string.
-        
-        Upper case is reduced to lower-case.
-        
-        This is not escaped enough for URL usage. Within a Django
-        codebase adhering to Python code conventions, it is unique.
-        It is usable where security is less important but human 
-        readability and a lowercase appearence are prefered e.g. 
-        filesystems.
-        '''
-        modstr = self.__module__
-        
-        # <last module> _ <classname>
-        classpath = "{}_{}".format(
-            modstr[modstr.rfind('.')+1:],
-            type(self).__name__
-        )
-
-        return classpath.lower()
-
-        
-    def file_name(self, base_name, extension):
+    def filename(self, stem, extension):
         '''
         Generate a filename from a base string.
-        '''
-        return base_name + '-' + self.id_str_short() + '.' + extension
-
-    # #? should not be here?
-    # def save_info_callback(self, src_format):
-        # '''
-        # Gather and choose between configs abbout how to save filter results.
-        # Probes into several settings. If present, settings file wins, 
-        # filter config wins, discovered state. 
-        # @ifilter instance of a Filter
-        # '''
-        # # defaults
-        # iformat = src_format
-        # jpeg_quality = settings.reforms.jpeg_quality
+        An ammended filter path and name is appended to the stem,
         
-        # # Overrides of output format. Settings first...
-        # if (settings.reforms.format_override):
-            # iformat = settings.reforms.format_override
-
-        # #,,,but Filter wins.
-        # if hasattr(self, 'format') and self.format:
-            # iformat = self.format
-
-        # if iformat == 'jpg':
-            # # Overrides of JPEG compression quality. Filter wins.
-            # if hasattr(self, 'jpeg_quality') and self.jpeg_quality:
-                # jpeg_quality = self.jpeg_quality
-                
-        # return {'format': iformat, 'jpeg_quality': jpeg_quality}
+        stem + '-' + ammended underscore path + '_' + filtername.lower() + '.' + extension
+         
+        It is to be concise, and near-unique to avoid provoking storage backends, 
+        '''
+        return "{}-{}_{}.{}".format(
+            stem,
+            "_".join(self._module_path_human()),
+            type(self).__name__.lower(),
+            extension
+        )
         
         
     def process(self, src_file):
