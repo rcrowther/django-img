@@ -1,3 +1,5 @@
+from django.utils.functional import cached_property
+
 '''
 Formats accepted.
 This list is used throughout the app, and is definitive.
@@ -12,6 +14,17 @@ IMAGE_FORMATS = [
     'webp',
 ]
 
+
+def extensions_maxlen():
+    m = 0
+    for f in IMAGE_FORMATS:
+        l = len(f)
+        if (l > m):
+            m = l
+    # for the period i.e '.png' is 4
+    m += 1
+    return m
+    
 _FORMAT_FILE_EXTENSIONS_BASE = {
     'bmp' : 'bmp',
     'jpg' : 'jpg',

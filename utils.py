@@ -1,10 +1,7 @@
 from django.utils.functional import cached_property
 from django.apps import apps
 from importlib import import_module
-from image.settings import settings
-from pathlib import Path
-from unidecode import unidecode
-import os.path
+
 print('create utils')
 
 
@@ -97,59 +94,3 @@ def autodiscover(
     return r
 
     
-#? should be in decisions?
-def image_save_path(filename):
-    '''
-    Get the full path from a filepath.
-    This calculates and truncates lengths. For example, the stock 
-    Django DB Filefield allows 100 chars path length. And Win32 
-    operating systems can only handle 255 char path lengths. 
-    @path a pathlib Path 
-    '''
-    p = Path(filename)
-    
-    # upload_to recieves a filename, no path.
-    # This needs maybe truncation
-    # do a unidecode in the filename and then replace non-ascii 
-    # characters in filename with _ , to sidestep issues with filesystem encoding
-    safer_stem = "".join((i if ord(i) < 128 else '_') for i in unidecode(p.stem))
-        
-    if (settings.reforms.truncate_paths):
-        # truncate filename to prevent it going over 100 chars,
-        # accounting for declared paths
-        # https://code.djangoproject.com/ticket/9893        
-        safer_stem = safer_stem[:settings.path_length_limit]
-        
-    #!? don't throw error, let other code handle?
-    return os.path.join(settings.media_subpath_originals, safer_stem) + '.' + p.suffix
-    
-    
-def reform_filename(path, filter_instance, extension):
-    '''
-    Get the save path from a filepath.
- 
-    @path a pathlib Path 
-    '''
-    # The path that comes in is from images. So it is mangled, and 
-    # already truncated.
-    # However, need to add a filter id to uniquify (if not perfectly), 
-    # reduce collisions, make human readable, etc.
-    # Then we need to put the extension on, which may have been changed 
-    # in the filter.
-    p = Path(path)
-    return filter_instance.filename(p.stem, p.extension)
-    
-    
-def reform_save_path(filename):
-    p = Path(filename)
-    
-    # upload_to recieves a filename, no path.
-    stem = p.stem
-    if (settings.truncate_paths):
-        # truncate filename to prevent it going over 100 chars,
-        # accounting for declared paths
-        # https://code.djangoproject.com/ticket/9893        
-        stem = stem[:settings.path_length_limit]
-        
-    # This needs the full path building.
-    return os.path.join(settings.media_subpath_reforms, stem)  + '.' + p.suffix

@@ -2,18 +2,21 @@ import unittest
 
 from django.test import TestCase
 from image.models import Image, Reform, SourceImageIOError
-from .utils import Image, get_test_image_file
+from .utils import get_test_image_file_jpg
 
 
 # ./manage.py test image.tests
 class TestImage(TestCase):
     def setUp(self):
-        # Create an image for running tests on
         self.image = Image.objects.create(
             title="Test image",
-            src=get_test_image_file(),
+            src=get_test_image_file_jpg(),
+            auto_delete=True,
         )
-        
+
+    def test_src_name(self):
+        self.assertEqual(self.image.src.name, 'originals/test.jpg')
+                
     def test_is_portrait(self):
         self.assertFalse(self.image.is_portrait())
 
@@ -22,17 +25,24 @@ class TestImage(TestCase):
         
     def test_is_stored_locally(self):
         self.assertTrue(self.image.is_stored_locally())
+
+    def test_bytesize(self):
+        size = self.image.bytesize
+        self.assertIsInstance(size, int)
+        self.assertGreater(size, 0)
         
     def test_bytesize_on_missing_file_raises_sourceimageioerror(self):
         self.image.src.delete(save=False)
         with self.assertRaises(SourceImageIOError):
             self.image.bytesize
 
+    def tearDown(self):    
+        self.image.src.delete(False) 
+
+
 
 from image.filters import Filter, PlacementError
 from image.image_filters import Thumb
-
-
 class TestFilters(TestCase):
     def setUp(self):
         # Create Filters for running tests on
@@ -52,19 +62,19 @@ class TestFilters(TestCase):
         self.assertEqual(self.filterthumb.filename(basename, extension), 'test-image_thumb.png')
 
 
+
+
 from image.registry import (
     FilterRegistry, 
-    Unregisterable, 
     AlreadyRegistered, 
+    Unregisterable,
     NotRegistered
 )
-
-#from image.filters_pillow import Crop, ResizeSmart
 
 class NonFilter():
     pass
     
-class TestClassRegistry(TestCase):
+class TestFilterRegistry(TestCase):
     def setUp(self):
         # Create a Registy for running tests on
         self.registry = FilterRegistry('test')
@@ -93,70 +103,71 @@ class TestClassRegistry(TestCase):
     def test_call(self):
         self.registry.register(self.filter)
         r = self.registry(self.filter.human_id())
-        # assert return is instance of filter?
         self.assertTrue(isinstance(r, Thumb))        
-                
+
+    def test_register_call_missing_key_raises_notregistered(self):
+        with self.assertRaises(NotRegistered):
+            self.registry('stuff_n_nuff')
+                            
     def test_unregister(self):
         self.registry.register(self.filter)
         self.registry.unregister(self.filter)
         self.assertEqual(self.registry.size, 0)
 
-    # # def test_filename(self):
-        # # self.registry.module_path(klass)
-                        
-# class TestReforms(TestCase):
-    # def setUp(self):
-        # # Create an image for running tests on
-        # self.image = Image.objects.create(
-            # title="Test image",
-            # src=get_test_image_file(),
-        # )
 
-        # self.filter = registry('image.Thumb')
+from image.settings import settings
+
+class TestSettings(TestCase):
+    # it does a lot of checking itself. Without going overboard,
+    # initialisation is all that needs checking.
+    def setUp(self):
+        self.settings = settings
         
-    # #def test_get_rendition_model(self):
-    # #    self.assertIs(Image.get_rendition_model(), Rendition)
+        
+from image import decisions
+class TestDecisions(TestCase):
+    def setUp(self):
+        self.decisions = decisions
 
-    # def test_creation(self):
-        # reform = self.image.get_reform(self.filter)
+    def test_long_imagename_truncated(self):
+        filepath = '/home/nightmare/originals/Cetron-DKZ800-Carphones-FurryDice-for-BMW-iPad-Fridge-Solidus-Nokirapo-MP3-players-etc-WITHOUT-Microphone-and-remote-0-2-uai-258x258.tiff'
+        r = self.decisions.image_save_path(filepath)
+        self.assertLessEqual(len(r), 100) 
 
-        # # Check size
-        # self.assertEqual(reform.src.width, 64)
-        # self.assertEqual(reform.src.height, 64)
+    def test_long_reformname_truncated(self):
+        filepath = '/home/nightmare/originals/Cetron-DKZ800-Carphones-FurryDice-for-BMW-iPad-Fridge-Solidus-Nokirapo-MP3-players-etc-WITHOUT-Microphone-and-remote-0-2-uai-258x258-twas-a-filter-name.bake.png.tiff'
+        r = self.decisions.reform_save_path(filepath)
+        self.assertLessEqual(len(r), 100)         
 
-        # # check that the rendition has been recorded under the correct filter,
-        # # via the Rendition.filter_spec attribute (in active use as of Wagtail 1.8)
-        # self.assertEqual(reform.filter_id, 'image.image_filters.Thumb')
+        
+class TestReforms(TestCase):
+    def setUp(self):
+        self.image = Image.objects.create(
+            title="Test image",
+            src=get_test_image_file_jpg(),
+        )
+        self.filter = Thumb()
+        self.reform = self.image.get_reform(self.filter)
 
-    # # def test_resize_to_max(self):
-        # # rendition = self.image.get_rendition('max-100x100')
+    def test_filter_id(self):
+        # check that the id returned from the reform is the filter id,
+        self.assertEqual(self.reform.filter_id, Thumb.human_id())
 
+    # # Can't. It's only a FileField.
+    # # def test_resize(self):
         # # # Check size
-        # # self.assertEqual(rendition.width, 100)
-        # # self.assertEqual(rendition.height, 75)
+        # # self.assertEqual(self.reform.src.width, 64)
+        # # self.assertEqual(self.reform.src.height, 64)
+        
+    def test_src_name(self):
+        self.assertEqual(self.reform.src.name, "reforms/test-image_thumb.png")
+        
+    def test_url_attribute(self):
+        self.assertEqual(self.reform.url, "/media/reforms/test-image_thumb.png")
+        
+    def test_alt_attribute(self):
+        self.assertEqual(self.reform.alt, "Test image")
 
-    # # def test_resize_to_min(self):
-        # # rendition = self.image.get_rendition('min-120x120')
-
-        # # # Check size
-        # # self.assertEqual(rendition.width, 160)
-        # # self.assertEqual(rendition.height, 120)
-
-    # # def test_resize_to_original(self):
-        # # rendition = self.image.get_rendition('original')
-
-        # # # Check size
-        # # self.assertEqual(rendition.width, 640)
-        # # self.assertEqual(rendition.height, 480)
-
-    # # def test_cache(self):
-        # # # Get two renditions with the same filter
-        # # first_rendition = self.image.get_rendition('width-400')
-        # # second_rendition = self.image.get_rendition('width-400')
-
-        # # # Check that they are the same object
-        # # self.assertEqual(first_rendition, second_rendition)
-
-    # def test_alt_attribute(self):
-        # reform = self.image.get_reform(self.filter)
-        # self.assertEqual(reform.alt, "Test image")
+    def tearDown(self):    
+        self.reform.src.delete(False)
+        self.image.src.delete(False)

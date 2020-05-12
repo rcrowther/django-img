@@ -23,11 +23,11 @@ class Command(BaseCommand):
             help='Delete orphaned models (with no matching file)',
         )        
         
-    def fp_media_list(self):
-        media_dir = settings.image_local_path
+    def originals_fp_list(self):
+        d = settings.file_path_originals
         
         # get all file paths
-        return [f for f in media_dir.iterdir() if f.is_file()]
+        return [f for f in d.iterdir() if f.is_file()]
 
     def db_image_fp_list(self):
         ''' 
@@ -55,7 +55,7 @@ class Command(BaseCommand):
 
 
     def handle(self, *args, **options):        
-        ml = self.fp_media_list()
+        ml = self.originals_fp_list()
 
         if options['remove_orphaned_models']:            
             dbl = self.db_image_list()          

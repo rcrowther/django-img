@@ -49,35 +49,31 @@ class Settings():
         
         self.auto_delete = False
         self.populate()
-        
-    #? could return none, if freed up in settings?
-    @cached_property
-    def path_length_limit(self):
-        '''
-        Length the settingss will allow for filenames.
-        '''
-        return (100 - max(len(self.media_subpath_originals), len(self.media_subpath_reforms)))
-              
+
     @property
-    def image_local_path(self):
+    def file_path_originals(self):
         '''
         Full path to the image directory.
         For original image uploads, not reforms.
         '''
-        #! put back
-        #return Path(settings.MEDIA_ROOT) / self.media_subpath_originals
-        return Path(self.media_root) / "original_images"
+        return Path(settings.media_root) / self.media_subpath_originals
+
+    @property
+    def filepath_maxlen(self):
+        '''
+        Length the settings will allow for filenames.
+        If not trucating paths, then set large.
+        '''
+        # These default to something, if settings are None
+        return  max(len(self.media_subpath_originals), len(self.media_subpath_reforms))
+        
         
     @property
     def max_upload_size(self):
         # Convert figure to MB
         return self._max_upload_size * 10 * 1024 * 1024
-        
-        
-    #@cached_property
+                
     def populate(self):
-        
-        #!? Ummm not for cloud storage
         if (not(hasattr(settings, 'MEDIA_ROOT'))):
             raise ImproperlyConfigured('The image app requires MEDIA_ROOT to be defined in settings.')
         self.media_root = settings.MEDIA_ROOT

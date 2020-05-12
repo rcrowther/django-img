@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models.signals import pre_delete, pre_save
 import os.path
+from pathlib import Path
 
 from contextlib import contextmanager
 from django.utils.translation import gettext_lazy as _
@@ -12,17 +13,17 @@ from django.forms.utils import flatatt
 from django.urls import reverse
 from collections import OrderedDict
 from django.utils.functional import cached_property
+from django.core.files.images import ImageFile
 #from image.filters import Filter
-from image.utils import (
+from image.decisions import (
     image_save_path, 
-    reform_filename, 
     reform_save_path
 )
-#from django.conf import settings
 #from image.settings import settings
 print('create models')
-from django.core.files.images import ImageFile
 from image.validators import validate_file_size, validate_image_file_extension
+ 
+ 
  
 class SourceImageIOError(IOError):
     """
@@ -34,7 +35,7 @@ class SourceImageIOError(IOError):
 def get_upload_to(instance, filename):
     """
     Obtain a valid upload path for an image file.
-    This needs to be a module-level function so that it can be referenced within migrations,
+    This needs to be a moduget_reform_upload_tole-level function so that it can be referenced within migrations,
     but simply delegates to the `get_upload_to` method of the instance, so that AbstractImage
     subclasses can override it.
     """
@@ -49,6 +50,7 @@ def get_reform_upload_to(instance, filename):
     subclasses can override it.
     """
     return instance.get_upload_to(filename)
+
 
 
 class AbstractImage(models.Model):
@@ -103,6 +105,7 @@ class AbstractImage(models.Model):
     # let's get this sorted here.
     width = models.PositiveIntegerField(verbose_name=_('width'), editable=False)
     height = models.PositiveIntegerField(verbose_name=_('height'), editable=False)
+
     # Not autopoulated by the storage, so funny name.
     # See the property further down.
     _bytesize = models.PositiveIntegerField(null=True, editable=False)
@@ -144,39 +147,19 @@ class AbstractImage(models.Model):
 
 
     def get_upload_to(self, filename):
-        print('image upload_to:')
-        print(str(filename))
         # Incoming filename comes from upload machinery, and needs 
         # treatment. Also, path needs appending.
-        #! replace with settings.media_subpath_originals
-        #folder_name = 'original_images'
         
-        #  storage.get_valid_name():
         # Quote stock local file implementation:
         # Return the given string converted to a string that can be used for a clean
         # filename. Remove leading and trailing spaces; convert other spaces to
         # underscores; and remove anything that is not an alphanumeric, dash,
         # underscore, or dot.
         filename = self.src.field.storage.get_valid_name(filename)
-        print('image upload_to:')
-        print(str(filename))
-        #! replace with src.file_utils.filename
-        # do a unidecode in the filename and then replace non-ascii 
-        # characters in filename with _ , to sidestep issues with filesystem encoding
-        # filename = "".join((i if ord(i) < 128 else '_') for i in unidecode(filename))
-
-        # # Truncate filename so it fits in the 100 character limit
-        # # https://code.djangoproject.com/ticket/9893
-        # full_path = os.path.join(folder_name, filename)
-        # if len(full_path) >= 95:
-            # chars_to_trim = len(full_path) - 94
-            # prefix, extension = os.path.splitext(filename)
-            # filename = prefix[:-chars_to_trim] + extension
-            # full_path = os.path.join(folder_name, filename)
-
-        filename = image_save_path(filename)
-        #full_path = os.path.join(folder_name, filename)
         
+        # truncate and makee relative to storage base
+        filename = image_save_path(filename)
+       
         return filename
         
         
@@ -213,7 +196,7 @@ class AbstractImage(models.Model):
             if close_src:
                 src.close()
 
-    #x unused
+    #? unused except for search eror handling
     @classmethod
     def get_reform_model(cls):
         """ Get the Reform models for this Image model """
@@ -226,23 +209,6 @@ class AbstractImage(models.Model):
         @ifilter instance of a filter, to generate the reform. 
         can be class, instance or text for registry???
         '''
-        #! what if filter is none?
-        #filtername = None
-        #filter_instance = filter_instance
-        #! registry?
-        # if isinstance(ifilter, str):
-            # filtername = ifilter
-            # #filterinstance = make one from the name. But that means a registry?
-            # #filter, created = Filter.objects.get_or_create(spec=filter)
-        # elif isinstance(ifilter, Filter):
-            # filter_instance = ifilter            
-            # filtername = ifilter.path_str()
-        # else:
-            # filter_instance = ifilter()
-            # filtername = filter_instance.path_str()
-        #filtername = filter_instance.human_id()
-            
-        #cache_key = filter.get_cache_key(self)
         Reform = self.get_reform_model()
 
         try:
@@ -250,31 +216,15 @@ class AbstractImage(models.Model):
                 filter_id=filter_instance.human_id(),
             )
         except Reform.DoesNotExist:
-            # make a new, reformed image and record for Reform DB table            
-
-            # First, a destination filename. The 
-            # field settings will handle the path, but we need a filename.                
-            # 'name' is path relative to media/. Name only, pleaee.
-            #src_fname = os.path.basename(self.src.name)
-            #src_fname_no_extension, extension = os.path.splitext(src_fname)
-            # <srcname> - <filtername> . <format> 
-            # <srcname> - <filtername> is a near-unique key. Near enough.
-            # dst_fname = "{}-{}.{}".format(
-                # src_fname_no_extension,
-                # filter_instance.human_path(),
-                # reform_write_attrs['format']
-            # )
-            # <srcname> - <filtername> is a near-unique key. Near enough.
-                        
+            # make a new, reformed image and record for Reform DB table
             # Open the file then produce a reformed image.
             with self.open_src() as fsrc:
                 (reform_buff, iformat) = filter_instance.process(fsrc)
 
-            dst_fname = reform_filename( 
-                self.src.name,
-                filter_instance, 
-                iformat
-            )
+            # A destination filename. Code needed the filter's
+            # decision on the extension.
+            p = Path(self.src.name)
+            dst_fname = filter_instance.filename(p.stem, iformat)
             
             # Right, lets make a Django ImageFile from that
             reform_file = ImageFile(reform_buff, name=dst_fname)
@@ -282,16 +232,11 @@ class AbstractImage(models.Model):
             # We got everything Django likes. A model save should 
             # generate a Reform DB entry and the file itself.
             reform = Reform(
-                reform = reform_file,
+                image = self,
                 filter_id = filter_instance.human_id(),
-                src = self,
-                #! can't guarentee these, can we? unless preset in filter?
-                #? needed at all?
-                #width = filter_instance.width,
-                #height = filter_instance.height,
-                #width = 0,
-                #height = 0,
+                src = reform_file,
             )
+
             reform.save()
 
         return reform
@@ -347,16 +292,9 @@ class Image(AbstractImage):
 class AbstractReform(models.Model):
     # For naming, see the note in AbstractImage
     src = models.FileField(
-        upload_to=get_reform_upload_to, 
-        #width_field='width', 
-        #height_field='height'
+        upload_to=get_reform_upload_to,
         )
     filter_id = models.CharField(max_length=255, db_index=True)
-    # get rid of these. You can use src.width
-    # or not? Never used them.
-    #width = models.IntegerField(editable=False)
-    #height = models.IntegerField(editable=False)
-    #Should this not have a sbytesize then?
     
     @property
     def url(self):
@@ -364,7 +302,7 @@ class AbstractReform(models.Model):
 
     @property
     def alt(self):
-        return self.src.title
+        return self.image.title
 
     @property
     def attrs(self):
@@ -395,13 +333,8 @@ class AbstractReform(models.Model):
     def get_upload_to(self, filename):
         # Incoming filename comes from get_reform() in Image, and  
         # only needs path appending.
-        print('reform upload_to:')
-        print(str(filename))
-        #folder_name = 'reforms'
         filename = self.src.field.storage.get_valid_name(filename)
-        # print('reform upload_to:')
-        # print(str(filename))
-        # return os.path.join(folder_name, filename)
+
         return reform_save_path(filename)
         
     @classmethod
@@ -409,7 +342,6 @@ class AbstractReform(models.Model):
         errors = super(AbstractReform, cls).check(**kwargs)
         if not cls._meta.abstract:
             if not any(
-                #set(constraint) == set(['src', 'filter_idc', 'focal_point_key'])
                 set(constraint) == set(['src', 'filter_id'])
                 for constraint in cls._meta.unique_together
             ):

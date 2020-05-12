@@ -11,6 +11,8 @@ class NotRegistered(KeyError):
 class Unregisterable(Exception):
     pass
 
+
+
 class ClassRegistry:
     '''
     Simple registry.
@@ -51,6 +53,9 @@ class ClassRegistry:
         del self._registry[k]
 
     def __call__(self, k, **kwargs):
+        '''
+        Return an instane of the registered class.
+        '''
         f = None
         try:
             f = self._registry[k]
