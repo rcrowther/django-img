@@ -51,7 +51,7 @@ def src_should_delete(image, calling_opinion):
 
     #,,,but Model wins.
     if not(image.auto_delete == image.DELETE_UNSET):
-        delete = image.delete_policies(image.auto_delete)
+        delete = image.delete_policies[image.auto_delete]
             
     return delete
 

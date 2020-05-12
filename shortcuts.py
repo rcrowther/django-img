@@ -1,9 +1,9 @@
-from image.models import SourceImageIOError
+from image.models import Reform, SourceImageIOError
 import os.path
 
 # cache
 def image_broken_filepath():
-    return os.path.join(os.path.dirname(__file__), 'files', 'notfound.png')
+    return os.path.join(os.path.dirname(__file__), 'files', 'unfound.png')
  
 def get_reform_or_not_found(image, ifilter):
     """
@@ -16,10 +16,10 @@ def get_reform_or_not_found(image, ifilter):
     try:
         return image.get_reform(ifilter)
     except SourceImageIOError:
-        # Image file is (probably) missing from /media/original_images - generate a dummy
-        # reform so that we just output a broken image, rather than crashing out completely
-        # during rendering.
-        # pick up any custom Image / Reform classes that may be in use
+        # (probably) Image file is missing from /media images. So
+        # make a mock reform to hold a generic broken image, rather than
+        # crashing out completely.
+        # A text filepath parameter triggers no attempt to 'upload'.
         Reform = image.reforms.model  
         reform = Reform(image=image)
         reform.src.name = image_broken_filepath()

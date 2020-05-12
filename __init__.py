@@ -1,20 +1,19 @@
 #from image.decorators import register
 from  image.settings import settings
-from image.registry import registry #, register
+from image.registry import registry
 from image import utils
 
 print('create __init__')
 
 
-# from image.filters_pillow import (
-    # #Filter, 
-    # Format, Resize, Crop, ResizeSmart, CropSmart
-# )
+from image.filters_pillow import (
+    Format, Resize, Crop, ResizeSmart, CropSmart
+)
 
 __all__ = [
-    # "Format", "Resize", "Crop", "ResizeSmart", "CropSmart",
-    #"Thumb",
-    #"register", "registry", "autodiscover"
+    "Format", "Resize", "Crop", "ResizeSmart", "CropSmart",
+    "Thumb",
+    "registry" # "autodiscover"
     ]
 
 

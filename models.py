@@ -122,8 +122,16 @@ class AbstractImage(models.Model):
         except NotImplementedError:
             return False
 
-            
-    #? We have it or don't. What's this for?
+    #! @property
+    #! auto_delete and private
+    def is_auto_delete(self):
+        if self.auto_delete == self.DELETE_NO:
+            return False
+        elif self.auto_delete == self.DELETE_YES: 
+            return True
+        else:
+            return None
+
     # This exists because, although Django Imagefield will autopopulate 
     # width and height via Pillow, pillow will not find the filesize.
     # That can be done by opening a file using Python.
@@ -267,10 +275,11 @@ class AbstractImage(models.Model):
         return mark_safe('<img{}>'.format(flatatt(attrs)))
 
     def __repr__(self):
-        return "Reform(upload_date: {}, title:'{}', src:'{}')".format(
+        return "Reform(upload_date: {}, title:'{}', src:'{}', auto_delete:{})".format(
             self.upload_date,
             self.title,
             self.src,
+            self.auto_delete
         )                
 
     def __str__(self):

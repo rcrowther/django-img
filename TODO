@@ -1,20 +1,20 @@
 = Structure
-Save in right place
 How does cloud storage generate reforms?
 Images Admin not removing files
-
+Are reforms auto-deleted?
+Does auto delete work?
 
 == Management
 Work on pks too
 Image sync again
 URL solutions?
+- Management
+- Tags
 
 == Images
 Optional delete-on-removal admin would be awesome.
 
 == Reforms
-Look over the process thing for FilePaths. It's still an issue.
-
 Must decide resolve the JPEG/Pillow transparency issue
 https://github.com/python-pillow/Pillow/issues/2609
 
@@ -38,12 +38,14 @@ Any othr ModulePath.from_str accidents?
 
 
 == Settings
-Put detections in utils.py
 Cache filefinding, and the like
 
 == Forms
 USe the ImgField in admin (set on model?)
-Should maxsize work on the model, or the form?
+
+= Tests
+Verify broken
+Verify validators running on forms
 
 = General
 STATIC_OR_URL
@@ -51,6 +53,4 @@ and switch between them
 SVG upload?
 Cleanup leftover WT files
 Performance
-
-
 
