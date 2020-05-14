@@ -1,13 +1,15 @@
 import unittest
 
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 from image.models import Image, Reform, SourceImageIOError
 from .utils import get_test_image_file_jpg
 from pathlib import Path
 from image.image_filters import Thumb
 
 # ./manage.py test image.tests.test_deletion
-class TestDeletion(TestCase):
+#class TestDeletion(TestCase):
+    
+class TestDeletion(TransactionTestCase):
     def setUp(self):
         self.image = Image.objects.create(
             title="Test image",

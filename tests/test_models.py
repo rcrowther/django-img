@@ -5,7 +5,13 @@ from image.models import Image, Reform, SourceImageIOError
 from .utils import get_test_image_file_jpg
 
 
+
 # ./manage.py test image.tests
+# A fundamental issue throughout the tests is that image uploading 
+# shunts files about. But TestCase will not complete over transactions
+# So fails to trigger file deletion. So these tests are littered
+# with rearDown() methods to clean up orphaned test files (poor orphans,
+# unwanted...). 
 class TestImage(TestCase):
     def setUp(self):
         self.image = Image.objects.create(
@@ -40,9 +46,9 @@ class TestImage(TestCase):
         self.image.src.delete(False) 
 
 
-
 from image.filters import Filter, PlacementError
 from image.image_filters import Thumb
+
 class TestFilters(TestCase):
     def setUp(self):
         # Create Filters for running tests on
@@ -75,6 +81,7 @@ class NonFilter():
     pass
     
 class TestFilterRegistry(TestCase):
+    #! ignore non-image_config keys?
     def setUp(self):
         # Create a Registy for running tests on
         self.registry = FilterRegistry('test')

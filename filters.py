@@ -1,4 +1,3 @@
-from image.utils import ModulePath
 
 from image.configuration_checks import (
     check_jpeg_quality, 

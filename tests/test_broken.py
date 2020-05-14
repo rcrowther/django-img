@@ -5,32 +5,31 @@ from image.image_filters import Thumb
 from .utils import get_test_image_file_jpg
 
 
+# ./manage.py test image.tests.test_broken
 class TestShortcuts(TestCase):
+
     def setUp(self):
-        self.good_image = Image.objects.create(
+        self.filter = Thumb()
+
+    def test_fallback(self):
+        good_image = Image.objects.create(
             title="Test image",
             src=get_test_image_file_jpg(),
-            auto_delete=True,
+            auto_delete=Image.DELETE_YES,
         )
-        
+        reform = get_reform_or_not_found(good_image, self.filter)
+        self.assertEqual(reform.src.name, 'reforms/test-image_thumb.png')
+        good_image.delete()
+    
     def test_fallback_to_not_found(self):
-        filterthumb = Thumb()
+        bad_image = Image.objects.create(
+            title="Test image",
+            src=get_test_image_file_jpg(),
+            auto_delete=Image.DELETE_YES,
+        )
 
-        # good_image = Image.objects.create(
-            # title="Test image",
-            # src=get_test_image_file_jpg(),
-        # )
-        bad_image = Image.objects.get(id=1)
+        bad_image.src.delete(False) 
 
-        rendition = get_reform_or_not_found(self.good_image, filterthumb)
-        self.assertEqual(rendition.src.name, 'reforms/test-image_thumb.png')
-
-        Reforms.objects.get(pk=1).src.delete(False) 
-
-        rendition = get_reform_or_not_found(self.good_image, filterthumb)
-        self.assertEqual(rendition.src.name, 'unfound')
-
-
-    def tearDown(self):
-        # delete
-        self.good_image.delete(False) 
+        reform = get_reform_or_not_found(bad_image, self.filter)
+        self.assertEqual(reform.src.name, 'unfound')
+        bad_image.delete()

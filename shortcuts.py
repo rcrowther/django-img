@@ -20,7 +20,7 @@ def get_reform_or_not_found(image, ifilter):
         # make a mock reform to hold a generic broken image, rather than
         # crashing out completely.
         # A text filepath parameter triggers no attempt to 'upload'.
-        Reform = image.reforms.model  
+        #Reform = image.reforms.model
         reform = Reform(image=image)
         reform.src.name = image_broken_filepath()
         return reform

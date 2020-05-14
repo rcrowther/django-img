@@ -255,24 +255,19 @@ class AbstractImage(models.Model):
 
     def is_landscape(self):
         return (self.height < self.width)
-        
+    #x another what for?
     @property
     def filename(self):
         return os.path.basename(self.src.name)
         
     @property
-    def default_alt_text(self):
-        # by default the alt text field is populated from the title. 
-        # Subclasses might provide a separate alt field, and
-        # override this
-        return self.title
-        
-    #? Not convinved about having this here.
-    def img_tag(self, extra_attributes={}):
-        '''@return html for the original upload'''
-        attrs = {'src': self.src.url, 'alt': self.default_alt_text}
-        attrs.update(extra_attributes)
-        return mark_safe('<img{}>'.format(flatatt(attrs)))
+    def alt(self):
+        # The model has no 'alt' field 
+        # Default alt attribute is 
+        # title.lower() + ' image'. 
+        # Subclasses might  provide a field, override this attribute, 
+        # or manipilate template contexts.
+        return self.title.lower() + ' image'
 
     def __repr__(self):
         return "Reform(upload_date: {}, title:'{}', src:'{}', auto_delete:{})".format(
@@ -309,35 +304,21 @@ class AbstractReform(models.Model):
     def url(self):
         return self.src.url
 
+    #! cache against lookup?
     @property
     def alt(self):
-        return self.image.title
-
-    @property
-    def attrs(self):
-        """
-        The src and alt attributes for an <img> tag, as a HTML
-        string
-        """
-        return flatatt(self.attrs_dict)
+        return self.image.alt
 
     @property
     def attrs_dict(self):
         """
-        A dict of the src and alt attributes for an <img> tag.
+        A dict of the src and alt attributes for html tags.
         """
         return OrderedDict([
             ('src', self.url),
+         #   ('src', self.src.name),
             ('alt', self.alt),
         ])
-
-    def img_tag(self, extra_attributes={}):
-        attrs = self.attrs_dict.copy()
-        attrs.update(extra_attributes)
-        return mark_safe('<img{}>'.format(flatatt(attrs)))
-
-    def __html__(self):
-        return self.img_tag()
 
     def get_upload_to(self, filename):
         # Incoming filename comes from get_reform() in Image, and  

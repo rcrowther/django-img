@@ -1,7 +1,6 @@
 = Structure
 How does cloud storage generate reforms?
 Images Admin not removing files
-Are reforms auto-deleted?
 Does auto delete work?
 
 == Management
@@ -44,7 +43,7 @@ Cache filefinding, and the like
 USe the ImgField in admin (set on model?)
 
 = Tests
-Verify broken
+How to provide a classic Django context?
 Verify validators running on forms
 
 = General
