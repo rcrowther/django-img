@@ -11,7 +11,8 @@ URL solutions?
 - Tags
 
 == Images
-Optional delete-on-removal admin would be awesome.
+Transactional removal works?
+Auto_Delete is a mess of attribbutes and settings
 
 == Reforms
 Must decide resolve the JPEG/Pillow transparency issue

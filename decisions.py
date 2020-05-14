@@ -21,7 +21,9 @@ def reform_save_info(ifilter, src_format):
     Gather and choose between configs about how to save filter results.
     Probes into several settings. If present, settings file wins, 
     filter config wins, discovered state. 
-    @ifilter instance of a Filter
+
+    ifilter 
+        instance of a Filter
     '''
     # defaults
     iformat = src_format
@@ -51,7 +53,7 @@ def src_should_delete(image, calling_opinion):
 
     #,,,but Model wins.
     if not(image.auto_delete == image.DELETE_UNSET):
-        delete = image.delete_policies[image.auto_delete]
+        delete = image.is_auto_delete()
             
     return delete
 

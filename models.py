@@ -125,9 +125,9 @@ class AbstractImage(models.Model):
     #! @property
     #! auto_delete and private
     def is_auto_delete(self):
-        if self.auto_delete == self.DELETE_NO:
+        if (self.auto_delete == self.DELETE_NO):
             return False
-        elif self.auto_delete == self.DELETE_YES: 
+        elif (self.auto_delete == self.DELETE_YES): 
             return True
         else:
             return None

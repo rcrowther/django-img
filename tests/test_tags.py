@@ -1,11 +1,10 @@
 import unittest
 
-from django.test import TestCase, SimpleTestCase
+from django.test import TestCase
 from django.template import Context, Template
 from django.template import TemplateSyntaxError
 from django.template.base import Token
 
-from .mock_view import TestView
 from image.models import Image
 from image.image_filters import Thumb
 from .utils import get_test_image_file_jpg
@@ -14,7 +13,7 @@ from .utils import get_test_image_file_jpg
 
 class TestTags(TestCase):
     # Check tags can output, and correctly.
-    # Very difficult tests, currently done with inline templates.
+    # Difficult tests, currently done with inline templates.
     def render_template(self, string, context=None):
         context = context or {}
         context = Context(context)
