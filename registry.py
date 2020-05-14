@@ -64,8 +64,9 @@ class ClassRegistry:
             k,
             ", ".join(self.list().keys()),
             ))
-        return f(**kwargs)   
-    
+        return f(**kwargs)
+           
+    @property
     def list(self):
         return self._registry
     

@@ -72,11 +72,6 @@ def image_tag_by_title(context, img_title, filter_id, **kwargs):
     return r.img_tag(kwargs)
 
 
-       
-# @register.simple_tag(takes_context=True)
-# def image_tag(context, img_model, filter_id, **kwargs):
-
-
 
 class ImageNode(template.Node):
     def __init__(self, image_model, filter_id, kwargs):

@@ -1,7 +1,7 @@
 = Structure
 How does cloud storage generate reforms?
-Images Admin not removing files
-Does auto delete work?
+Images Admin not removing files (do last)
+Does auto delete work? (Partly)
 
 == Management
 Work on pks too
@@ -20,28 +20,24 @@ https://github.com/python-pillow/Pillow/issues/2609
 
 
 == Filters
-For cloud, what to you get to make reforms? so what source goes into the filter?
+For cloud, what do you get to make reforms? so what source goes into the filter?
 Register, want an instance? Admin want Model?
 
-Why decorator not working?
-https://docs.djangoproject.com/en/3.0/ref/contrib/admin/
-
-Breakable template from tags
 Get rid of output transparency?
 Stop filters applying effects to fills.
 
-'Not found' and 'watermark' files on URLs
+'Not found' and 'watermark' files on URLs? Makes them static files?
 
 
 == Utils
-Any othr ModulePath.from_str accidents?
+
 
 
 == Settings
 Cache filefinding, and the like
 
 == Forms
-USe the ImgField in admin (set on model?)
+Use the ImgField in admin (set on model?)
 
 = Tests
 How to provide a classic Django context?
@@ -51,6 +47,7 @@ Verify validators running on forms
 STATIC_OR_URL
 and switch between them
 SVG upload?
-Cleanup leftover WT files
+Theres a request issue round auto_discover?
+
 Performance
 

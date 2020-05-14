@@ -54,31 +54,36 @@ class ModulePath():
         return ".".join(self.path)
         
 
-def autodiscover(
+def autodiscover_modules(
         *module_names, 
-        parents=[], 
+        parent_modules=[], 
         find_in_apps=True, 
         not_core_apps=False
     ):
     """
-    Auto-discover modules on module pathss.
+    Auto-discover named modules on module paths.
     Fails silently when not present. 
     Forces an import on the module to recover any requests.
     Very similar to django.utils.module_loading.autodiscover_modules,
     but it's not.
-    @module_names module names to find
-    @parents list of module paths to search
-    @find_in_apps seek for modules in registered apps
-    @not_core_apps remove 'django' paths from any given list
+    
+    module_names 
+        module names to find
+    parent_modules 
+        hardcoded list of module paths to search
+    find_in_apps 
+        seek for modules in registered apps
+    not_core_apps 
+        remove 'django' paths from any given list
+    return
+        list of modules loaded
     """
     app_modules = []
     if (find_in_apps):
         app_modules = [a.name for a in apps.get_app_configs()]
     if (not_core_apps):
         app_modules = [p for p in app_modules if (not p.startswith('django'))]
-    module_parents = [*parents, *app_modules]
-    #print('module load ')
-    #print(str(module_parents))
+    module_parents = [*parent_modules, *app_modules]
     r = []
     for module_parent in module_parents:
         for name in module_names:
@@ -88,9 +93,7 @@ def autodiscover(
                 import_module(p)
                 r.append(p)
             except Exception as e:
-                print("exception on {} {}".format(p, e))
+                #print("exception on {} {}".format(p, e))
                 pass
             
     return r
-
-    
