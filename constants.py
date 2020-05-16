@@ -43,24 +43,39 @@ Map of allowed file extensions -> format key
 Includes upper and lower case entries, and variations in spelling 
 e.g. 'jpg'/'jpeg'
 '''
+#x
 ALLOWED_FILE_EXTENSIONS = {**_FORMAT_FILE_EXTENSIONS_BASE, **_UPPER_EXTENSIONS}
 
+FORMAT_EXTENSIONS_APP = {**_FORMAT_FILE_EXTENSIONS_BASE, **_UPPER_EXTENSIONS}
+
+'''
+Map of uppercase format keys -> app formats.
+This map will work for Pillow and Wand libraries.
+'''
+#FORMAT_UCLIB_APP = {v:k for k,v in FORMAT_APP_UCLIB.items()}
+FORMAT_UCLIB_APP = {
+    'BMP' : 'bmp',
+    'JPEG' : 'jpg',
+    'JPG' : 'jpg',
+    'MPO' : 'jpg',
+    'PNG' : 'png',
+    'GIF' : 'gif',
+    'TIFF' : 'tiff',
+    'WEBP' : 'webp',
+}
 
 '''Map of app formats -> uppercase format keys.
 This map will work for both Pillow and Wand libraries.
 '''
-FORMAT_APP_UCLIB = {
-    'bmp' : 'BMP',
-    'jpg' : 'JPEG',
-    'png' : 'PNG',
-    'gif' : 'GIF',
-    'tiff': 'TIFF',
-    'webp' : 'WEBP',
-}
+# FORMAT_APP_UCLIB = {
+    # 'bmp' : 'BMP',
+    # 'jpg' : 'JPEG',
+    # 'png' : 'PNG',
+    # 'gif' : 'GIF',
+    # 'tiff': 'TIFF',
+    # 'webp' : 'WEBP',
+# }
+FORMAT_APP_UCLIB = {v:k for k,v in FORMAT_UCLIB_APP.items()}
 
 
-'''
-Map of uppercase format keys -> app formats.
-This map will work for both Pillow and Wand libraries.
-'''
-FORMAT_UCLIB_APP = {v:k for k,v in FORMAT_APP_UCLIB.items()}
+

@@ -30,7 +30,7 @@ class TestDecisions(TestCase):
         image = Image.objects.create(
             title="Test",
             src=get_test_image_file_jpg(),
-            auto_delete=Image.DELETE_YES,
+            auto_delete=Image.AutoDelete.YES,
         )
         
         
@@ -39,7 +39,7 @@ class TestDecisions(TestCase):
 
         # change the attribute
         # still must clean after a test, whatever.
-        image.auto_delete=Image.DELETE_NO
+        image.auto_delete=Image.AutoDelete.NO
         do_delete = self.decisions.src_should_delete(image, False)  
         self.assertFalse(do_delete)  
         

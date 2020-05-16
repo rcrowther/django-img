@@ -29,13 +29,13 @@ class WandProcess():
  
         # break out processing, it's the only action that changes
         # across different filters
-        self.modify(image) or image
+        wand_dst = self.modify(image) or image
         
         # set the format
-        image.format = FORMAT_APP_UCLIB[write_attrs['format']]
+        wand_dst.format = FORMAT_APP_UCLIB[write_attrs['format']]
         
         # set JPEG and others quality
-        image.compression_quality = write_attrs['jpeg_quality']
+        wand_dst.compression_quality = write_attrs['jpeg_quality']
         
         #! No transparency
         #pil_dst = pil_dst.convert("RGB")
@@ -43,12 +43,11 @@ class WandProcess():
 
         out_buff = BytesIO()
 
-        image.save(
+        wand_dst.save(
             out_buff,
         )
         
         return (out_buff,  write_attrs['format'])
-
 
     def modify(self, lib_image):
         '''
@@ -63,8 +62,9 @@ class WandProcess():
         
         @lib_image the class used by the library to wrap image data
         '''
-        # no return. Wand can alter in-place
-        pass
+        # Wand often alters in-place, but generates images for some 
+        # processing.
+        return lib_image
 
 
 
@@ -72,9 +72,8 @@ class Format(PhotoFXMixin, FormatMixin, WandProcess, Filter):
     '''Establish the format for an image. 
     Set iformat=None means the image is unchanged.
     '''
-
     def modify(self, lib_image):
-        super().modify(lib_image)
+        #super().modify(lib_image)
         image_ops_wand.photoFX(
             lib_image, 
             self.pop, 
@@ -85,8 +84,9 @@ class Format(PhotoFXMixin, FormatMixin, WandProcess, Filter):
             self.no,
             self.watermark,
         )
+        return lib_image
     
-    
+
                         
 class Resize(ResizeCropMixin,  Format):
     '''Resize n image.
@@ -98,14 +98,14 @@ class Resize(ResizeCropMixin,  Format):
             height=760    
             iformat='png'
     '''
-    
     def modify(self, lib_image):
         image_ops_wand.resize_aspect(
             lib_image,
             self.width,
             self.height
             )
-        super().modify(lib_image)
+        return super().modify(lib_image)
+
 
         
 class Crop(ResizeCropMixin, Format):
@@ -116,14 +116,13 @@ class Crop(ResizeCropMixin, Format):
             height=760    
             tpe='png'
     '''
-        
     def modify(self, lib_image):
         image_ops_wand.crop(
             lib_image,
             self.width,
             self.height
         )
-        super().modify(lib_image)
+        return super().modify(lib_image)
 
 
 
@@ -138,15 +137,26 @@ class ResizeSmart(ResizeCropSmartMixin, Format):
             tpe='png'
             fill_color="dark-green"
     '''
-        
     def modify(self, lib_image):
-        image_ops_wand.resize_smart(
+        # image_ops_wand.resize_smart(
+            # lib_image, 
+            # self.width, 
+            # self.height, 
+            # self.fill_color
+        # )
+        image_ops_wand.resize_aspect(
             lib_image, 
             self.width, 
-            self.height, 
-            self.fill_color
-        )
+            self,height
+            )
         super().modify(lib_image)
+        image_ops_wand.fill(
+            lib_image, 
+            self.width, 
+            self,height, 
+            self.fill_color
+            )
+        return lib_image
 
 
 
@@ -159,12 +169,23 @@ class CropSmart(ResizeCropSmartMixin, Format):
             tpe='png'
             fill_color="coral"
     '''
-        
     def modify(self, lib_image):
-        image_ops_wand.crop_smart(
+        # image_ops_wand.crop_smart(
+            # lib_image, 
+            # self.width, 
+            # self.height
+        # )
+        # super().modify(lib_image)
+        image_ops_wand.crop(
             lib_image, 
             self.width, 
-            self.height
-        )
+            self,height
+            )
         super().modify(lib_image)
-        
+        image_ops_wand.fill(
+            lib_image, 
+            self.width, 
+            self,height, 
+            self.fill_color
+            )        
+        return lib_image

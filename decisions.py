@@ -44,6 +44,7 @@ def reform_save_info(ifilter, src_format):
             
     return {'format': iformat, 'jpeg_quality': jpeg_quality}
 
+
 def src_should_delete(image, calling_opinion):
     delete = calling_opinion
     
@@ -52,11 +53,10 @@ def src_should_delete(image, calling_opinion):
         delete = True
 
     #,,,but Model wins.
-    if not(image.auto_delete == image.DELETE_UNSET):
-        delete = image.is_auto_delete()
+    if (image.auto_delete != image.AutoDelete.UNSET):
+        delete = (image.auto_delete == image.AutoDelete.YES)
             
     return delete
-
 
 
  #! DRY these two   

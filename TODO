@@ -12,7 +12,7 @@ URL solutions?
 
 == Images
 Transactional removal works?
-Auto_Delete is a mess of attribbutes and settings
+x Auto_Delete is a mess of attribbutes and settings - test
 
 == Reforms
 Must decide resolve the JPEG/Pillow transparency issue
@@ -24,9 +24,12 @@ For cloud, what do you get to make reforms? so what source goes into the filter?
 Register, want an instance? Admin want Model?
 
 Get rid of output transparency?
-Stop filters applying effects to fills.
+x Stop filters applying effects to fills. (try?)
 
 'Not found' and 'watermark' files on URLs? Makes them static files?
+
+== Tags
+Can title be part of general tag?
 
 
 == Utils
@@ -40,7 +43,6 @@ Cache filefinding, and the like
 Use the ImgField in admin (set on model?)
 
 = Tests
-How to provide a classic Django context?
 Verify validators running on forms
 
 = General
@@ -49,5 +51,5 @@ and switch between them
 SVG upload?
 Theres a request issue round auto_discover?
 
-Performance
+== Performance
 

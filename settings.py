@@ -70,8 +70,16 @@ class Settings():
         
     @property
     def max_upload_size(self):
+        '''
+        return the max upload sise.
+        Converted from Mb to bytes.
+        return 
+            upload size in bytes
+        '''
+        if not(self._max_upload_size):
+            return self._max_upload_size
         # Convert figure to MB
-        return self._max_upload_size * 10 * 1024 * 1024
+        return self._max_upload_size * 1024 * 1024
                 
     def populate(self):
         if (not(hasattr(settings, 'MEDIA_ROOT'))):

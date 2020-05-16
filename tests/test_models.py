@@ -16,7 +16,7 @@ class TestImage(TestCase):
         self.image = Image.objects.create(
             title="Test",
             src=get_test_image_file_jpg(),
-            auto_delete=True,
+            auto_delete=Image.AutoDelete.YES,
         )
 
     def test_src_name(self):

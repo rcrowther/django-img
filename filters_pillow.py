@@ -64,7 +64,6 @@ class PillowProcess:
         
         return (out_buff, app_format)
 
-
     def modify(self, lib_image):
         '''
         Modify the image.
@@ -78,7 +77,7 @@ class PillowProcess:
         
         @lib_image the class used by the library to wrap image data
         '''
-        # simple return. PIL usees returns
+        # simple return. PIL uses returns
         return lib_image
         
         
@@ -100,7 +99,6 @@ class Resize(ResizeCropMixin, Format):
             height=760    
             iformat='png'
     '''
-    
     def modify(self, lib_image):
         lib_image = image_ops_pillow.resize_aspect(
             lib_image, 
@@ -119,7 +117,6 @@ class Crop(ResizeCropMixin, Format):
             height=760 
             tpe='png'
     '''
-        
     def modify(self, lib_image):
         lib_image = image_ops_pillow.crop(
             lib_image,
@@ -141,7 +138,6 @@ class ResizeSmart(ResizeCropSmartMixin, Format):
             tpe='png'
             fill_color="dark-green"
     '''
-        
     def modify(self, lib_image):
         lib_image = image_ops_pillow.resize_smart(
             lib_image, 
@@ -163,7 +159,6 @@ class CropSmart(ResizeCropSmartMixin, Format):
             tpe='png'
             fill_color="coral"
     '''
-        
     def modify(self, lib_image):
         lib_image = image_ops_pillow.crop_smart(
             lib_image, 
@@ -171,6 +166,3 @@ class CropSmart(ResizeCropSmartMixin, Format):
             self.height
         )
         return super().modify(lib_image)
-
-
-

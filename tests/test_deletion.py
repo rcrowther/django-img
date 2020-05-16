@@ -14,13 +14,10 @@ class TestDeletion(TransactionTestCase):
         self.image = Image.objects.create(
             title="Test image",
             src=get_test_image_file_jpg(),
-            auto_delete=Image.DELETE_YES,
+            auto_delete=Image.AutoDelete.YES,
         )
         
         self.filter = Thumb()
-
-    #def test_delete_attribute(self):
-    #    self.assertTrue(self.image.is_auto_delete())
         
     def test_delete_image(self):
         self.image.delete()
@@ -38,7 +35,7 @@ class TestPreservation(TestCase):
         self.image = Image.objects.create(
             title="Test image",
             src=get_test_image_file_jpg(),
-            auto_delete=Image.DELETE_NO,
+            auto_delete=Image.AutoDelete.NO,
         )
 
         self.filter = Thumb()

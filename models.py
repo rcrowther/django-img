@@ -54,20 +54,25 @@ def get_reform_upload_to(instance, filename):
 
 
 class AbstractImage(models.Model):
-    # Delete policy
-    DELETE_UNSET = 0
-    DELETE_NO = 1
-    DELETE_YES = 2
-    DELETE_POLICIES = [
-        (DELETE_UNSET, 'None'),
-        (DELETE_NO, 'No'),
-        (DELETE_YES, 'Yes'),
-    ]
-    delete_policies = {
-        DELETE_UNSET: None,
-        DELETE_NO: False,
-        DELETE_YES: True,
-    }
+    class AutoDelete(models.IntegerChoices):
+        UNSET = 0, _('Unset')
+        NO = 1, _('Dont delete file')
+        YES = 2, _('Auto-delete file')        
+        
+    # # Delete policy
+    # DELETE_UNSET = 0
+    # DELETE_NO = 1
+    # DELETE_YES = 2
+    # DELETE_POLICIES = [
+        # (DELETE_UNSET, 'None'),
+        # (DELETE_NO, 'No'),
+        # (DELETE_YES, 'Yes'),
+    # ]
+    # delete_policies = {
+        # DELETE_UNSET: None,
+        # DELETE_NO: False,
+        # DELETE_YES: True,
+    # }
 
     upload_date = models.DateTimeField(_("Date of upload"),
         auto_now_add=True,
@@ -94,19 +99,19 @@ class AbstractImage(models.Model):
     )
     
     auto_delete = models.PositiveSmallIntegerField(_("Delete uploaded files on item deletion"), 
-        choices=DELETE_POLICIES,
-        default=DELETE_UNSET,
+        choices=AutoDelete.choices,
+        default=AutoDelete.UNSET,
     )    
 
     # Django uses Pillow anyway to provide width and height. So why?
     # The 'orrible duplication is for cloud storage, to spare web hits. 
     # Also to stop opening and closing the file, which is how file 
-    # storage attributes are loaded. Sure, they will be cached, but 
-    # let's get this sorted here.
+    # storage attributes are loaded. Sure, they values will be cached, 
+    # but let's get this sorted here.
     width = models.PositiveIntegerField(verbose_name=_('width'), editable=False)
     height = models.PositiveIntegerField(verbose_name=_('height'), editable=False)
 
-    # Not autopoulated by the storage, so funny name.
+    # Not autopoulated by storage, so funny name.
     # See the property further down.
     _bytesize = models.PositiveIntegerField(null=True, editable=False)
 
@@ -122,15 +127,15 @@ class AbstractImage(models.Model):
         except NotImplementedError:
             return False
 
-    #! @property
-    #! auto_delete and private
-    def is_auto_delete(self):
-        if (self.auto_delete == self.DELETE_NO):
-            return False
-        elif (self.auto_delete == self.DELETE_YES): 
-            return True
-        else:
-            return None
+    #@property
+    #def auto_delete(self):
+    #    return self._auto_del
+        # if (self._auto_del == self.AutoDeleteSrc.NO):
+            # return False
+        # elif (self._auto_del == self.AutoDeleteSrc.YES): 
+            # return True
+        # else:
+            # return None
 
     # This exists because, although Django Imagefield will autopopulate 
     # width and height via Pillow, pillow will not find the filesize.
@@ -150,9 +155,8 @@ class AbstractImage(models.Model):
                 raise SourceImageIOError(str(e))
 
             self.save(update_fields=['_bytesize'])
-
+            
         return self._bytesize
-
 
     def get_upload_to(self, filename):
         # Incoming filename comes from upload machinery, and needs 
@@ -169,7 +173,6 @@ class AbstractImage(models.Model):
         filename = image_save_path(filename)
        
         return filename
-        
         
     @contextmanager
     def open_src(self):

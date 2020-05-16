@@ -3,6 +3,6 @@ from image.models import Image, Reform
 
 
 class ImageAdmin(admin.ModelAdmin):
-    fields = ('title', 'image', 'bytesize')
+    fields = ('title', 'src')
     
 admin.site.register(Image, ImageAdmin)

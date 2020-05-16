@@ -15,7 +15,7 @@ class TestShortcuts(TestCase):
         good_image = Image.objects.create(
             title="Test image",
             src=get_test_image_file_jpg(),
-            auto_delete=Image.DELETE_YES,
+            auto_delete=Image.AutoDelete.YES,
         )
         reform = get_reform_or_not_found(good_image, self.filter)
         self.assertEqual(reform.src.name, 'reforms/test-image_thumb.png')
@@ -25,7 +25,7 @@ class TestShortcuts(TestCase):
         bad_image = Image.objects.create(
             title="Test image",
             src=get_test_image_file_jpg(),
-            auto_delete=Image.DELETE_YES,
+            auto_delete=Image.AutoDelete.YES,
         )
 
         bad_image.src.delete(False) 

@@ -399,7 +399,7 @@ Images accepts settings. They look like the Django template settings,
 
 ### General settings
 MAX_UPLOAD_SIZE
-If not set or None, any size allowed. In MB. Fractions allowed???
+If not set or None, any size allowed. In MB. Fractions allowed.
 
 APP_DIRS
 Defines if 'image_filters.py' files will be sought in apps. If false, the app only uses filters defined in the core app.

@@ -7,7 +7,7 @@ from image.decisions import src_should_delete
 
 
 def _image_src_delete(instance, **kwargs):
-    if (src_should_delete(instance, Image.DELETE_YES)):
+    if (src_should_delete(instance, Image.AutoDelete.YES)):
         #print('delete is on!')
         # Pass false so FileFields don't save the model.
         #! I need more info. Documentation seems to insidt objects are 
