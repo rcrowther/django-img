@@ -59,21 +59,6 @@ class AbstractImage(models.Model):
         NO = 1, _('Dont delete file')
         YES = 2, _('Auto-delete file')        
         
-    # # Delete policy
-    # DELETE_UNSET = 0
-    # DELETE_NO = 1
-    # DELETE_YES = 2
-    # DELETE_POLICIES = [
-        # (DELETE_UNSET, 'None'),
-        # (DELETE_NO, 'No'),
-        # (DELETE_YES, 'Yes'),
-    # ]
-    # delete_policies = {
-        # DELETE_UNSET: None,
-        # DELETE_NO: False,
-        # DELETE_YES: True,
-    # }
-
     upload_date = models.DateTimeField(_("Date of upload"),
         auto_now_add=True,
         db_index=True
@@ -81,6 +66,8 @@ class AbstractImage(models.Model):
     
     title = models.CharField(_('title'),
         max_length=255,
+        #unique = True,
+        #db_index=True
     )
     
     # A note about the name. Even if possible, using the word 'file'
@@ -258,6 +245,9 @@ class AbstractImage(models.Model):
 
     def is_landscape(self):
         return (self.height < self.width)
+        
+    #! url more useful?
+    
     #x another what for?
     @property
     def filename(self):

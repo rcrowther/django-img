@@ -14,8 +14,11 @@ IMAGE_FORMATS = [
     'webp',
 ]
 
-
 def extensions_maxlen():
+    '''
+    max length of listed extensions, including the period.
+    eg '.tiff' returns 5
+    '''
     m = 0
     for f in IMAGE_FORMATS:
         l = len(f)
@@ -25,6 +28,7 @@ def extensions_maxlen():
     m += 1
     return m
     
+# Map possible (lowercase) file extensions -> internal format
 _FORMAT_FILE_EXTENSIONS_BASE = {
     'bmp' : 'bmp',
     'jpg' : 'jpg',
@@ -37,22 +41,17 @@ _FORMAT_FILE_EXTENSIONS_BASE = {
 
 _UPPER_EXTENSIONS = {k.upper():v for k,v in _FORMAT_FILE_EXTENSIONS_BASE.items()}
 
-
 '''
 Map of allowed file extensions -> format key
 Includes upper and lower case entries, and variations in spelling 
 e.g. 'jpg'/'jpeg'
 '''
-#x
-ALLOWED_FILE_EXTENSIONS = {**_FORMAT_FILE_EXTENSIONS_BASE, **_UPPER_EXTENSIONS}
-
 FORMAT_EXTENSIONS_APP = {**_FORMAT_FILE_EXTENSIONS_BASE, **_UPPER_EXTENSIONS}
 
 '''
 Map of uppercase format keys -> app formats.
 This map will work for Pillow and Wand libraries.
 '''
-#FORMAT_UCLIB_APP = {v:k for k,v in FORMAT_APP_UCLIB.items()}
 FORMAT_UCLIB_APP = {
     'BMP' : 'bmp',
     'JPEG' : 'jpg',
@@ -64,17 +63,10 @@ FORMAT_UCLIB_APP = {
     'WEBP' : 'webp',
 }
 
-'''Map of app formats -> uppercase format keys.
-This map will work for both Pillow and Wand libraries.
 '''
-# FORMAT_APP_UCLIB = {
-    # 'bmp' : 'BMP',
-    # 'jpg' : 'JPEG',
-    # 'png' : 'PNG',
-    # 'gif' : 'GIF',
-    # 'tiff': 'TIFF',
-    # 'webp' : 'WEBP',
-# }
+Map of app formats -> uppercase format keys.
+This map will work for Pillow and Wand libraries.
+'''
 FORMAT_APP_UCLIB = {v:k for k,v in FORMAT_UCLIB_APP.items()}
 
 

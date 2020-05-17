@@ -6,9 +6,9 @@ from .utils import get_test_image_file_jpg
 from pathlib import Path
 from image.image_filters import Thumb
 
-# ./manage.py test image.tests.test_deletion
-#class TestDeletion(TestCase):
-    
+
+
+# ./manage.py test image.tests.test_deletion    
 class TestDeletion(TransactionTestCase):
     def setUp(self):
         self.image = Image.objects.create(

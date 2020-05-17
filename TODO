@@ -2,6 +2,8 @@
 How does cloud storage generate reforms?
 Images Admin not removing files (do last)
 Does auto delete work? (Partly)
+auto_delete tests
+Django is checking filename length
 
 == Management
 Work on pks too
@@ -29,7 +31,7 @@ x Stop filters applying effects to fills. (try?)
 'Not found' and 'watermark' files on URLs? Makes them static files?
 
 == Tags
-Can title be part of general tag?
+Can title be part of general tag? No...
 
 
 == Utils
@@ -40,10 +42,9 @@ Can title be part of general tag?
 Cache filefinding, and the like
 
 == Forms
-Use the ImgField in admin (set on model?)
+Show auto_delete 
 
 = Tests
-Verify validators running on forms
 
 = General
 STATIC_OR_URL
