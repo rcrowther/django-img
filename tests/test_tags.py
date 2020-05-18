@@ -44,6 +44,13 @@ class TestTags(TestCase):
             )
         self.assertHTMLEqual(render, '<img src="/media/reforms/test-image_thumb.png" alt="test image" class="detail-img"/>')
 
+    def test_image_by_title_tag(self):
+        render = self.render_template(
+            '{% load img_tags %}{% image_by_title_tag "Test" image.Thumb %}',
+            context={}
+            )
+        self.assertHTMLEqual(render, '<img src="/media/reforms/test-image_thumb.png" alt="test image"/>')
+
     def tearDown(self):    
         self.reform.src.delete(False) 
         self.image.src.delete(False) 

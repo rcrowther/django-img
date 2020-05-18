@@ -1,9 +1,34 @@
 from django.utils.functional import cached_property
 from django.apps import apps
+from django.templatetags.static import static
 from importlib import import_module
 
 print('create utils')
 
+
+def path_absolute_static_aware(self, path):
+    """
+    Given a relative or absolute path to a static asset, return an 
+    absolute path. An absolute path will be returned unchanged while a 
+    relative path will be passed to django.templatetags.static.static().
+    """
+    # Straight lift from django.forms.widgets.Media
+    if path.startswith(('http://', 'https://', '/')):
+        return path
+    return static(path)
+
+from django.utils.encoding import iri_to_uri
+from urllib.parse import quote, urljoin
+from django.conf import settings
+
+
+def url_absolute_media(path):
+    # a far conversion from django.templatetags.static
+    prefix = ''
+    url = getattr(settings, 'MEDIA_URL', '')
+    if (url):
+        prefix = iri_to_uri(url)
+    return urljoin(prefix, quote(path))
 
 
 #! should match names with pathlib.Path

@@ -5,11 +5,14 @@ Does auto delete work? (Partly)
 auto_delete tests
 Django is checking filename length
 
+== Model
+Unique titles? get rid of pks. Good? Good for searches.
+
+
 == Management
 Work on pks too
-Image sync again
+Image sync 
 URL solutions?
-- Management
 - Tags
 
 == Images
@@ -28,7 +31,7 @@ Register, want an instance? Admin want Model?
 Get rid of output transparency?
 x Stop filters applying effects to fills. (try?)
 
-'Not found' and 'watermark' files on URLs? Makes them static files?
+x 'Not found' and 'watermark' files on URLs? Makes them static files? !Test
 
 == Admin
 

@@ -16,5 +16,6 @@ class Format(filters_wand.Format):
     warm = False
     strong = False
     film = False
-
+    watermark = "image/watermark.png"
+    
 registry.register(Thumb)

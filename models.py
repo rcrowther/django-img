@@ -102,7 +102,7 @@ class AbstractImage(models.Model):
     # See the property further down.
     _bytesize = models.PositiveIntegerField(null=True, editable=False)
 
-
+    # is_local?
     def is_stored_locally(self):
         """
         Returns True if the image is hosted on the local filesystem
@@ -305,7 +305,6 @@ class AbstractReform(models.Model):
         """
         return OrderedDict([
             ('src', self.url),
-         #   ('src', self.src.name),
             ('alt', self.alt),
         ])
 

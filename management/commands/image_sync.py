@@ -4,7 +4,7 @@ from pathlib import Path
 from image.settings import settings
 
 
-# https://www.algotech.solutions/blog/python/deleting-unused-django-media-files/
+
 class Command(BaseCommand):
     help = 'Resync local image files to the database. The default (no options) adds models for orphan files.'
     output_transaction = True
@@ -39,10 +39,9 @@ class Command(BaseCommand):
         
         return [media_full_path / rel_path for rel_path in val_list]
             
-
     def db_image_list(self):
         ''' 
-        Read all image models for pk, title and file
+        Read all image models for pk, title and src
         @return object list supplemented with 'full_path' key referencing a Path
         '''
         val_list = Image.objects.values('pk', 'title', 'src')
@@ -52,7 +51,6 @@ class Command(BaseCommand):
             e['full_path']  = media_full_path / e['src']
         
         return  val_list  
-
 
     def handle(self, *args, **options):        
         ml = self.originals_fp_list()
@@ -114,7 +112,7 @@ class Command(BaseCommand):
                 
                 # Presuming files in /media are already truncated by
                 # configuration.
-                # The update effect in Imagefiedls will not work with 
+                # The update effect in Imagefields will not work with 
                 # Paths, only strings
                 i = Image(
                     title = path.stem,

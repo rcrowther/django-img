@@ -86,7 +86,6 @@ class Settings():
             raise ImproperlyConfigured('The image app requires MEDIA_ROOT to be defined in settings.')
         self.media_root = settings.MEDIA_ROOT
             
-        #AttributeError
         if (hasattr(settings, 'IMAGES')):
             isettings = settings.IMAGES[0]
             if ('APP_DIRS' in isettings):

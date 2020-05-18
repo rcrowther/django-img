@@ -264,13 +264,15 @@ no
 watermark
     Accepts a filepath to a watermark image template.
 
-Watermark deserves some explanation. This does not draw on the image, as handling text metrics is unreliable. You provide a filepath to a image template,
+Watermark deserves some explanation. This does not draw on the image, as text metrics are tricky to handle. Provide a URL stub to an image, here's a builtin,
 
-    watermark = '/www/data/images/watermark.png'
+    watermark = 'image/watermark.png'
 
-The template is scaled to the image-to-be-watermarked, then compsited over the main image by 'disolve'. So the watermark is customisable, can be used on most sizes of image, and is usually readale since aspect ratio is preserved, 
+The URL is Django static-aware, but will pass untouched if you give it a web URL (like the URLs in Django Media).
+ 
+The template is scaled to the image-to-be-watermarked, then composited over the main image by 'disolve'. So the watermark is customisable, can be used on most sizes of image, and is usually readale since aspect ratio is preserved.
 
-It is probably worth saying again that you can not change the parameters, the strengths of these effects, without creating a new filter.
+It is probably worth saying again that you can not change the parameters, so the strengths of these effects, without creating a new filter.
 
 
 ### Writing Filters
