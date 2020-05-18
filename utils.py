@@ -17,18 +17,19 @@ def path_absolute_static_aware(self, path):
         return path
     return static(path)
 
-from django.utils.encoding import iri_to_uri
-from urllib.parse import quote, urljoin
-from django.conf import settings
+#! Where, and for what?
+# from django.utils.encoding import iri_to_uri
+# from urllib.parse import quote, urljoin
+# from django.conf import settings
 
 
-def url_absolute_media(path):
-    # a far conversion from django.templatetags.static
-    prefix = ''
-    url = getattr(settings, 'MEDIA_URL', '')
-    if (url):
-        prefix = iri_to_uri(url)
-    return urljoin(prefix, quote(path))
+# def url_absolute_media(path):
+    # # a far conversion from django.templatetags.static
+    # prefix = ''
+    # url = getattr(settings, 'MEDIA_URL', '')
+    # if (url):
+        # prefix = iri_to_uri(url)
+    # return urljoin(prefix, quote(path))
 
 
 #! should match names with pathlib.Path

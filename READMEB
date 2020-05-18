@@ -128,7 +128,7 @@ However, I don't know about you, if I have a new app I like to try with real dat
 ## Viewing images
 Ok, lets show an image. In the same app, goto a template, I'll assume you are passing the model in through the context. Add this, 
 
-        {{ image-tag image.Large page.img }}
+        {{ image image.Large page.img }}
         <caption>{{ page.img.title }}</caption>
 
 'image.Large' is a predefined filter. Te code will generate the image from the given title, then you should see the result onscreen. To change how the image is filtered, size and so on, see Filters.
@@ -349,25 +349,25 @@ The tag guess can guess the app from the context. So,
 
      {% image report.img Large %}
 
-Will guess the filter is in whater app the context says the view comes from.
+Will assume the filter is in the app the context says the view comes from.
 
-The tag accpts keyword parameters which become HTML attrributes,
+The tag accpts keyword parameters which become HTML attributes,
 
-     {% image report.img Large class="report-figure" title="" %}
+     {% image report.img Large class="report-image" %}
+     <caption>{{ page.img.title }}</caption>
 
-renders similar to,
+Assuming a title "End Of Year Table", this renders similar to,
 
-    <img alt="results-table image" class="report-figure" src="/media/reforms/report-report_large.png">
-
+    <img src="/media/reforms/eoy-report_large.png" alt="end of year table image" class="report-image">
+    <caption>End Of Year Table</caption>
 
 
 ### Data search by title
-There is a tag to find images by title. Sometimes this will be useful, for fixed or temporary decoration/banners etc. However, it uses a database query,
+There is a tag to find images by title. Sometimes this will be useful, for fixed or temporary decoration/banners etc. 
 
-        {{ image-tag-by-title image.Large titleOfImage }}
-        <caption>{{ page.img,title }}</caption>
+        {{ imagefromtitle "titleOfImage" image.Large  }}
 
-While this may be useful at times, especially for fixed logos or banners, it is unnecessary if you are passing a model through a context,
+However, it uses a database query. While this may be useful at times, especially for fixed logos or banners, it is unnecessary if you are passing a model through a context,
 
 
 ### Filters from other apps

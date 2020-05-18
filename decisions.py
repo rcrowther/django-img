@@ -49,8 +49,8 @@ def src_should_delete(image, calling_opinion):
     delete = calling_opinion
     
     # Settings can override...
-    if (settings.auto_delete):
-        delete = True
+    if (not(settings.auto_delete is None)):
+        delete = settings.auto_delete
 
     #,,,but Model wins.
     if (image.auto_delete != image.AutoDelete.UNSET):

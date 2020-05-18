@@ -23,8 +23,10 @@ def get_reform_or_not_found(image, ifilter):
         # (probably) SourceImageIOError indicates an Image is missing 
         # it's file. Instead of throwing a whole page error, make a mock
         # reform to hold a generic broken image.
-        # A textlike 'name' parameter triggers no attempt to 'upload'.
+        # I've forgotten why this works, but a textlike 'name' parameter
+        # triggers no attempt to 'upload'.
+        # Also note the path is relative to the site.
         fp = image_broken_url()
         reform = Reform(image=image)
-        reform.src.name = fp
+        reform.src = fp
         return reform

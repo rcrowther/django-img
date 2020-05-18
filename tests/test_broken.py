@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 from image.shortcuts import get_reform_or_not_found
 from image.models import Image
 from image.image_filters import Thumb
@@ -6,7 +6,7 @@ from .utils import get_test_image_file_jpg
 from pathlib import Path
 
 # ./manage.py test image.tests.test_broken
-class TestShortcuts(TestCase):
+class TestShortcuts(TransactionTestCase):
 
     def setUp(self):
         self.filter = Thumb()
@@ -18,8 +18,9 @@ class TestShortcuts(TestCase):
             auto_delete=Image.AutoDelete.YES,
         )
         reform = get_reform_or_not_found(good_image, self.filter)
-        self.assertEqual(reform.src.name, 'reforms/test-image_thumb.png')
-        good_image.delete()
+        name = Path(reform.src.name).name
+        self.assertEqual(name, 'test-image_thumb.png')
+        good_image.delete(False)
     
     def test_fallback_to_not_found(self):
         bad_image = Image.objects.create(
@@ -29,11 +30,11 @@ class TestShortcuts(TestCase):
         )
 
         bad_image.src.delete(False) 
-
+        
+        # an instance of the model remains
         reform = get_reform_or_not_found(bad_image, self.filter)
         stem = Path(reform.src.name).stem
         self.assertEqual(stem, 'unfound')
-        bad_image.delete()
 
     def test_filter_none_raises_exception(self):
         # A more open case, using a call corrupt because it has no 

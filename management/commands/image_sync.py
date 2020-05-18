@@ -95,6 +95,7 @@ class Command(BaseCommand):
 
             dbl = self.db_image_fp_list()
             file_no_model = set(ml) - set(dbl)
+            media_originals = Path(settings.media_subpath_originals)
 
             for path in file_no_model:
                 # Make new models.
@@ -113,10 +114,11 @@ class Command(BaseCommand):
                 # Presuming files in /media are already truncated by
                 # configuration.
                 # The update effect in Imagefields will not work with 
-                # Paths, only strings
+                # Paths, only strings. Also, it works relative to /media
+                # (so path relativization here)
                 i = Image(
                     title = path.stem,
-                    src = str(path),
+                    src = str(media_originals / path.name),
                 ) 
 
                 try:

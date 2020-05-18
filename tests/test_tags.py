@@ -32,21 +32,21 @@ class TestTags(TestCase):
 
     def test_image_tag(self):
         render = self.render_template(
-            '{% load img_tags %}{% image_tag image_model image.Thumb %}',
+            '{% load img_tags %}{% image image_model image.Thumb %}',
             context={'image_model': self.image}
             )
         self.assertHTMLEqual(render, '<img src="/media/reforms/test-image_thumb.png" alt="test image"/>')
 
     def test_image_tag_extra_attrs(self):
         render = self.render_template(
-            '{% load img_tags %}{% image_tag image_model image.Thumb class="detail-img" %}',
+            '{% load img_tags %}{% image image_model image.Thumb class="detail-img" %}',
             context={'image_model': self.image}
             )
         self.assertHTMLEqual(render, '<img src="/media/reforms/test-image_thumb.png" alt="test image" class="detail-img"/>')
 
     def test_image_by_title_tag(self):
         render = self.render_template(
-            '{% load img_tags %}{% image_by_title_tag "Test" image.Thumb %}',
+            '{% load img_tags %}{% imagefromtitle "Test" image.Thumb %}',
             context={}
             )
         self.assertHTMLEqual(render, '<img src="/media/reforms/test-image_thumb.png" alt="test image"/>')
@@ -71,7 +71,7 @@ class TestTagCalls(TestCase):
     def test_not_enough_args_raises_templatesyntaxerror(self):
         token = Token(
             token_type = TokenType.TEXT,
-            contents =  'image_tag image_model'
+            contents =  'image image_model'
         )
         with self.assertRaises(TemplateSyntaxError):
             image_tag(self.parser, token)
@@ -79,7 +79,7 @@ class TestTagCalls(TestCase):
     def test_malformed_kwargs_raises_templatesyntaxerror(self):
         token = Token(
             token_type = TokenType.TEXT,
-            contents = 'image_tag image_model image.Thumb sth-pacific="True"'
+            contents = 'image image_model image.Thumb sth-pacific="True"'
         )
         with self.assertRaises(TemplateSyntaxError):
             image_tag(self.parser, token)
@@ -87,7 +87,7 @@ class TestTagCalls(TestCase):
     def test_unquoted_kwargs_raises_templatesyntaxerror(self):
         token = Token(
             token_type = TokenType.TEXT,
-            contents =  'image_tag image_model image.Thumb sthpacific=True'
+            contents =  'image image_model image.Thumb sthpacific=True'
         )
         with self.assertRaises(TemplateSyntaxError):        
             image_tag(self.parser,token)

@@ -94,7 +94,7 @@ class ImageByTitleNode(template.Node):
             return ''
 
                     
-@register.tag(name="image_by_title_tag")
+@register.tag(name="imagefromtitle")
 def image_by_title_tag(parser, token):
     '''
     Lookup an image by filter, and title.
@@ -143,7 +143,7 @@ class ImageNode(template.Node):
             return ''
 
                 
-@register.tag(name="image_tag")
+@register.tag(name="image")
 def image_tag(parser, token):
     '''
     Lookup and display an image. 

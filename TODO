@@ -12,8 +12,10 @@ Unique titles? get rid of pks. Good? Good for searches.
 == Management
 Work on pks too
 Image sync 
-URL solutions?
-- Tags
+View file wrong after sync
+http://localhost:8000/media/srv/soundsense/media/originals/03.09.12_smilejam_purple_3_2.png
+/media/srv/soundsense spurious
+Yet it deletes a file?
 
 == Images
 Transactional removal works?
@@ -57,6 +59,7 @@ STATIC_OR_URL
 and switch between them
 SVG upload?
 Theres a request issue round auto_discover?
+Get rid of checks. Django does them.
 
 == Performance
 
