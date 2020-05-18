@@ -30,36 +30,13 @@ class ImageAdmin(admin.ModelAdmin):
     upload_day.short_description = 'Upload day'
     upload_day.admin_order_field = 'upload_date'
 
-    #class Media:
-    #    js = ('image/js/prepopulate.js',)
-
     @property
     def media(self):
         base = super().media
         for jslist in base._js_lists:
             for i, e in enumerate(jslist): 
                 if e == 'admin/js/prepopulate.js':
-                    #del(jslist[i]) 
                     jslist[i] = 'image/js/prepopulate.js'
-        #return Media(js = ('image/js/prepopulate.js',)) + base
         return base
-        
-    #BaseModelAdmin
-    #def get_prepopulated_fields(self, request, obj=None):
-    # better, but how reference object?
-    # formfield_overrides = {
-        # models.TextField: {'widget': RichTextEditorWidget},
-    # }
-    # def get_form(self, request, obj=None, **kwargs):
-        # form = super().get_form(request, obj, **kwargs)
-        # if not obj:
-            # #obj.title = obj.src.name
-            # print('form:')
-            # #print(str(form.base_fields['src'].initial.descriptor.file.name))
-            # print(str(form.base_fields['src']))
-            # form.base_fields['title'].initial = '2fgod2'
-
-        #return form
-
          
 admin.site.register(Image, ImageAdmin)

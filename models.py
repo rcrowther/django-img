@@ -110,19 +110,13 @@ class AbstractImage(models.Model):
         try:
             self.src.path
             return True
-            
+        except ValueError as e:
+            # The access attempt will fail with currently a ValueError
+            # if no associated file. But in context of asking 'is it 
+            # local?' that's now a source error.
+            raise SourceImageIOError(str(e))
         except NotImplementedError:
             return False
-
-    #@property
-    #def auto_delete(self):
-    #    return self._auto_del
-        # if (self._auto_del == self.AutoDeleteSrc.NO):
-            # return False
-        # elif (self._auto_del == self.AutoDeleteSrc.YES): 
-            # return True
-        # else:
-            # return None
 
     # This exists because, although Django Imagefield will autopopulate 
     # width and height via Pillow, pillow will not find the filesize.
@@ -180,7 +174,9 @@ class AbstractImage(models.Model):
 
                 close_src = True
         except IOError as e:
-            # re-throw this as a SourceImageIOError so that calling code
+            # re-throw these as a SourceImageIOError
+            # IOError comes from... an IO error. 
+            # so that calling code
             # can distinguish these from IOErrors elsewhere in the 
             # process e.g. currently causes a broken-image display.
             raise SourceImageIOError(str(e))

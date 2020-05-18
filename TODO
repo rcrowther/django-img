@@ -14,10 +14,10 @@ URL solutions?
 
 == Images
 Transactional removal works?
-x Auto_Delete is a mess of attribbutes and settings - test
+
 
 == Reforms
-Must decide resolve the JPEG/Pillow transparency issue
+Conclude the JPEG/Pillow transparency issue
 https://github.com/python-pillow/Pillow/issues/2609
 
 
@@ -31,33 +31,7 @@ x Stop filters applying effects to fills. (try?)
 'Not found' and 'watermark' files on URLs? Makes them static files?
 
 == Admin
-After,
- $('#fileinput').prop('files')[0].name;
 
-In options,
-
-    def media(self):
-
-     class Media:
-         js = ('image/js/prepopulate.js')
-
-    @property
-    def media(self):
-        base = super().media
-        for jslist in base._js_lists:
-            for i, e in enumerate(jslist): 
-                if e == 'admin/js/prepopulate.js':
-                    del(jslist[i]) 
-        return base + Media(js = ('image/js/prepopulate.js',))
-
-#############################
-
-
-
-
-        if path.startswith(('http://', 'https://', '/')):
-            return path
-        return static(path)
 == Tags
 Can title be part of general tag? No...
 
@@ -71,6 +45,7 @@ Cache filefinding, and the like
 
 
 == Forms
+Prepopulate in other forms
 
 = Tests
 

@@ -317,15 +317,11 @@ This is a deliberate decision. It makes life easy. If you want to produce a fron
 
 
 ## Admin
-Images are made available in admin. Reforms are not (they autogenerate from template tags, autodelete their files, and are generally regarded as sutomatic).
+Images are made available in admin. Reforms are not (they autogenerate from template tags, autodelete their files, and are generally regarded as automatic).
 
-Images are mainly intended to be attached to other models. So the admin display is only inended for dev and maintencence. Therefore the admin screen is basic, and will not display images, to speed lookups and save visual space.
+Images are mainly intended to be attached to other models. So the admin display is only intended for dev and maintencence. Therefore the displays are basic, and will not display images, to speed lookups and save visual space.
 
-
-The model has auto-slug() code. Declare this in admin.py to fill in suggestions automatically,
-
-    class PageAdmin(admin.ModelAdmin):
-        prepopulated_fields = {'slug': ('title')}
+The model admin forms have prepopulate code for titles. If you don't want that, comment out the prepopulate attribute, and preferably the media property declaration.
 
 
 

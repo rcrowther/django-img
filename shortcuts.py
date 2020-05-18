@@ -1,10 +1,14 @@
 from image.models import Reform, SourceImageIOError
 import os.path
+from django.templatetags.static import static
 
 # cache
-def image_broken_filepath():
-    return os.path.join(os.path.dirname(__file__), 'files', 'unfound.png')
- 
+def image_broken_url():
+    '''
+    Deliver a static-aware 'broken url' path.
+    '''
+    return static('image/unfound.png')
+     
 def get_reform_or_not_found(image, ifilter):
     """
     Tries to get / create the reform for the image or renders a 
@@ -16,11 +20,11 @@ def get_reform_or_not_found(image, ifilter):
     try:
         return image.get_reform(ifilter)
     except SourceImageIOError:
-        # (probably) Image file is missing from /media images. So
-        # make a mock reform to hold a generic broken image, rather than
-        # crashing out completely.
-        # A text filepath parameter triggers no attempt to 'upload'.
-        #Reform = image.reforms.model
+        # (probably) SourceImageIOError indicates an Image is missing 
+        # it's file. Instead of throwing a whole page error, make a mock
+        # reform to hold a generic broken image.
+        # A textlike 'name' parameter triggers no attempt to 'upload'.
+        fp = image_broken_url()
         reform = Reform(image=image)
-        reform.src.name = image_broken_filepath()
+        reform.src.name = fp
         return reform
