@@ -2,8 +2,10 @@ from django.utils.functional import cached_property
 
 '''
 Formats accepted.
-This list is used throughout the app, and is definitive.
-The entries can be used for new file extensions.
+This list is used throughout the app, and is definitive. The entries can
+be used for new file extensions. However, for verification and other 
+code, other collections in this module are preferred. The main use in 
+code is for displaying nice messages for the user. 
 '''
 IMAGE_FORMATS = [
     'bmp',
@@ -46,6 +48,7 @@ Map of allowed file extensions -> format key
 Includes upper and lower case entries, and variations in spelling 
 e.g. 'jpg'/'jpeg'
 '''
+# NB: see the extension strip list in prepopulate.js
 FORMAT_EXTENSIONS_APP = {**_FORMAT_FILE_EXTENSIONS_BASE, **_UPPER_EXTENSIONS}
 
 '''
