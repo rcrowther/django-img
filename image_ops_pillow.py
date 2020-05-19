@@ -61,48 +61,24 @@ def fill(pillow, width, height, fill_color="white"):
     Image must be smaller than the giveen box. Checking is 
     regarded as a seperate operation.
     '''
+    # NB: This converts to RGB. Not not an issue, as fill runs last.
     s = pillow.size
     current_width = s[0]
     current_height = s[1]
-    
-    # Palette images with Transparency expressed in bytes should be 
-    # converted to RGBA images
-    # Whatever that means.
-    bg = PILImage.new('RGBA', (width, height), fill_color)
 
     x = (width - current_width) >> 1
     #x = math.floor((width - current_width) / 2)
     y = (height - current_height) >> 1
+        
+    # needed for the split
+    pillow.load() 
+    bg = PILImage.new('RGB', (width, height), fill_color)
 
-    bg.paste(pillow, (x, y))
+    # paste down, mask from the alpha channel (usually last)
+    bg.paste(pillow, (x, y),  mask=pillow.split()[-1])
+    
     return bg
 
-
-
-# def crop_smart(pillow, width, height, fill_color="white"):
-    # '''Fit the given image to the given size.
-    # A general-purpose transformation.
-    # If the image is too large, it is shrunk to fit then, if necessary,
-    # filled to size.
-    # If too small, image is filled to size
-    # @return image of the given dimensions.
-    # '''
-    # rs = crop(pillow, width, height)
-    # f = fill(rs, width, height, fill_color)
-    # return f
-
-
-    
-# def resize_smart(pillow, width, height, fill_color="white"):
-    # '''Resize to the given dimensions.
-    # If the image is too large, it is shrunk to fit then, if necessary,
-    # filled to size.
-    # If too small, image is filled to size
-    # @return image of the given dimensions.
-    # '''
-    # rs = resize_aspect(pillow, width, height)
-    # f = fill(rs, width, height, fill_color)
-    # return f
 
 
 

@@ -49,8 +49,19 @@ class PillowProcess:
         # across different filters
         pil_dst = self.modify(src_image) or src_image
 
-        #! No transparency
-        pil_dst = pil_dst.convert("RGB")
+
+        # PIL raises error if given RGBA for JPEG output
+        # in that case, no transparency
+        if ((pil_dst.mode in ('RGBA', 'LA')) and (app_format == 'jpg')):            
+            # If expressed, respect background colour. May be backing
+            # a genuine transparency, so path of least surprise.
+            if (hasattr(self, 'fill_color')):
+                fc = self.fill_color
+            else:
+                fc = 'white'
+            bg = PILImage.new('RGB', pil_dst.size, fc)
+            bg.paste(pil_dst, pil_dst.split()[-1])
+            pil_dst = bg
         
         #! test. I think that;s the name.
         write_attrs['quality'] = write_attrs['jpeg_quality']
@@ -139,6 +150,7 @@ class ResizeSmart(ResizeCropSmartMixin, Format):
             fill_color="dark-green"
     '''
     def modify(self, lib_image):
+        print('riesize smart modify.....')
         i = image_ops_pillow.resize_aspect(
             lib_image, 
             self.width, 
