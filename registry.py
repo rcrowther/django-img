@@ -62,7 +62,7 @@ class ClassRegistry:
         except KeyError:
             raise NotRegistered("Class instance requested but not found. key:{} registered: {}".format(
             k,
-            ", ".join(self.list().keys()),
+            ", ".join(self.list.keys()),
             ))
         return f(**kwargs)
            

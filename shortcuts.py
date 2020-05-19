@@ -2,7 +2,7 @@ from image.models import Reform, SourceImageIOError
 import os.path
 from django.templatetags.static import static
 
-# cache
+#? cache
 def image_broken_url():
     '''
     Deliver a static-aware 'broken url' path.
@@ -23,8 +23,7 @@ def get_reform_or_not_found(image, ifilter):
         # (probably) SourceImageIOError indicates an Image is missing 
         # it's file. Instead of throwing a whole page error, make a mock
         # reform to hold a generic broken image.
-        # I've forgotten why this works, but a textlike 'name' parameter
-        # triggers no attempt to 'upload'.
+        # A textlike parameter triggers no attempt to 'upload'.
         # Also note the path is relative to the site.
         fp = image_broken_url()
         reform = Reform(image=image)

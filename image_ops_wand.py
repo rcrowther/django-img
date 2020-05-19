@@ -71,10 +71,10 @@ def resize_aspect(wand, width, height):
     height_reduce = wand.height - height
   
     if (width_reduce > height_reduce and width_reduce > 0):
-        h = math.floor((width/wand.width) * wand.height)
+        h = math.floor((width * wand.height)/wand.width)
         wand.resize(width, h)        
     elif (height_reduce > width_reduce and height_reduce > 0):
-        w = math.floor((height/wand.height) * wand.width)
+        w = math.floor((height * wand.width)/wand.height)
         wand.resize(w, height)
     return wand
 

@@ -138,22 +138,16 @@ class ResizeSmart(ResizeCropSmartMixin, Format):
             fill_color="dark-green"
     '''
     def modify(self, lib_image):
-        # image_ops_wand.resize_smart(
-            # lib_image, 
-            # self.width, 
-            # self.height, 
-            # self.fill_color
-        # )
         image_ops_wand.resize_aspect(
             lib_image, 
             self.width, 
-            self,height
+            self.height
             )
         super().modify(lib_image)
         image_ops_wand.fill(
             lib_image, 
             self.width, 
-            self,height, 
+            self.height, 
             self.fill_color
             )
         return lib_image
@@ -179,13 +173,13 @@ class CropSmart(ResizeCropSmartMixin, Format):
         image_ops_wand.crop(
             lib_image, 
             self.width, 
-            self,height
+            self.height
             )
         super().modify(lib_image)
         image_ops_wand.fill(
             lib_image, 
             self.width, 
-            self,height, 
+            self.height, 
             self.fill_color
             )        
         return lib_image

@@ -66,8 +66,8 @@ class AbstractImage(models.Model):
     
     title = models.CharField(_('title'),
         max_length=255,
-        #unique = True,
-        #db_index=True
+        unique=True, 
+        db_index=True
     )
     
     # A note about the name. Even if possible, using the word 'file'
@@ -102,8 +102,7 @@ class AbstractImage(models.Model):
     # See the property further down.
     _bytesize = models.PositiveIntegerField(null=True, editable=False)
 
-    # is_local?
-    def is_stored_locally(self):
+    def is_local(self):
         """
         Returns True if the image is hosted on the local filesystem
         """
@@ -164,7 +163,7 @@ class AbstractImage(models.Model):
 
             if self.src.closed:
                 # Reopen the file
-                if self.is_stored_locally():
+                if self.is_local():
                     self.src.open('rb')
                 else:
                     # Some external storage backends don't allow reopening
@@ -259,7 +258,7 @@ class AbstractImage(models.Model):
         return self.title.lower() + ' image'
 
     def __repr__(self):
-        return "Reform(upload_date: {}, title:'{}', src:'{}', auto_delete:{})".format(
+        return "Image(upload_date: {}, title:'{}', src:'{}', auto_delete:{})".format(
             self.upload_date,
             self.title,
             self.src,

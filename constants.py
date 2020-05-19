@@ -55,11 +55,13 @@ FORMAT_EXTENSIONS_APP = {**_FORMAT_FILE_EXTENSIONS_BASE, **_UPPER_EXTENSIONS}
 Map of uppercase format keys -> app formats.
 This map will work for Pillow and Wand libraries.
 '''
+# put jpg after mpo so it overwrites on k:v inversion
 FORMAT_UCLIB_APP = {
     'BMP' : 'bmp',
     'JPEG' : 'jpg',
-    'JPG' : 'jpg',
     'MPO' : 'jpg',
+    'JPG' : 'jpg',
+    'JPEG' : 'jpg',
     'PNG' : 'png',
     'GIF' : 'gif',
     'TIFF' : 'tiff',
@@ -70,7 +72,12 @@ FORMAT_UCLIB_APP = {
 Map of app formats -> uppercase format keys.
 This map will work for Pillow and Wand libraries.
 '''
-FORMAT_APP_UCLIB = {v:k for k,v in FORMAT_UCLIB_APP.items()}
-
-
-
+# can't be trusted to be generated.
+FORMAT_APP_UCLIB  = {
+    'bmp' : 'BMP',
+    'jpg' : 'JPEG',
+    'png' : 'PNG',
+    'gif' : 'GIF',
+    'tiff' : 'TIFF',
+    'webp' : 'WEBP',
+}
