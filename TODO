@@ -25,9 +25,6 @@ https://github.com/python-pillow/Pillow/issues/2609
 For cloud, what do you get to make reforms? so what source goes into the filter?
 Register, want an instance? Admin want Model?
 
-Get rid of output transparency?
-x Stop filters applying effects to fills. (try?)
-
 x 'Not found' and 'watermark' files on URLs? Makes them static files? !Test
 
 == Admin
@@ -48,6 +45,8 @@ Cache filefinding, and the like
 Prepopulate in other forms
 
 = Tests
+For filter format (size)?
+
 
 = General
 STATIC_OR_URL

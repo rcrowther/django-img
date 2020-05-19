@@ -57,7 +57,7 @@ def photoFX(wand, pop, grayscale, warm, night, strong, no, watermark):
                 arguments='35', 
                 gravity='center'
             )
-
+    return wand
 
 
 def resize_aspect(wand, width, height):
@@ -124,27 +124,7 @@ def fill(wand, width, height, fill_color="white"):
         wand.background_color = bg
         x = (width - current_width) >> 1
         y = (height - current_height) >> 1
+        # the negative is deliberate. Wand I think is anchored to *bottom* left.
         wand.extent(width=width, height=height, x=x, y=-y)
-  
-  
-def crop_smart(wand, width, height, fill_color="white"):
-    '''Fit the given image to the given size.
-    A general-purpose transformation.
-    If the image is too large, it is shrunk to fit then, if necessary,
-    filled to size.
-    If too small, image is filled to size
-    @return image of the given dimensions.
-    '''
-    crop(wand, width, height)
-    fill(wand, width, height, fill_color)
-    
-    
-def resize_smart(wand, width, height, fill_color="white"):
-    '''Resize to the given dimensions.
-    If the image is too large, it is shrunk to fit then, if necessary,
-    filled to size.
-    If too small, image is filled to size
-    @return image of the given dimensions.
-    '''
-    resize_aspect(wand, width, height)
-    fill(wand, width, height, fill_color)
+
+    return wand

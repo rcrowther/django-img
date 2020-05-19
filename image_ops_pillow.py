@@ -61,7 +61,7 @@ def fill(pillow, width, height, fill_color="white"):
     Image must be smaller than the giveen box. Checking is 
     regarded as a seperate operation.
     '''
-    # NB: This converts to RGB. Not not an issue, as fill runs last.
+    # NB: This converts to RGB. Not an issue, as fill runs last.
     s = pillow.size
     current_width = s[0]
     current_height = s[1]

@@ -40,7 +40,13 @@ class WandProcess():
         #! No transparency
         #pil_dst = pil_dst.convert("RGB")
         #write_attrs['quality'] = 85
-
+        if ((wand_dst.alpha_channel) and (write_attrs['format'] == 'jpg')): 
+            # Here's where Wand plays for us. Alpha channel or not, it 
+            # sets a background_color. And the default is 'white', like 
+            # us. So all we have to do is remove the alpha channel, 
+            # because Wand doesn't like one on jpeg rendering, and Wand 
+            # will compose down.
+            wand_dst.alpha_channel = 'remove'
         out_buff = BytesIO()
 
         wand_dst.save(
@@ -73,8 +79,7 @@ class Format(PhotoFXMixin, FormatMixin, WandProcess, Filter):
     Set iformat=None means the image is unchanged.
     '''
     def modify(self, lib_image):
-        #super().modify(lib_image)
-        image_ops_wand.photoFX(
+        return image_ops_wand.photoFX(
             lib_image, 
             self.pop, 
             self.greyscale, 
@@ -83,9 +88,8 @@ class Format(PhotoFXMixin, FormatMixin, WandProcess, Filter):
             self.strong, 
             self.no,
             self.watermark,
-        )
-        return lib_image
-    
+        )    
+
 
                         
 class Resize(ResizeCropMixin,  Format):
@@ -99,12 +103,12 @@ class Resize(ResizeCropMixin,  Format):
             iformat='png'
     '''
     def modify(self, lib_image):
-        image_ops_wand.resize_aspect(
+        i = image_ops_wand.resize_aspect(
             lib_image,
             self.width,
             self.height
             )
-        return super().modify(lib_image)
+        return super().modify(i)
 
 
         
@@ -117,12 +121,12 @@ class Crop(ResizeCropMixin, Format):
             tpe='png'
     '''
     def modify(self, lib_image):
-        image_ops_wand.crop(
+        i = image_ops_wand.crop(
             lib_image,
             self.width,
             self.height
         )
-        return super().modify(lib_image)
+        return super().modify(i)
 
 
 
@@ -138,19 +142,19 @@ class ResizeSmart(ResizeCropSmartMixin, Format):
             fill_color="dark-green"
     '''
     def modify(self, lib_image):
-        image_ops_wand.resize_aspect(
+        i = image_ops_wand.resize_aspect(
             lib_image, 
             self.width, 
             self.height
             )
-        super().modify(lib_image)
-        image_ops_wand.fill(
+        i = super().modify(i)
+        i = image_ops_wand.fill(
             lib_image, 
             self.width, 
             self.height, 
             self.fill_color
             )
-        return lib_image
+        return i
 
 
 
@@ -164,22 +168,16 @@ class CropSmart(ResizeCropSmartMixin, Format):
             fill_color="coral"
     '''
     def modify(self, lib_image):
-        # image_ops_wand.crop_smart(
-            # lib_image, 
-            # self.width, 
-            # self.height
-        # )
-        # super().modify(lib_image)
-        image_ops_wand.crop(
+        i = image_ops_wand.crop(
             lib_image, 
             self.width, 
             self.height
             )
-        super().modify(lib_image)
-        image_ops_wand.fill(
+        i = super().modify(i)
+        i = image_ops_wand.fill(
             lib_image, 
             self.width, 
             self.height, 
             self.fill_color
             )        
-        return lib_image
+        return i

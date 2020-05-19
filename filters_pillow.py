@@ -111,12 +111,12 @@ class Resize(ResizeCropMixin, Format):
             iformat='png'
     '''
     def modify(self, lib_image):
-        lib_image = image_ops_pillow.resize_aspect(
+        i = image_ops_pillow.resize_aspect(
             lib_image, 
             self.width,
             self.height
         )
-        return super().modify(lib_image)
+        return super().modify(i)
 
         
 
@@ -129,12 +129,12 @@ class Crop(ResizeCropMixin, Format):
             tpe='png'
     '''
     def modify(self, lib_image):
-        lib_image = image_ops_pillow.crop(
+        i = image_ops_pillow.crop(
             lib_image,
             self.width,
             self.height
         )
-        return super().modify(lib_image)
+        return super().modify(i)
 
                 
                                     
