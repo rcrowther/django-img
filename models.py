@@ -14,12 +14,10 @@ from django.urls import reverse
 from collections import OrderedDict
 from django.utils.functional import cached_property
 from django.core.files.images import ImageFile
-#from image.filters import Filter
 from image.decisions import (
     image_save_path, 
     reform_save_path
 )
-#from image.settings import settings
 print('create models')
 from image.validators import validate_file_size, validate_image_file_extension
  

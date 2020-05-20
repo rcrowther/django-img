@@ -6,19 +6,16 @@ auto_delete tests
 Django is checking filename length
 
 == Model
-Unique titles? get rid of pks. Good? Good for searches.
 
 
 == Management
-Work on pks too
+
 
 == Images
 Transactional removal works?
 
 
 == Reforms
-Conclude the JPEG/Pillow transparency issue
-https://github.com/python-pillow/Pillow/issues/2609
 
 
 == Filters
@@ -43,6 +40,18 @@ Cache filefinding, and the like
 
 == Forms
 Prepopulate in other forms
+Not show ''change' file link at all?
+
+== Widget
+Since when was Mozilla file browser D&D?
+- How to test?
+Some of the hover drop effects not working, why?
+Remove file selection from admin ''change', report only?
+''Add is fine, uses simple file widget
+Similar foreign add is fine, simple widget
+but ''change' is the horrible mess of ''choose' and ''add'
+
+What it needs to do is save the new image, the go on to create the model into which it is embedded.
 
 = Tests
 For filter format (size)?
@@ -53,7 +62,6 @@ STATIC_OR_URL
 and switch between them
 SVG upload?
 Theres a request issue round auto_discover?
-Get rid of checks. Django does them.
 
 == Performance
 

@@ -3,14 +3,19 @@ from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from django.forms import Media
 from image.models import Image, Reform
+from image import widgets
 
-
+from django import forms
+from django.db import models
                                     
 class ImageAdmin(admin.ModelAdmin):
+    #fields = ('title', 'auto_delete')
+    # For pooled ffiles use, replace the above with this
     fields = ('title', 'src', 'auto_delete')
 
     # case-insensitive contains match
     search_fields = ['title']
+    #! how about delete?
     list_display = ('title', 'upload_day', 'view_image')
     prepopulated_fields = {"title": ("src",)}
 
@@ -30,6 +35,15 @@ class ImageAdmin(admin.ModelAdmin):
     upload_day.short_description = 'Upload day'
     upload_day.admin_order_field = 'upload_date'
 
+
+    formfield_overrides = {
+        # This changes the 'change' form to not display the view link
+        #models.ImageField: {'widget': forms.FileInput},
+        models.ImageField: {'widget': widgets.FileSingleChooserDAndD},
+        
+        #forms.ImageField: {'widget': admin.widgets.AdminFileWidget},
+    }
+    
     @property
     def media(self):
         base = super().media
