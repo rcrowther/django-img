@@ -52,6 +52,8 @@ def get_reform_upload_to(instance, filename):
 
 
 class AbstractImage(models.Model):
+    
+    
     class AutoDelete(models.IntegerChoices):
         UNSET = 0, _('Unset')
         NO = 1, _('Dont delete file')

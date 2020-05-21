@@ -46,6 +46,9 @@ Remove file selection from admin ''change', report only?
 Similar foreign add is fine, simple widget
 What it needs to do is save the new image, the go on to create the model into which it is embedded.
 
+== Model Field
+on_delete underride not acknowledged - Look in Field
+
 == Widget
 Since when was Mozilla file browser D&D?
 - How to test?
