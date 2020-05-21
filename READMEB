@@ -458,11 +458,37 @@ The app uses the URL attribute of the FileFields to generate HTML 'src' (not the
 ## Forms
 There's nothing special about using the Image model in forms. Stock Django. Use the model via Django admin or Model forms. For your own forms, the Image model contains some extra validators, but a call to is_valid() will run them.
 
-  
+
+## Models
+There's a helper for model fields. It's a small override of a OneToOneField,
+
+ImageSingleField
+    A preconfigured model field for Images.
+    This is a OneToOneField, so not suitable for referring to several 
+    images e.g gallery use. Also, becaue OneToOneField, once it has an
+    image no other model in that table can share the image 
+    (unique=True). Mainly intended for images coupled to models e.g
+    'Sales product' -> 'Product image'.
+    Mild configuration to delete image if model is deleted, and
+    not to be able to track the image back to the model (the model
+    can find it's image, though). 
+
+e.g.
+
+    class Page(models.Model):
+
+        img = image.ImageSingleField(
+            'image.Image',
+            null=True, 
+            blank=True,
+        )
+
+
 # Credits
 I take little credit for the upload and storage code. It was ripped from the Wagtail CMS. Though I have responsibility for how I have treated the code.
 
 [Wagtail documentation](https://docs.wagtail.io/en/v2.8.1/advanced_topics/images/index.html)
+
 
 
 ##############

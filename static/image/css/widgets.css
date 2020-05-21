@@ -12,10 +12,9 @@
     padding: 8px 4em;
     margin-right: 4px;
     min-width:160px;
-    background-color: #f0f0f0;
+    background-color: #fff;
     border-radius: 4px;
-    outline: 1px dashed #999;
-    outline-offset: -6px;    
+    border: 1px dashed #999;
 }
 
 .filedrop > .msg {
@@ -28,6 +27,6 @@
 }
 
 .filedrop.in_dragover {
-    background-color: white;
+    border: 2px dashed #333;
 }
 

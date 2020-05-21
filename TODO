@@ -41,17 +41,19 @@ Cache filefinding, and the like
 == Forms
 Prepopulate in other forms
 Not show ''change' file link at all?
+Remove file selection from admin ''change', report only?
+''Add is fine, uses simple file widget
+Similar foreign add is fine, simple widget
+What it needs to do is save the new image, the go on to create the model into which it is embedded.
 
 == Widget
 Since when was Mozilla file browser D&D?
 - How to test?
 Some of the hover drop effects not working, why?
-Remove file selection from admin ''change', report only?
-''Add is fine, uses simple file widget
-Similar foreign add is fine, simple widget
-but ''change' is the horrible mess of ''choose' and ''add'
 
-What it needs to do is save the new image, the go on to create the model into which it is embedded.
+but ''change' is the horrible mess of ''choose' and ''add'
+Try test for writability of ''files'
+
 
 = Tests
 For filter format (size)?

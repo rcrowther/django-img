@@ -64,7 +64,7 @@ class AbstractImage(models.Model):
     
     title = models.CharField(_('title'),
         max_length=255,
-        unique=True, 
+        #unique=True, 
         db_index=True
     )
     
