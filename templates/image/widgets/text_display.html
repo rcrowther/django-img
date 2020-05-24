@@ -1,0 +1,13 @@
+<span class="modeladmin" {% include "django/forms/widgets/attrs.html" %}>
+<span class="view">
+    {% for key, value in widget.data.items %}
+    <span class="data-{{ key }}">{{ value }}</span>
+    {% endfor %}            
+</span>
+
+<ul class="ops">
+    <li><a href="{{ widget.urls.add }}" class="button">Add</a></li>
+    <li><a href="{{ widget.urls.change }}" class="button">{{ widget.urls.change }}</a></li>
+    <li><a href="{{ widget.urls.delete }}" class="button">{{ widget.urls.delete }}</a></li>
+</ul>
+</span>

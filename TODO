@@ -41,10 +41,46 @@ Cache filefinding, and the like
 == Forms
 Prepopulate in other forms
 Not show ''change' file link at all?
-Remove file selection from admin ''change', report only?
-''Add is fine, uses simple file widget
-Similar foreign add is fine, simple widget
+
+Foreign key model
+Add shows unwanted selector, add and edit icons
+: just a picker, please, for a new
+Change is worse, shows the same pick, add and edit icons
+:Either 'form in form', or 'edit the image file' button. Or both.
+
 What it needs to do is save the new image, the go on to create the model into which it is embedded.
+
+
+== embedded
+    def get_formset(self, request, obj=None, **kwargs):
+
+
+_changeform_view
+_create_formsets
+get_formsets_with_inlines
+
+# get fields is only sub
+_get_form_for_get_fields
+
+
+modelformset_factory too
+This is the add.change form in admin.options
+
+
+However, this is an issue, it uses the (non-existing) fk,
+BaseInlineFormSet
+
+forms.models.inlineformset_factory
+modelformset_factory
+Can do it all without fk, which is presed in at the end?
+
+
+forms.models._get_foreign_key
+: looks for key from model to parent???
+parent Article
+model image
+
+
 
 == Model Field
 on_delete underride not acknowledged - Look in Field

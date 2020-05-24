@@ -30,3 +30,25 @@
     border: 2px dashed #333;
 }
 
+.modeladmin,
+.modeladmin .ops,
+.modeladmin .view,
+.modeladmin .ops > li {
+    display: inline-block;
+}
+
+.modeladmin {
+    vertical-align: middle;
+    padding: 5px 2px;
+}
+
+.modeladmin .ops,
+.modeladmin .ops > li {
+    margin-left: 5px;
+}
+
+.modeladmin a {
+    letter-spacing: 0.5px;
+    padding: 3px 12px;
+}
+

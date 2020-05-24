@@ -12,15 +12,16 @@ from image import widgets
                           
                                     
 class ImageAdmin(admin.ModelAdmin):
-    # For pooled files, replace the above with this
-    #fields = ('title', 'src', 'auto_delete')
-    #readonly_fields = ('src',)
-
+    #! Do not use the fields attribute to remove source unless dependant
+    # code below is removed.
+    
     # case-insensitive contains match
     search_fields = ['title']
     #! how about delete button?
     list_display = ('title', 'upload_day', 'view_image')
-    #list_display = ('title', 'upload_day')
+
+    #! works as Django Admin, except for enhancing file pickers,
+    # sometimes, with a drop area. See note on Media.
     #prepopulated_fields = {"title": ("src",)}
 
     def __init__(self, model, admin_site):
@@ -47,6 +48,8 @@ class ImageAdmin(admin.ModelAdmin):
     upload_day.admin_order_field = 'upload_date'
 
 
+    #! remove or swap to enable simple or Admin filepicker (no drop
+    # field)
     formfield_overrides = {
         # This changes the 'change' form to not display the view link
         #models.ImageField: {'widget': forms.FileInput},
@@ -55,6 +58,7 @@ class ImageAdmin(admin.ModelAdmin):
         #forms.ImageField: {'widget': admin.widgets.AdminFileWidget},
     }
     
+    #! Remove or comment to edit files after connection to models.
     def get_form(self, request, obj=None, change=False, **kwargs):
         # Only way I can think of differentiating between the two forms.
         # change attribute behaves so inconsistently I think I have an
@@ -71,6 +75,7 @@ class ImageAdmin(admin.ModelAdmin):
                 self.readonly_fields.remove('src')
         return super().get_form( request, obj, change, **kwargs)
         
+    #! remove or comment this to go back to Django admin prepopulation
     @property
     def media(self):
         base = super().media
