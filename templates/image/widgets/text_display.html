@@ -1,13 +1,16 @@
-<span class="modeladmin" {% include "django/forms/widgets/attrs.html" %}>
-<span class="view">
-    {% for key, value in widget.data.items %}
-    <span class="data-{{ key }}">{{ value }}</span>
+<div class="modelctrls" {% include "django/forms/widgets/attrs.html" %}>
+    {% for pk, model in widget.modelctrls.items %}
+    <ul class="model">
+        <ul class="view">
+            {% for fname, fval in model.data.items %}
+            <li class="data-{{ fname }}">{{ fval }}</li>
+            {% endfor %}            
+        </ul>
+        <ul class="ops">
+            <li><a href="{{ model.urls.add }}" class="button">Add</a></li>
+            <li><a href="{{ model.urls.change }}" class="button">Change</a></li>
+            <li><a href="{{ model.urls.delete }}" class="button">Delete</a></li>
+        </ul>
+    </ul>
     {% endfor %}            
-</span>
-
-<ul class="ops">
-    <li><a href="{{ widget.urls.add }}" class="button">Add</a></li>
-    <li><a href="{{ widget.urls.change }}" class="button">{{ widget.urls.change }}</a></li>
-    <li><a href="{{ widget.urls.delete }}" class="button">{{ widget.urls.delete }}</a></li>
-</ul>
-</span>
+</div>

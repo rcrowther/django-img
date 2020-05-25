@@ -30,24 +30,24 @@
     border: 2px dashed #333;
 }
 
-.modeladmin,
-.modeladmin .ops,
-.modeladmin .view,
-.modeladmin .ops > li {
+.modelctrls,
+.modelctrls .view,
+.modelctrls .ops {
     display: inline-block;
 }
 
-.modeladmin {
-    vertical-align: middle;
-    padding: 5px 2px;
+.modelctrls,
+.modelctrls ul .view,
+.modelctrls ul .ops,
+.modelctrls .model {
+    margin: 0;
 }
 
-.modeladmin .ops,
-.modeladmin .ops > li {
-    margin-left: 5px;
+.modelctrls .view {
+    min-width:260px;
 }
 
-.modeladmin a {
+.modelctrls a {
     letter-spacing: 0.5px;
     padding: 3px 12px;
 }

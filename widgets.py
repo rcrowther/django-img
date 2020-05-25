@@ -1,4 +1,5 @@
 import json
+import copy
 
 from django import forms
 from django.template.loader import render_to_string
@@ -7,66 +8,107 @@ from django.forms.renderers import get_default_renderer
 
 
 
-# From Input
+#! not handling blank value
 class TextDisplayWidget(forms.Widget):
     '''
-    model 
-        usually a class, not an instance
+    This widget presents a small/basic CRUD interface for a field.
+    Since this suggests the field reprents a model, it is intended 
+    for use on relation fields.
+    The editing interface in this widget is links to appropriate 
+    admin forms. But the view action will display a small table of 
+    text renderable fields within the model.
+    The widget is an interesting substitute for Django's default ModelCoosing
+    widgets, more limited but clear in action and avoiding 
+    potentially expensive db querying.
+    
+    model
+        Class or instance
+    mdata
+        An iterable list of model-like data (the fields of which should
+        themselves be iterables of field name/values)
+    empty_vaLue
+        A string to show if nothing else is rendered.
+    url_format
+        a callable of the form url_format(*args, action). USed to 
+        provide the urls.
     '''
     template_name = 'image/widgets/text_display.html'
+    empty_value='',
     
     def __init__(self, 
-        admin_site,
+        admin_site_name,
         model,
-        attrs=None, 
-        data=(),
-        can_add=None,
+        mdata=(),
+        can_add=False,
+        can_view=False,
         can_change=False,
         can_delete=False,
-        can_view=False
+        attrs=None
     ):
-        super().__init__(attrs)
-        # Data can be any iterable pairs, but we may need to render the
+        self.site_name = admin_site_name
+
+        # Needed for URLs
+        opts = model._meta
+        self.app_label = opts.app_label
+        self.model_name = opts.model_name
+        
+        # Data can be any iterable items, but we may need to render the
         # widget multiple times. So says Django. Thus, collapse it into 
         # a list.
-        self.data = list(data)
-        self.admin_site = admin_site
-        self.model = model
+        self.data = list(mdata)
         self.can_add = can_add
         self.can_view = can_view
         self.can_change  = can_change
         self.can_delete = can_delete
+
+        print('init sprite')
+        print(str(self.model_name))
+        print(str(self.app_label))
+        super().__init__(attrs)
+        
+    def __deepcopy__(self, memo):
+        obj = copy.copy(self)
+        obj.attrs = self.attrs.copy()
+        obj.data = copy.copy(self.data)
+        memo[id(self)] = obj
+        return obj
         
     def format_value(self, value):
+        # Could be any kind of value representing a foreign field. 
+        # Unchanged, so leave it.
         print('format')
-        #return super().format_value(value)
-        if value == '' or value is None:
-            return 'No data'
-        if self.is_localized:
-            return formats.localize_input(value)
-        return str(value)
+        print(str(value))
+        return super().format_value(value)
+        # if value == '' or value is None:
+            # return 'No data'
+        # if self.is_localized:
+            # return formats.localize_input(value)
+        # return str(value)
 
-    def get_related_url(self, info, action, *args):
-        return reverse("admin:%s_%s_%s" % (info + (action,)),
-                       current_app=self.admin_site.name, args=args)
-        
+    def get_related_url(self, action, *args):
+        return reverse(
+                "admin:{}_{}_{}".format(self.app_label, self.model_name, action),
+                args=args,
+                current_app=self.site_name
+                )
+                          
     def get_context(self, name, value, attrs):
-        opts = self.model._meta
-        info = (opts.app_label, opts.model_name)
-        context = super().get_context(name, value, attrs)
-        if self.can_view:
-            context['widget']['data'] = self.data
-        urls = {}
-        if self.can_add:
-            urls['add'] = self.get_related_url(info, 'add')
-        #if (value):
-        if self.can_delete:
-            urls['delete'] = self.get_related_url(info, 'delete', value)
-        if self.can_change:
-            urls['change'] = self.get_related_url(info, 'change', value)
-        context['widget']['urls'] = urls
         print('mk context')
-        print(str(self.can_view))
+        print(str(self.data))
+        context = super().get_context(name, value, attrs)
+        modelctrls = {}
+        for pk, model_data in self.data.items():
+            if self.can_view:
+                data = model_data
+            urls = {}
+            if self.can_add:
+                urls['add'] = self.get_related_url('add')
+            if self.can_delete:
+                urls['delete'] = self.get_related_url('delete', pk)
+            if self.can_change:
+                urls['change'] = self.get_related_url('change', pk)
+            modelctrls[pk] = {'data': data, 'urls': urls}
+        context['widget']['modelctrls'] = modelctrls
         return context
                 
     # def render(self, name, value, attrs=None, renderer=None):
@@ -74,31 +116,12 @@ class TextDisplayWidget(forms.Widget):
         # print('render')
         # return r
 
-    def _render(self, template_name, context, renderer=None):
-        if renderer is None:
-             renderer = get_default_renderer()
-        print('____render')
-        print(str(context))
-        return mark_safe(renderer.render(template_name, context))
-# class HiddenDisplayWidget(MultiWidget):
-    # template_name = 'image/forms/widgets/hiddendisplaywidget.html'
-        # widgets = (
-            # TextDisplayWidget(
-                # attrs=attrs,
-            # ),
-            # HiddenInput(
-                # attrs=attrs,
-            # ),
-        # )
-        
-# class HiddenHiddenDisplayWidget(HiddenDisplayWidget):
-    # template_name = 'image/forms/widgets/hiddenhiddendisplaywidget.html'
-
-    # def __init__(self, model):
-        # super().__init__(attrs)
-        # for widget in self.widgets:
-            # widget.input_type = 'hidden'
-
+    # def _render(self, template_name, context, renderer=None):
+        # if renderer is None:
+             # renderer = get_default_renderer()
+        # print('____render')
+        # print(str(context))
+        # return mark_safe(renderer.render(template_name, context))
         
     class Media:
             css={

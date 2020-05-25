@@ -60,10 +60,18 @@ class ForeignKeyFixedField(Field):
         kwargs["required"] = False
 
         self.empty_value = empty_value or self.empty_value
-        self.show_fields=show_fields or self.show_fields
+        self.show_fields = show_fields or self.show_fields
         if (not(show_fields)):
-            self.show_fields = ("title",)
-            
+            self.show_fields = [f.name for f in model._meta.fields]
+
+        # ensure the pk is retrieved
+        pk = model._meta.pk.name
+        if (pk not in self.show_fields):
+            self.show_fields.append(pk)
+        self.pk = pk
+        
+        #! but remove trick stuff like imagefields?
+        
         print('form field kwargs')
         print(str(kwargs))
         #print('form field queryset')
@@ -100,6 +108,10 @@ class ForeignKeyFixedField(Field):
              )
         return value
 
+    def to_python(self, value):
+        print('to pythin')
+        print(str(value))
+        return super().to_python(value)
 
     def bound_data(self, data, initial):
         """
@@ -126,15 +138,17 @@ class ForeignKeyFixedField(Field):
     def get_bound_field(self, form, field_name):
         # called
         print('get_bound_field')
-        print(str(self))
+        #print(str(form))
         return BoundField(form, self, field_name)
 
     def get_data(self):
         if self.show_fields:
-            obj = self.queryset[0]
-            b = {f: getattr(obj, f) for f in self.show_fields}
+            b = {}
+            for obj in self.queryset:
+                obj_data = {f: getattr(obj, f) for f in self.show_fields}
+                b[getattr(obj, self.pk)] =(obj_data)
             self.widget.data = b
-            self.widget.model = self.model
+            #self.widget.model = self.model
             self.widget.can_add=self.can_add
             self.widget.can_change=self.can_change
             self.widget.can_delete=self.can_delete
