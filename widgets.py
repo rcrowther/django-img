@@ -254,11 +254,11 @@ class RemoteControlWidget(forms.widgets.Input):
             }
 
 
-class FileSingleChooserDAndD(forms.widgets.FileInput):
+
+class FileChooserDAndD(forms.widgets.FileInput):
     # type name value and attrs printer
     template_name = 'image/widgets/file.html'
-    #! needs_multipart_form = False
-    #! could subwidget the file input?
+
     @property
     def media(self):
         return forms.Media(

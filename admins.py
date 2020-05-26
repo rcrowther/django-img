@@ -6,11 +6,14 @@ from django import forms
 from django.db.models import ImageField
                          
 #from image.models import Image, Reform
-from image.widgets import FileSingleChooserDAndD
+from image.widgets import FileChooserDAndD
 
 
                                     
 class ImageLockedAdmin(admin.ModelAdmin):
+    # locks files to images by disallowing editing. 
+    # Includes several other Admin configurations and hacks.
+    
     #! All the below can be commented or adapted to remove/change 
     # particular effects.
     # See the notes.
@@ -63,7 +66,7 @@ class ImageLockedAdmin(admin.ModelAdmin):
         #ImageField: {'widget': admin.widgets.AdminFileWidget},
         
         # Image picker has a simple drop field
-        ImageField: {'widget': FileSingleChooserDAndD},
+        ImageField: {'widget': FileChooserDAndD},
     }
     
     # Block filechoosing on uploaded Image models.
