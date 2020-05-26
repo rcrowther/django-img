@@ -10,7 +10,7 @@ from django.urls.exceptions import NoReverseMatch
 from django.utils.safestring import mark_safe
 
 
-class RemoteControlWidget(forms.widgets.Input):
+class RemoteControlWidget2(forms.widgets.Input):
     '''
     This widget presents a small/basic CRUD interface for a field.
     Since this suggests the field reprents a model, it is intended 
@@ -252,3 +252,16 @@ class RemoteControlWidget(forms.widgets.Input):
             css={
                  'screen': ('image/css/widgets.css',)
             }
+
+
+class FileSingleChooserDAndD(forms.widgets.FileInput):
+    # type name value and attrs printer
+    template_name = 'image/widgets/file.html'
+    #! needs_multipart_form = False
+    #! could subwidget the file input?
+    @property
+    def media(self):
+        return forms.Media(
+                js=('image/js/upload_dd.js',),
+                css={'screen': ('image/css/widgets.css',),}
+            )

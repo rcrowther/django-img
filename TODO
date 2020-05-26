@@ -41,10 +41,12 @@ Cache filefinding, and the like
 == Widgets
 Make no_data_message on RemoteControlWidget an attribute too
 No mark_safe in RemoteControlWidget?
+D&D wiget not work with prepopulattion--a click on the label fixes that?
 
 == Forms
 Prepopulate in other forms
-Not show ''change' file link at all?
+ #! throws a dependency error on change files
+
 
 Foreign key model
 Add shows unwanted selector, add and edit icons
