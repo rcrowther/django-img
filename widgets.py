@@ -5,11 +5,12 @@ from django import forms
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext_lazy as _
 from django.forms.renderers import get_default_renderer
+from django.urls import reverse
+from django.urls.exceptions import NoReverseMatch
+from django.utils.safestring import mark_safe
 
 
-
-#! not handling blank value
-class TextDisplayWidget(forms.Widget):
+class RemoteControlWidget(forms.widgets.Input):
     '''
     This widget presents a small/basic CRUD interface for a field.
     Since this suggests the field reprents a model, it is intended 
@@ -32,17 +33,19 @@ class TextDisplayWidget(forms.Widget):
         a callable of the form url_format(*args, action). USed to 
         provide the urls.
     '''
-    template_name = 'image/widgets/text_display.html'
-    empty_value='',
-    
+    template_name = 'image/widgets/remote_control.html'
+    #template_name = 'django/forms/widgets/hidden.html'
+    input_type = 'hidden'
+
     def __init__(self, 
         admin_site_name,
         model,
+        no_data_message='Unset',
         mdata=(),
-        can_add=False,
-        can_view=False,
-        can_change=False,
-        can_delete=False,
+        show_add=False,
+        show_view=False,
+        show_change=False,
+        show_delete=False,
         attrs=None
     ):
         self.site_name = admin_site_name
@@ -56,11 +59,11 @@ class TextDisplayWidget(forms.Widget):
         # widget multiple times. So says Django. Thus, collapse it into 
         # a list.
         self.data = list(mdata)
-        self.can_add = can_add
-        self.can_view = can_view
-        self.can_change  = can_change
-        self.can_delete = can_delete
-
+        self.show_add = show_add
+        self.show_view = show_view
+        self.show_change  = show_change
+        self.show_delete = show_delete
+        self.no_data_message = no_data_message
         print('init sprite')
         print(str(self.model_name))
         print(str(self.app_label))
@@ -73,17 +76,17 @@ class TextDisplayWidget(forms.Widget):
         memo[id(self)] = obj
         return obj
         
+    @property
+    def is_hidden(self):
+        return False
+        
     def format_value(self, value):
         # Could be any kind of value representing a foreign field. 
         # Unchanged, so leave it.
         print('format')
         print(str(value))
         return super().format_value(value)
-        # if value == '' or value is None:
-            # return 'No data'
-        # if self.is_localized:
-            # return formats.localize_input(value)
-        # return str(value)
+
 
     def get_related_url(self, action, *args):
         return reverse(
@@ -93,22 +96,29 @@ class TextDisplayWidget(forms.Widget):
                 )
                           
     def get_context(self, name, value, attrs):
-        print('mk context')
-        print(str(self.data))
+        # widget -> modelctrls -> no_data_message/data -> pk -> mod4els/urls
         context = super().get_context(name, value, attrs)
         modelctrls = {}
-        for pk, model_data in self.data.items():
-            if self.can_view:
-                data = model_data
-            urls = {}
-            if self.can_add:
-                urls['add'] = self.get_related_url('add')
-            if self.can_delete:
-                urls['delete'] = self.get_related_url('delete', pk)
-            if self.can_change:
-                urls['change'] = self.get_related_url('change', pk)
-            modelctrls[pk] = {'data': data, 'urls': urls}
+        modelctrls['no_data_message'] = self.no_data_message
+        modelctrls_data = {} 
+        if (self.data):
+            for pk, md in self.data.items():
+                models = {}
+                if self.show_view:
+                    models = md
+                urls = {}
+                if self.show_add:
+                    urls['add'] = self.get_related_url('add')
+                if self.show_delete:
+                    urls['delete'] = self.get_related_url('delete', pk)
+                if self.show_change:
+                    urls['change'] = self.get_related_url('change', pk)
+                modelctrls_data[pk] = {'models': models, 'urls': urls}
+        modelctrls['data'] = modelctrls_data
         context['widget']['modelctrls'] = modelctrls
+        print('mk context')
+        print(str(context['widget']))
+        
         return context
                 
     # def render(self, name, value, attrs=None, renderer=None):
@@ -129,105 +139,116 @@ class TextDisplayWidget(forms.Widget):
             }
 
 
-from django.urls import reverse
-from django.urls.exceptions import NoReverseMatch
-from django.utils.safestring import mark_safe
-from django.core.exceptions import ValidationError
-from django.utils.text import Truncator
 
-def url_params_from_lookup_dict(lookups):
-    """
-    Convert the type of lookups specified in a ForeignKey limit_choices_to
-    attribute to a dictionary of query parameters
-    """
-    params = {}
-    if lookups and hasattr(lookups, 'items'):
-        for k, v in lookups.items():
-            if callable(v):
-                v = v()
-            if isinstance(v, (tuple, list)):
-                v = ','.join(str(x) for x in v)
-            elif isinstance(v, bool):
-                v = ('0', '1')[v]
-            else:
-                v = str(v)
-            params[k] = v
-    return params
+class RemoteControlWidget(forms.widgets.Input):
+    '''
+    This widget presents a small/basic CRUD interface for a field.
+    Since this suggests the field reprents a model, it is intended 
+    for use on relation fields.
+    The editing interface in this widget is links to appropriate 
+    admin forms. But the view action will display a small table of 
+    text renderable fields within the model.
+    The widget is an interesting substitute for Django's default ModelCoosing
+    widgets, more limited but clear in action and avoiding 
+    potentially expensive db querying.
     
-#class ForeignKey():
-#    Widget
-# /django-admin/image/image/?_to_field=id
-class ImageSingleFieldWidget(forms.TextInput):
-    """
-    A Widget for displaying ForeignKeys in the "raw_id" interface rather than
-    in a <select> box.
-    """
-    #template_name = 'admin/widgets/foreign_key_raw_id.html'
-    template_name = 'image/widgets/image_single_field.html'
+    This is a contrib.admin inclined widget---the urls are addressed 
+    there.
+    
+    model
+        Class, not instance
+    mdata
+        An iterable list of model data. The models should be iterables 
+        of field name/values e.g. dicts.
+    no_data_message
+        A string to show if nothing  is rendered.
+    '''
+    # The idea here is to render the field as a hidden input, which
+    # is unchanged on return. This means the form plays along with
+    # all submission and save proceedure (rather than faffing with save
+    # to make it a speciality). The display floats alongside.
+    # I think rendering URLs belongs here, but conceed it is a faff, 
+    # what with admin site and model both required.
+    template_name = 'image/widgets/remote_control.html'
+    input_type = 'hidden'
 
-    def __init__(self, rel, admin_site, attrs=None, using=None):
-        self.rel = rel
-        self.admin_site = admin_site
-        self.db = using
+    def __init__(self, 
+        admin_site_name,
+        model,
+        no_data_message='Unset',
+        mdata=(),
+        show_add=False,
+        show_view=False,
+        show_change=False,
+        show_delete=False,
+        attrs=None
+    ):
+        self.site_name = admin_site_name
+
+        # Needed for URLs
+        opts = model._meta
+        self.app_label = opts.app_label
+        self.model_name = opts.model_name
+        
+        # Data can be any iterable items, but we may need to render the
+        # widget multiple times. So says Django. Thus, collapse it into 
+        # a list.
+        self.data = list(mdata)
+        self.show_add = show_add
+        self.show_view = show_view
+        self.show_change  = show_change
+        self.show_delete = show_delete
+        self.no_data_message = no_data_message
         super().__init__(attrs)
+        
+    #? is this correct?
+    def __deepcopy__(self, memo):
+        obj = copy.copy(self)
+        obj.attrs = self.attrs.copy()
+        obj.data = copy.copy(self.data)
+        memo[id(self)] = obj
+        return obj
+        
+    @property
+    def is_hidden(self):
+        # Never hidden. It's a display. Overrrides detection of the 
+        # 'hidden' attribute.
+        return False
 
+    def get_related_url(self, action, *args):
+        return reverse(
+                "admin:{}_{}_{}".format(self.app_label, self.model_name, action),
+                args=args,
+                current_app=self.site_name
+                )
+                          
     def get_context(self, name, value, attrs):
+        # Generates:
+        # widget -> modelctrls -> no_data_message/data -> pk -> models/urls
         context = super().get_context(name, value, attrs)
-        rel_to = self.rel.model
-        if rel_to in self.admin_site._registry:
-            # The related object is registered with the same AdminSite
-            related_url = reverse(
-                'admin:%s_%s_changelist' % (
-                    rel_to._meta.app_label,
-                    rel_to._meta.model_name,
-                ),
-                current_app=self.admin_site.name,
-            )
-
-            params = self.url_parameters()
-            if params:
-                related_url += '?' + '&amp;'.join('%s=%s' % (k, v) for k, v in params.items())
-            context['related_url'] = mark_safe(related_url)
-            context['link_title'] = _('Lookup')
-            # The JavaScript code looks for this class.
-            context['widget']['attrs'].setdefault('class', 'vForeignKeyRawIdAdminField')
-        else:
-            context['related_url'] = None
-        if context['widget']['value']:
-            context['link_label'], context['link_url'] = self.label_and_url_for_value(value)
-        else:
-            context['link_label'] = None
+        modelctrls = {}
+        modelctrls['no_data_message'] = self.no_data_message
+        modelctrls_data = {} 
+        if (self.data):
+            for pk, md in self.data.items():
+                models = {}
+                if self.show_view:
+                    models = md
+                urls = {}
+                if self.show_add:
+                    urls['add'] = self.get_related_url('add')
+                if self.show_delete:
+                    urls['delete'] = self.get_related_url('delete', pk)
+                if self.show_change:
+                    urls['change'] = self.get_related_url('change', pk)
+                modelctrls_data[pk] = {'models': models, 'urls': urls}
+        modelctrls['data'] = modelctrls_data
+        context['widget']['modelctrls'] = modelctrls
+        #print('mk context')
+        #print(str(context['widget']))        
         return context
 
-    def base_url_parameters(self):
-        limit_choices_to = self.rel.limit_choices_to
-        if callable(limit_choices_to):
-            limit_choices_to = limit_choices_to()
-        return url_params_from_lookup_dict(limit_choices_to)
-
-    def url_parameters(self):
-        from django.contrib.admin.views.main import TO_FIELD_VAR
-        params = self.base_url_parameters()
-        params.update({TO_FIELD_VAR: self.rel.get_related_field().name})
-        return params
-
-    def label_and_url_for_value(self, value):
-        key = self.rel.get_related_field().name
-        try:
-            obj = self.rel.model._default_manager.using(self.db).get(**{key: value})
-        except (ValueError, self.rel.model.DoesNotExist, ValidationError):
-            return '', ''
-
-        try:
-            url = reverse(
-                '%s:%s_%s_change' % (
-                    self.admin_site.name,
-                    obj._meta.app_label,
-                    obj._meta.object_name.lower(),
-                ),
-                args=(obj.pk,)
-            )
-        except NoReverseMatch:
-            url = ''  # Admin not registered for target model.
-
-        return Truncator(obj).words(14), url
+    class Media:
+            css={
+                 'screen': ('image/css/widgets.css',)
+            }

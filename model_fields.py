@@ -6,7 +6,7 @@ from django.db import models
 from  django.db.models.fields.mixins import FieldCacheMixin
 from django.utils.functional import cached_property
 
-from image.form_fields import ForeignKeyFixedField
+from image.form_fields import ModelShowField
 
 
 # What this needs to do...
@@ -30,7 +30,7 @@ class ImageSingleField(OneToOneField):
     '''
     on_delete=models.CASCADE,
     related_name='+'
-    form_class = ForeignKeyFixedField
+    form_class = ModelShowField
         
     def check(self, **kwargs):
         # run after the core checks

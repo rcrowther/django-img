@@ -40,9 +40,12 @@
 .modelctrls ul .view,
 .modelctrls ul .ops,
 .modelctrls .model {
-    margin: 0;
+    margin: 0 0 6px 0;
 }
 
+.modelctrls ul .ops {
+    vertical-align: top;
+}
 .modelctrls .view {
     min-width:260px;
 }
@@ -52,3 +55,6 @@
     padding: 3px 12px;
 }
 
+.modelctrls li {
+    margin-bottom: 2px;
+}

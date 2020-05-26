@@ -38,6 +38,10 @@ Can title be part of general tag? No...
 Cache filefinding, and the like
 
 
+== Widgets
+Make no_data_message on RemoteControlWidget an attribute too
+No mark_safe in RemoteControlWidget?
+
 == Forms
 Prepopulate in other forms
 Not show ''change' file link at all?
