@@ -182,7 +182,95 @@ from itertools import chain
         # self.widget.show_view=self.show_view
 
 
-#Should do it
+
+#from django import contrib.admin
+
+#! should validate this is from a related field? or ok?
+class ModelFixedField(Field):
+    '''
+    A base field that offers access and setting of related models.
+    Compare to forms.models.ModelChoiceField, which offers choices. But 
+    this has no need of an adjustable queryset, it takes the model field
+    from which it can derive all necessary information.    
+    
+    model_field
+        an instance, not the class
+    initial
+        can be an model obj
+    '''
+    #? Making an assumption of pk, but ok for OneToOne and OneToMany
+    default_error_messages = {
+        'invalid_value': _('"%(value)s"  is not valid.'),
+    }
+    
+    widget = HiddenInput
+
+    def __init__(self, 
+            model_field,
+            *args, 
+            **kwargs
+        ):
+        super().__init__(**kwargs)
+        self.model_field = model_field
+
+    # Helpers. Given the, ummm, luxurious nature of Django model
+    # information, well needed.
+    def get_related_model(self):
+        #NB admin contains utils.get_model_from_relation(model_field)
+        # which uses field.get_path_info()[-1].to_opts.model
+        # and there is model_field.remote_field...
+        # but this seems most direct?
+        return self.model_field.target_field.model
+        
+    def get_related_model_fields(self):
+        return self.get_related_model()._meta.fields        
+
+    def get_objs(self, value, hints={}):
+        remote_manager = self.get_related_model()._base_manager.db_manager(hints=hints)
+        #params = {
+        #    '{}__exact'.format(remote_field.name): value
+        #    for _, remote_field in self.model_field.related_fields
+        #}
+
+        #query = {self.model_field.target_field + '__exact' : value}
+        query = {'pk__exact' : value}
+        #? Want the pk but I think qs always gets it?
+        return remote_manager.get(**query)
+
+    def prepare_value(self, value):
+        if hasattr(value, '_meta'):
+            return value.pk
+        return super().prepare_value(value)
+        
+    def to_python(self, value):
+        """
+        Return as int.
+        Thus validates as int().
+        return 
+            int(), or None for empty values.
+        """
+        #NB like a form IntegerField
+        value = super().to_python(value)
+        if value in self.empty_values:
+            return None
+        try:
+            value = int(str(value))
+        except (ValueError, TypeError):
+            raise ValidationError(
+                    self.error_messages['invalid_value'],
+                    code='invalid_value',
+                    params={'value': value},
+                )
+        return value
+        
+    def has_changed(self, initial, data):
+        if self.disabled:
+            return False
+        initial_value = initial if initial is not None else ''
+        data_value = data if data is not None else ''
+        return str(self.prepare_value(initial_value)) != str(data_value)
+    
+
 #! How to glue by defULT to ImageSingleField?
 #! not checking against original data --- has_changed? 
 #! what about add forms, tho?
@@ -226,7 +314,7 @@ class ModelShowField(Field):
         
         # NB widgets if given as class are zero-argument instanciated.
         super().__init__(**kwargs)
-
+    
     def to_python(self, value):
         """
         Validate that int() can be called on the input. Return the result
@@ -250,6 +338,9 @@ class ModelShowField(Field):
         """
         # hard to believe Django has nothing like a simple foreign key
         # lookup, but I can't find it. Hence this insanity.
+        #? get_objs_from_relations()
+        #! forms.utils.get_related_model
+        #? field.get_path_info()[-1].to_opts.model
         remote_manager = self.model_field.target_field.model._base_manager.db_manager(hints=hints)
         params = {
             '{}__exact'.format(remote_field.name): value

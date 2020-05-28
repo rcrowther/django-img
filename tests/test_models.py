@@ -5,12 +5,12 @@ from image.models import Image, Reform, SourceImageIOError
 from .utils import get_test_image_file_jpg
 
 
-# ./manage.py test image.tests.test_models
 # A fundamental issue throughout the tests is that image uploading 
 # shunts files about. But TestCase will not complete over transactions
 # So fails to trigger file deletion. So these tests are littered
 # with rearDown() methods to clean up orphaned test files (poor orphans,
 # unwanted...). 
+# ./manage.py test image.tests.test_models
 class TestImage(TestCase):
     def setUp(self):
         self.image = Image.objects.create(

@@ -36,7 +36,7 @@ Can title be part of general tag? No...
 
 == Settings
 Cache filefinding, and the like
-
+Test making new models
 
 == Widgets
 Make no_data_message on RemoteControlWidget an attribute too
@@ -103,6 +103,8 @@ Try test for writability of ''files'
 = Tests
 For filter format (size)?
 
+== Documentation
+Test quickstart
 
 = General
 STATIC_OR_URL
