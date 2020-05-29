@@ -36,8 +36,8 @@ class TestFormFields(TestCase):
     def test_get_related_model_fields(self):
         self.assertEqual(self.form_field.get_related_model_fields(), Image._meta.fields)   
 
-    def test_get_objs(self):
-        self.assertEqual(self.form_field.get_objs(1), self.image)  
+    def test_get_obj(self):
+        self.assertEqual(self.form_field.get_obj(1), self.image)  
 
     def test_prepare_value(self):
         self.assertEqual(self.form_field.prepare_value(5), 5)  

@@ -10,7 +10,7 @@ from django.urls.exceptions import NoReverseMatch
 from django.utils.safestring import mark_safe
 
 
-class RemoteControlWidget2(forms.widgets.Input):
+class RemoteFormWidget(forms.widgets.Widget):
     '''
     This widget presents a small/basic CRUD interface for a field.
     Since this suggests the field reprents a model, it is intended 
@@ -33,48 +33,25 @@ class RemoteControlWidget2(forms.widgets.Input):
         a callable of the form url_format(*args, action). USed to 
         provide the urls.
     '''
-    template_name = 'image/widgets/remote_control.html'
-    #template_name = 'django/forms/widgets/hidden.html'
+    #template_name = 'image/widgets/remote_control.html'
+    #template_name = 'admin/includes/fieldset.html'
+    template_name = 'image/widgets/temp_form.html'
     input_type = 'hidden'
+    needs_multipart_form = True
 
     def __init__(self, 
-        admin_site_name,
-        model,
-        no_data_message='Unset',
-        mdata=(),
-        show_add=False,
-        show_view=False,
-        show_change=False,
-        show_delete=False,
+        form=None,
         attrs=None
     ):
-        self.site_name = admin_site_name
-
-        # Needed for URLs
-        opts = model._meta
-        self.app_label = opts.app_label
-        self.model_name = opts.model_name
-        
-        # Data can be any iterable items, but we may need to render the
-        # widget multiple times. So says Django. Thus, collapse it into 
-        # a list.
-        self.data = list(mdata)
-        self.show_add = show_add
-        self.show_view = show_view
-        self.show_change  = show_change
-        self.show_delete = show_delete
-        self.no_data_message = no_data_message
-        print('init sprite')
-        print(str(self.model_name))
-        print(str(self.app_label))
+        self.form = form
         super().__init__(attrs)
         
-    def __deepcopy__(self, memo):
-        obj = copy.copy(self)
-        obj.attrs = self.attrs.copy()
-        obj.data = copy.copy(self.data)
-        memo[id(self)] = obj
-        return obj
+    # def __deepcopy__(self, memo):
+        # obj = copy.copy(self)
+        # obj.attrs = self.attrs.copy()
+        # obj.data = copy.copy(self.data)
+        # memo[id(self)] = obj
+        # return obj
         
     @property
     def is_hidden(self):
@@ -87,38 +64,11 @@ class RemoteControlWidget2(forms.widgets.Input):
         print(str(value))
         return super().format_value(value)
 
-
-    def get_related_url(self, action, *args):
-        return reverse(
-                "admin:{}_{}_{}".format(self.app_label, self.model_name, action),
-                args=args,
-                current_app=self.site_name
-                )
-                          
     def get_context(self, name, value, attrs):
         # widget -> modelctrls -> no_data_message/data -> pk -> mod4els/urls
         context = super().get_context(name, value, attrs)
-        modelctrls = {}
-        modelctrls['no_data_message'] = self.no_data_message
-        modelctrls_data = {} 
-        if (self.data):
-            for pk, md in self.data.items():
-                models = {}
-                if self.show_view:
-                    models = md
-                urls = {}
-                if self.show_add:
-                    urls['add'] = self.get_related_url('add')
-                if self.show_delete:
-                    urls['delete'] = self.get_related_url('delete', pk)
-                if self.show_change:
-                    urls['change'] = self.get_related_url('change', pk)
-                modelctrls_data[pk] = {'models': models, 'urls': urls}
-        modelctrls['data'] = modelctrls_data
-        context['widget']['modelctrls'] = modelctrls
-        print('mk context')
-        print(str(context['widget']))
-        
+        context['fieldset'] = self.form
+        print(str(context))
         return context
                 
     # def render(self, name, value, attrs=None, renderer=None):
@@ -133,10 +83,10 @@ class RemoteControlWidget2(forms.widgets.Input):
         # print(str(context))
         # return mark_safe(renderer.render(template_name, context))
         
-    class Media:
-            css={
-                 'screen': ('image/css/widgets.css',)
-            }
+    # class Media:
+            # css={
+                 # 'screen': ('image/css/widgets.css',)
+            # }
 
 
 
