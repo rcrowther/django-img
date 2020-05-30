@@ -64,6 +64,9 @@ class AbstractImage(models.Model):
         db_index=True
     )
     
+    #! not sure that title should be requiredd, even with
+    #! prepopulates. And it ain't unique. But what about
+    #! the search issue? 
     title = models.CharField(_('title'),
         max_length=255,
         #unique=True, 

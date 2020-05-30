@@ -1,20 +1,18 @@
+from itertools import chain
+from django.utils.translation import gettext, gettext_lazy as _
 from django.forms.fields import Field
 from django.forms.widgets import (
     HiddenInput, MultipleHiddenInput,
 )
-from django.utils.translation import gettext, gettext_lazy as _
-from image.widgets import RemoteControlWidget, RemoteFormWidget
 from django.forms.boundfield import BoundField
-from itertools import chain
-#from django.forms.models import modelform_factory, modelformset_factory, BaseModelFormSet, ModelForm
-#from django import forms
+from django.core.exceptions import ValidationError
 
-from django.core.exceptions import (
-    ValidationError,
-)
+from image.widgets import RemoteControlWidget, RemoteFormWidget
+
 
 
 #! should validate this is from a related field? or ok?
+#! RemoteModelField
 class ModelFixedField(Field):
     '''
     A base field that offers access and setting of related models.
@@ -43,7 +41,7 @@ class ModelFixedField(Field):
         self.model_field = model_field
 
     # Helpers. Given the, ummm, luxurious nature of Django model
-    # information, well needed.
+    # information, needed.
     def get_related_model(self):
         #NB admin contains utils.get_model_from_relation(model_field)
         # which uses field.get_path_info()[-1].to_opts.model
@@ -91,7 +89,7 @@ class ModelFixedField(Field):
         return
             the object (queryset result), or None.
         '''
-        # from admin.options.get_object
+        # See admin.options.get_object() for similar shenannigans
         model = self.get_related_model()
         remote_manager = model._base_manager.db_manager(hints=hints)
         #query = {'pk__exact' : value}
@@ -121,17 +119,35 @@ class ModelFixedField(Field):
         return str(self.prepare_value(initial_value)) != str(data_value)
     
 
-
+#! RemoteFormField
 class ModelFormField(ModelFixedField):
+    '''
+    Query for a remote id and instanciate a form.
+    The form must be suitable for the recovered data. It is instanciated
+    with the recovered object.
+    The form is alsd hard-prefixed with 'embed-'.
+    
+    model_field
+        A model field
+    formk
+        A form class, ready
+    '''
     widget = RemoteFormWidget
     
     def __init__(self, 
             model_field,
-            #target_admin,
             formk,
             **kwargs
         ):
-        #self.target_admin = target_admin
+        # Why? Why ask for a form when the model form builders can 
+        # make one?
+        # because a formfield is a raw thing, concerned with alidation.
+        # exta data it configure it can know little about. In particular,
+        # it doesn't ant to be supplied with requests, field definitions
+        # and so forth. That probably belongs elsewhere.
+        # And a minor second, Django's model form machinery involoves
+        # clss then instanciation options. Class configuration is a bit 
+        # involved for a form field.
         self.formk = formk
         # Makes no sense for a display.
         kwargs["required"] = False
@@ -148,8 +164,6 @@ class ModelFormField(ModelFixedField):
         # that points to a model in another table.
         # From this, we can build a query, and so data to display.
         self.get_form(bf.value())
-        
-        #print(str(bf.value()))
         return bf
 
     def get_form(self, value):
@@ -175,6 +189,9 @@ class ModelFormField(ModelFixedField):
 #! How to glue by defULT to ImageSingleField?
 #! not checking against original data --- has_changed? 
 #! what about add forms, tho?
+#! retrofit ModelFixedField
+#! RemoteShowField
+#class ModelShowField(ModelFixedField):
 class ModelShowField(Field):
     """
     Handle an unchanging int representing a foreign key.

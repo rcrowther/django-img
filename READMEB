@@ -758,3 +758,7 @@ Put this in an 'image_filters.py' file somewhere,
         # optional. By default, the format of the source.
         iformat='png'
 
+###########
+https://github.com/ebertti/django-admin-easy/blob/master/README.rst
+
+https://pypi.org/project/django-reverse-admin/#modal-close
