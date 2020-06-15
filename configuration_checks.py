@@ -8,15 +8,17 @@ from image.constants import IMAGE_FORMATS
 # These settings checks are used in filters, with the site-wide Django 
 # settings, and this apps summary, Settings. So gathered here.
 
-def check_media_subpath(class_name, setting_name, v):
-    if (v and (len(v) > 24)):
+def check_media_subpath(class_name, setting_name, v, max):
+    if (v and (len(v) > max)):
         raise ImproperlyConfigured(
-            "In {}, '{}' value '{}' exceeds 24 chars."
-            "Reset or set TRUNCATE_PATHS = False"
-            " Path len (in chars): {}".format(
+            "In {}, '{}' value '{}' exceeds {} chars."
+            "Set to a smaller value, or set PATH_TRUNCATE_LEN to a"
+            "longer value, then set the 'src' DB field to match."
+            "Path len (in chars): {}".format(
             class_name,
             setting_name,
             v,
+            max,
             len(v),
         ))     
 
@@ -42,7 +44,20 @@ def check_jpeg_quality(class_name, setting_name, v):
             v
         ))    
     
+def check_int(class_name, setting_name, v):
+    try:
+        int(v)
+    except TypeError:
+        raise TypeError(
+            "In {}, '{}' must be a number."
+            " value: {}".format(
+            class_name, 
+            setting_name, 
+            v
+        ))     
+        
 def check_value_range(class_name, setting_name, v, min, max):
+    check_int(class_name, setting_name, v)
     if (v and (v > min or v > max)):
         raise ValueError(
             "In {}, '{}' smust be {}--{}."
@@ -55,6 +70,7 @@ def check_value_range(class_name, setting_name, v, min, max):
         )) 
          
 def check_positive(class_name, setting_name, v):
+    check_int(class_name, setting_name, v)
     if (v and (v < 0)):
         raise ValueError(
             "In {}, '{}' must be a positive number."
@@ -74,8 +90,7 @@ def check_boolean(class_name, setting_name, v):
             v
         ))         
 
-def check_file(class_name, setting_name, v):
-    
+def check_file(class_name, setting_name, v):    
     if (v and (not(Path(v).is_file()))):
         raise ValueError(
             "In {}, '{}' can not be deetected as an existing file"

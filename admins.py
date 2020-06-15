@@ -19,12 +19,12 @@ class ImageLockedAdmin(admin.ModelAdmin):
     # See the notes.
     
     # case-insensitive contains match
-    search_fields = ['title']
+    search_fields = ['src']
     
     # Style the lists.
     # See the support code below
     #! how about delete button?
-    list_display = ('title', 'upload_day', 'view_image')
+    list_display = ('filename', 'upload_day', 'view_image')
 
     # Enhance file pickers, sometimes, with a drop area. 
     # See note on Media.
@@ -41,9 +41,7 @@ class ImageLockedAdmin(admin.ModelAdmin):
     # Support code for styling the admin list
     # See the 'list_display' attribute.
     def view_image(self, obj):
-        # Can't say I like Django styling, but 'button' is what I find 
-        # as given.
-        return format_html('<a href="{}" class="button">View</span></a>',
+        return format_html('<a href="{}" class="button">View</a>',
             obj.src.url
         )
     view_image.short_description = 'View Image'

@@ -6,13 +6,13 @@ auto_delete tests
 Django is checking filename length
 
 == Model
-
+Test making new models
+Remove title
 
 == Management
 
 
 == Images
-Transactional removal works?
 
 
 == Reforms
@@ -21,8 +21,6 @@ Transactional removal works?
 == Filters
 For cloud, what do you get to make reforms? so what source goes into the filter?
 Register, want an instance? Admin want Model?
-
-x 'Not found' and 'watermark' files on URLs? Makes them static files? !Test
 
 == Admin
 
@@ -35,8 +33,8 @@ Can title be part of general tag? No...
 
 
 == Settings
-Cache filefinding, and the like
-Test making new models
+? Cache filepaths, and the like
+
 
 == Widgets
 Make no_data_message on RemoteControlWidget an attribute too
@@ -48,55 +46,11 @@ Prepopulate in other forms
  #! throws a dependency error on change files
 
 
-Foreign key model
-Add shows unwanted selector, add and edit icons
-: just a picker, please, for a new
-Change is worse, shows the same pick, add and edit icons
-:Either 'form in form', or 'edit the image file' button. Or both.
-
-What it needs to do is save the new image, the go on to create the model into which it is embedded.
-
-
-== embedded
-    def get_formset(self, request, obj=None, **kwargs):
-
-
-_changeform_view
-_create_formsets
-get_formsets_with_inlines
-
-# get fields is only sub
-_get_form_for_get_fields
-
-
-modelformset_factory too
-This is the add.change form in admin.options
-
-
-However, this is an issue, it uses the (non-existing) fk,
-BaseInlineFormSet
-
-forms.models.inlineformset_factory
-modelformset_factory
-Can do it all without fk, which is presed in at the end?
-
-
-forms.models._get_foreign_key
-: looks for key from model to parent???
-parent Article
-model image
-
-
-
-== Model Field
-on_delete underride not acknowledged - Look in Field
-
 == Widget
 Since when was Mozilla file browser D&D?
 - How to test?
 Some of the hover drop effects not working, why?
 
-but ''change' is the horrible mess of ''choose' and ''add'
 Try test for writability of ''files'
 
 

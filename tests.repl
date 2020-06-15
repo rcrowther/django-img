@@ -36,6 +36,22 @@ c.branch().branch()
 c.extend('coop')
 
 
+# get a modelform
+from django.forms.models import ModelForm, modelform_factory
+from image.models import Image
+class ImageForm(ModelForm):
+    class Meta:
+        model = Image
+        fields = ['src', 'title', 'auto_delete']
+
+mf =  ImageForm(prefix="embed-")  
+
+# or
+MF = modelform_factory(Image, fields=['src', 'title', 'auto_delete'])
+mf =  MF(prefix="embed-")  
+
+
+
 from image import utils
 s = utils.Settings()
 s.dirs

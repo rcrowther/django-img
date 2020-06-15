@@ -3,12 +3,15 @@ from image import decisions
 
 from image.image_filters import Thumb
 from image.models import Image
+from image.settings import settings, Settings
 from .utils import get_test_image_file_jpg
 
 
-
+# ./manage.py test image.tests.test_decisions
 class TestDecisions(TestCase):
     def setUp(self):
+        # get a defaulted Settings, uninfluenced by current app.
+        self.settings = Settings(populate=False)
         self.decisions = decisions
 
     def test_long_imagename_truncated(self):

@@ -58,15 +58,15 @@ def src_should_delete(image, calling_opinion):
             
     return delete
 
-
- #! DRY these two   
 def image_save_path(filename):
     '''
     Get the save path from a source filepath.
     This calculates and truncates lengths. For example, the stock 
     Django DB Filefield allows 100 chars path length. And Win32 
     operating systems can only handle 255 char path lengths. 
-    @path a pathlib Path 
+    
+    filename
+        any kind of stringlike filename or path. Should have an extension. 
     '''
     # Starts with a filename, needs a path relative to /media.
     p = Path(filename)
@@ -76,30 +76,35 @@ def image_save_path(filename):
     # characters in filename with _ , to sidestep issues with filesystem encoding
     safer_stem = "".join((i if ord(i) < 128 else '_') for i in unidecode(p.stem))
         
-    if (settings.reforms.truncate_paths):
-        # truncate filename to prevent path going over 100 chars,
-        # accounting for declared paths and filename extensions
-        # https://code.djangoproject.com/ticket/9893
-        # must allow 2 for joining chars
-        stem_limit = 100 - 2 - settings.filepath_maxlen - len(p.suffix)    
-        safer_stem = safer_stem[:stem_limit]
+    # truncate filename to prevent path going over 100 chars,
+    # accounting for declared paths and filename extensions
+    # https://code.djangoproject.com/ticket/9893
+    stem_limit = settings.filename_originals_maxlen - len(p.suffix)
+    stem = safer_stem[:stem_limit]
         
     # This needs the /media relative path building.
-    return os.path.join(settings.media_subpath_originals, safer_stem) + p.suffix
-    
+    return str(settings.file_path_originals / stem) + p.suffix
     
 def reform_save_path(filename):
+    '''
+    Get the save path from a source filepath.
+    This calculates and truncates lengths. For example, the stock 
+    Django DB Filefield allows 100 chars path length. And Win32 
+    operating systems can only handle 255 char path lengths. 
+    
+    filename
+        any kind of stringlike filename or path. Should have an extension. 
+    '''
     p = Path(filename)
     
     # Starts with a filename, needs a path relative to /media.
     safe_stem = p.stem
 
-    # Need to truncate on a reform. It has a  filter id appended,
-    # an maye a new extension.
-    if (settings.reforms.truncate_paths):
-        limit = 100 - 2 - len(settings.media_subpath_reforms) - len(p.suffix)
-        safe_stem = safe_stem[:limit]        
+    # Still need to truncate on a reform. It has a filter id appended,
+    # and maybe a new extension.
+    stem_limit = settings.filename_reforms_maxlen - len(p.suffix)
+    stem = safe_stem[:stem_limit]        
 
     # This needs the /media relative path building.
-    return os.path.join(settings.media_subpath_reforms, safe_stem) + p.suffix
+    return str(settings.file_path_reforms / stem) + p.suffix
 

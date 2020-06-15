@@ -6,9 +6,6 @@ from django.db import models
 from  django.db.models.fields.mixins import FieldCacheMixin
 from django.utils.functional import cached_property
 
-from image.form_fields import ModelShowField
-
-
     
 # What this needs to do...
 # - if new, send empty data
@@ -31,7 +28,6 @@ class ImageSingleField(OneToOneField):
     '''
     on_delete=models.CASCADE,
     related_name='+'
-    form_class = ModelShowField
         
     def check(self, **kwargs):
         # run after the core checks

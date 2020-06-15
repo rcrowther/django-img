@@ -26,14 +26,14 @@ class Settings():
     modules 
     module paths to seek an image_filters submodule 
     
-    truncate_paths
+    path_truncate_len
     100 chars in the databaase
     https://docs.djangoproject.com/en/3.0/ref/models/fields/#filefield
     win32 255 overall length
     This module sets a 32 char limit on the path, and filename limits 
     are based on actual lengths.
     '''
-    def __init__(self):
+    def __init__(self, populate=True):
         # defaults
         self.media_root = None
         self.modules = []
@@ -41,40 +41,59 @@ class Settings():
         self._max_upload_size = None
         self.media_subpath_originals = 'originals'
         self.media_subpath_reforms = 'reforms'
+        self.path_truncate_len = 100
         
         self.reforms = SimpleNamespace()
         self.reforms.format_override = None
         self.reforms.jpeg_quality = 85
-        self.reforms.truncate_paths = True
         
         self.auto_delete = False
-        self.populate()
+        if (populate):
+            self.populate()
 
     @property
     def file_path_originals(self):
         '''
         Full path to the image directory.
-        For original image uploads, not reforms.
+        For original image uploads. Note this can be a longish absolute
+        path from server root.
         '''
         return Path(settings.media_root) / self.media_subpath_originals
 
     @property
-    def filepath_maxlen(self):
+    def file_path_reforms(self):
+        '''
+        Full path to the image directory.
+        For reform image uploads. Note this can be a longish absolute
+        path from server root.
+        '''
+        return Path(settings.media_root) / self.media_subpath_reforms
+
+    @property
+    def filename_originals_maxlen(self):
         '''
         Length the settings will allow for filenames.
-        If not trucating paths, then set large.
         '''
         # These default to something, if settings are None
-        return  max(len(self.media_subpath_originals), len(self.media_subpath_reforms))
-        
-        
+        # - 1 for join char 
+        return self.path_truncate_len - len(str(self.file_path_originals)) - 1
+
+    @property
+    def filename_reforms_maxlen(self):
+        '''
+        Length the settings will allow for filenames.
+        '''
+        # These default to something, if settings are None
+        # - 1 for join char 
+        return self.path_truncate_len - len(str(self.file_path_reforms)) - 1
+                                
     @property
     def max_upload_size(self):
         '''
         return the max upload sise.
         Converted from Mb to bytes.
         return 
-            upload size in bytes
+            upload size in bytes. If unstated, return None
         '''
         if not(self._max_upload_size):
             return self._max_upload_size
@@ -92,53 +111,63 @@ class Settings():
                 self.app_dirs = isettings['APP_DIRS']
             if ('MAX_UPLOAD_SIZE' in isettings):
                 self._max_upload_size = isettings['MAX_UPLOAD_SIZE']
+                check_positive(
+                    'Django settings', 
+                    'MAX_UPLOAD_SIZE', 
+                    self._max_upload_size   
+                ) 
+            if ('PATH_TRUNCATE_LEN' in isettings):
+                self.path_truncate_len = reforms['PATH_TRUNCATE_LEN']    
+                check_positive(
+                    'Django settings', 
+                    'PATH_TRUNCATE_LEN', 
+                    self.path_truncate_len   
+                )  
             if ('MEDIA_SUBPATH_ORIGINALS' in isettings):
                 self.media_subpath_originals = isettings['MEDIA_SUBPATH_ORIGINALS']
+
+                # - 12 is a near-arbitary value, allowing space for, 
+                # say, extensions of length 5, a connect char, and 
+                # filename of six chars...
+                check_media_subpath(
+                    'Django settings', 
+                    'MEDIA_SUBPATH_REFORMS',  
+                    self.media_subpath_originals,
+                    self.path_truncate_len - 12
+                )  
             if ('MEDIA_SUBPATH_REFORMS' in isettings):
                 self.media_subpath_reforms = isettings['MEDIA_SUBPATH_REFORMS']
+
+                # - 12 is a near-arbitary value, allowing space for, 
+                # say, extensions of length 5, a connect char, and 
+                # filename of six chars...
+                check_media_subpath(
+                    'Django settings', 
+                    'MEDIA_SUBPATH_ORIGINALS',  
+                    self.media_subpath_reforms,
+                    self.path_truncate_len - 12
+                )  
             if ('REFORMS' in isettings):
                 reforms = isettings['REFORMS']
                 if ('FORMAT_OVERRIDE' in reforms):
                     self.reforms.format_override = reforms['FORMAT_OVERRIDE']
+                    check_image_formats(
+                        'Django settings', 
+                        'REFORMS[FORMAT_OVERRIDE]',
+                        self.reforms.format_override 
+                    )  
                 if ('JPEG_QUALITY' in reforms):
                     self.reforms.jpeg_quality = reforms['JPEG_QUALITY']
-                if ('TRUNCATE_PATHS' in reforms):
-                    self.reforms.truncate_paths = reforms['TRUNCATE_PATHS']    
+                    check_jpeg_quality(
+                        'Django settings', 
+                        'REFORMS[JPEG_QUALITY]', 
+                        self.reforms.jpeg_quality
+                    )
             if ('AUTO_DELETE' in isettings):
                 self.auto_delete = isettings['AUTO_DELETE']                             
             if ('MODULES' in isettings):
                 self.modules = isettings['MODULES']
-             
-        # Tests
-
-        # impose short limit on filepath (Django, 100 char overall path default)
-        # includes '/media/', so just 24 chars
-        check_media_subpath(
-            'Django settings', 
-            'MEDIA_SUBPATH_REFORMS',  
-            self.media_subpath_originals
-        )           
-        check_positive(
-            'Django settings', 
-            'MAX_UPLOAD_SIZE', 
-            self._max_upload_size   
-        )             
-        check_media_subpath(
-            'Django settings', 
-            'MEDIA_SUBPATH_ORIGINALS',  
-            self.media_subpath_reforms
-        )
-        check_image_formats(
-            'Django settings', 
-            'REFORMS[FORMAT_OVERRIDE]',
-            self.reforms.format_override 
-        )      
-        check_jpeg_quality(
-            'Django settings', 
-            'REFORMS[JPEG_QUALITY]', 
-            self.reforms.jpeg_quality
-        )
-                
+            
     def __repr__(self):
         return "Settings( app_dirs:{}, modules:{}, {}, {}, reform_settings:{})".format(
             self.app_dirs,

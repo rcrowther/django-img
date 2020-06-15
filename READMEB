@@ -15,7 +15,7 @@ This may not be the app for you.
 
 All these facilities can be built into the base code. But then the app wil not be, for you, a plug and go solution.
  
-The code API is a step back from the facilities mentioned above. It is small, concise, and fits in with good CSS/template-practice. Also, so far, I have not considered and/or tested,
+The code API is a step back from the facilities mentioned above. It is small, concise, and fits good CSS/template-practice. Also, so far, I have not considered and/or tested,
 
 - SVG images
 - pormissions
@@ -29,9 +29,9 @@ Each original image can generate derivitive images. These are tracked in a table
 
 Image delivery is by template tag. The presence of a tag with a reference to a filter will generate a reform automatically. 
 
-File-based storage is in media/ with paths adjustable through Django settings.
+File-based storage is in 'media/' with paths adjustable through Django settings.
 
-The app includes code to upload images. The tags deliver images by a URL. There is extra support and options for administration.
+The app includes code to upload images. The tags deliver images by URL. There is extra support and options for administration.
 
 # Quickstart
 ## Depemdancies
@@ -84,7 +84,7 @@ If you have Django Admin, you can now upload images.
 ## Uploading
 In Django admin, go to Image upload and try upload a few images.
 
-However, I don't know about you, if I have a new app I like to try with real data. If you have a collection of test images somewhere, try this management command,
+I don't know about you, but if I have a new app I like to try with real data. If you have a collection of test images somewhere, try this management command,
 
     ./manage.py image_create_bulk pathToMyDirectory
 
@@ -93,7 +93,7 @@ You can create, meaning upload and register, fifteen or twenty images in a few s
 
 
 ## Viewing images
-Ok, let's show an image. Find a web view template. Nearly any template will do (maybe not a JSON REST interface, but even a form if you can get at the general web template).
+Ok, let's show an image. Find a web view template. Nearly any template will do (maybe not a JSON REST interface, something visible).
 
 Have a look at the images you uploaded. Add this tag to the template, 
 
@@ -111,7 +111,6 @@ Perhaps your firat request will be how to make a new filter. So, a slight deviat
 
 Make a new file called 'image filters'. Put it in the top level of any app, or in the site folder (alongside url.py and wsgi.py). Put something like this in it (adapt if you wish),
 
-
     from image import Resize, registry
 
     class MediumImage(Resize)
@@ -127,7 +126,7 @@ Now adapt the template tag to point at the new filter,
 
 Visit the page again. Image sees the new filter definition, finds it has no record of a reform for that image and filter, so generates a new one, then displays it.
 
-I hope you can see what you are doing here. You made a new filter definition, deriving from a base filter called ''Resize'. You registered the filter, in the same way you might register an app admin. You then asked the template tag to use it. The app did everything else.
+I hope you can see what you are doing here. You made a new filter definition, deriving from a base filter called ''Resize'. You registered the filter, in the same way you might register an app admin. You then asked the template tag to use it. The app did the resize, saved the reform image, returned it's filepath.
 
 If you want to continue, you probably have many questions. Goto the main documentation.
 
@@ -144,7 +143,7 @@ Migrate backwards,
 
 Remove from apps.py.
 
-Remove two directories in /media (if you didn't change the filepaths),
+Remove the two directories in /media,
 
     originals/
     reforms/
@@ -260,11 +259,11 @@ Its fun to tweak with settings, but sometimes, maybe even often, this is not the
 
 Let's say you have a website which gathers photos that are joined to NewsArticle. Those photos are linked for sure to the Article, and can probably be created and deleted with the NewsAreticle. But you may also have a need to be uploading images for the site in general. Perhaps for banner displays. Not only the deletion policy, but the banner display has a need for titles that are easy to refer to and administer as a pool. Wheras the NewsArticle photos will not need to be pooled, but may need extra information attached such as captions, credits, dates, and/or data for semantic rendering.
  
-I know the business of uploading images is difficult in website software, so it is tempting to think about the action, about getting the job done, But I encourage you to think in terms of the basics of data structure and semantics. These are two seperate apps.
+I know the business of uploading images is difficult in website software, so it is tempting to think about the action, about getting the job done, But I encourage you to think in terms of the basics of data structure and semantics. In those terms, the needs listed above describe two seperate apps.
 
 The image app contains a lot of functionality, so if you are sure you want a general pool, go ahead and create it. Or you can use another app alongside image.
  
-Another way is to duplicate the image app. Image and Reform models are created with an abstract base. So you can create what is, in effect, another app, with seperate database tables, configured differently.
+In this case, it will be better to create a new image app. Image and Reform models are created with an abstract base. So you can create what is, in effect, another app, with seperate database tables, configured differently.
 
 ### Creating new tables
 In an app, do this,
@@ -287,7 +286,7 @@ from image.models import AbstractImage, AbstractReform
     class NewssArticleReform(AbstractReform):
         pass
 
-That's it. You now have a new image upload app. Refer to it in the models,
+That's it. You now have a new image upload app. It has it's own DB tables. It's configuration can be set to auto-delete. Refer to it in the models,
 
     class NewsArticle(models.Model):
 
@@ -306,7 +305,7 @@ That's it. You now have a new image upload app. Refer to it in the models,
 ### Overview
 Filters are used to describe how an original uploaded image should be modified for display. In the background, the app will automatically adjust the image to the given spacification (or use a cached version).
  
-A few filters are predefined. These are base filters, which you configure. They are (centre-anchored) Crop, Resize, SmartCrop, SmartResize. If you only need different image sizes, then you only need to configure these. But if you want to pass some time with image-processing code, you can add extra filters to generate ''PuddingColour' and other similar filters.
+A few filters are predefined. These are base filters, which you configure. They are (centre-anchored) Crop, Resize, SmartCrop, SmartResize. If you only need different image sizes, then you only need to configure these. But if you want to pass some time with image-processing code, you can add extra filters to generate ''PuddingColour' and other filters.
 
 
 ### Filter declarations
@@ -346,7 +345,7 @@ The Smart variations do a background fill in a chosen colour, so return the requ
 
     registry.register(MediumImage)
 
-Fill color is defined however the image library handles it. Both Pillow and Wand can handle CSS style hex '#00FF00' (green), and X-window/HTML colour-names 'AliceWhite'.
+Fill color is defined however the image library handles it. Both Pillow and Wand can handle CSS style hex e.g. '#00FF00' (green), and HTML colour-names e.g. 'AliceWhite'.
 
 
 ### Filter placement and registration
@@ -474,7 +473,7 @@ See the code for details.
 
 
 ### Why can filters not be chained?
-Filters can not be chained, except in an unorderable way within a fixed filter. There is no way to present chaining to a user. Filters must be written in code, and do not accept parameters. You want a filter with new parameters, you write it and it is set.
+Filters can not be chained dynamically. There is no way to present chaining to a user. You need to create a fixed filter. Filters must be written in code, and do not accept parameters. You want a filter with new parameters, you write it and it is set.
 
 This is a deliberate decision. It makes life easy. If you want to produce a front-end that can lever the filters and chain them, that is another step. Possible, but further than this app will go.
 
@@ -619,11 +618,12 @@ Images accepts settings. They look like the Django template settings,
             'APP_DIRS': True,
             # 'MEDIA_SUBPATH_ORIGINALS':
             # 'MEDIA_SUBPATH_REFORMS':
+            # 'PATH_TRUNCATE_LEN': 200,
         'AUTO_DELETE': True,
         'REFORMS': [
             #'FORMAT_OVERRIDE': 'jpg',
             #'JPEG_QUALITY': 28,
-            'TRUNCATE_PATHS': True,
+
         ],
             'MODULES': [
                         "someSiteName",
@@ -649,6 +649,8 @@ Deleting files when the model is deleted has downsides, but suits the use-cases 
 
 You may have noticed in Admin that the app offers a switch to set policy by image. Local settings win---the per-image setting overrides the general setting. For example, you may decide to generally erase files when models are deleted. But if you want to set an image against deletion---for example, a banner, a logo or a generic product photo---you can set that image to persist.
 
+PATH_TRUNCATE_LEN
+Truncate filepaths. This is done by truncating the length of filenames (which on the web can become very long). Django limits filepath lengths to 100 chars, to fit in the database fields on FileFields (which must declare length), and to maintain compatibility with some filesystems. Default: 100. If you change this setting, be aware you will also need to expicitly declare the db fields. Applies to both Images and Reforms.
 
 ### Reform settings
 FORMAT_OVERRIDE
@@ -659,8 +661,7 @@ Quality of reform JPGs. Basic is '85' of '100', which is high quality. You can g
 
 Locality wins. If a filter sets a 'jpeg_quality' attribute, that wins. After, if this site-wide setting is present, it wins. Otherwise, the quality defaults to '85'.
 
-TRUNCATE_PATHS
-Truncate filepaths. This is usually done by truncating the length of filenames (which can become very long on the web). This is because Django limits filepath lengths to 100 chars, to fit in the database fields on FileFields (which must declare length), and to maintain compatibility with some filesystems. Default True. If you switch this setting off, be aware you will also need to expicitly declare longer db fields.
+
 
 
 # Other usages

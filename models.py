@@ -14,10 +14,7 @@ from django.urls import reverse
 from collections import OrderedDict
 from django.utils.functional import cached_property
 from django.core.files.images import ImageFile
-from image.decisions import (
-    image_save_path, 
-    reform_save_path
-)
+from image import decisions
 print('create models')
 from image.validators import validate_file_size, validate_image_file_extension
  
@@ -33,8 +30,9 @@ class SourceImageIOError(IOError):
 def get_upload_to(instance, filename):
     """
     Obtain a valid upload path for an image file.
-    This needs to be a moduget_reform_upload_tole-level function so that it can be referenced within migrations,
-    but simply delegates to the `get_upload_to` method of the instance, so that AbstractImage
+    This needs to be a module-level function so that it can be 
+    referenced within migrations, but simply delegates to the 
+    `get_upload_to` method of the instance, so that AbstractImage
     subclasses can override it.
     """
     return instance.get_upload_to(filename)
@@ -52,8 +50,13 @@ def get_reform_upload_to(instance, filename):
 
 
 class AbstractImage(models.Model):
+    '''
+    Data about stored images.
     
-    
+    Provides db fields for width, height and bytesize. Also accessors 
+    for useful derivatives such as 'alt' and 'url'.
+    Finally, machinery provided for creating reforms.
+    '''
     class AutoDelete(models.IntegerChoices):
         UNSET = 0, _('Unset')
         NO = 1, _('Dont delete file')
@@ -64,7 +67,7 @@ class AbstractImage(models.Model):
         db_index=True
     )
     
-    #! not sure that title should be requiredd, even with
+    #! not sure that title should be required, even with
     #! prepopulates. And it ain't unique. But what about
     #! the search issue? 
     title = models.CharField(_('title'),
@@ -82,6 +85,8 @@ class AbstractImage(models.Model):
         upload_to=get_upload_to, 
         width_field='width', 
         height_field='height',
+        #! model validators do not only run on upload, they run on any modification?
+        # too much?
         validators = [
             validate_file_size,
             validate_image_file_extension
@@ -93,7 +98,7 @@ class AbstractImage(models.Model):
         default=AutoDelete.UNSET,
     )    
 
-    # Django uses Pillow anyway to provide width and height. So why?
+    # Django can use Pillow to provide width and height. So why?
     # The 'orrible duplication is for cloud storage, to spare web hits. 
     # Also to stop opening and closing the file, which is how file 
     # storage attributes are loaded. Sure, they values will be cached, 
@@ -152,8 +157,9 @@ class AbstractImage(models.Model):
         # underscore, or dot.
         filename = self.src.field.storage.get_valid_name(filename)
         
-        # truncate and makee relative to storage base
-        filename = image_save_path(filename)
+        # Then respect settings, such as truncation, and relative path 
+        # to storage base
+        filename = decisions.image_save_path(filename)
        
         return filename
         
@@ -244,32 +250,42 @@ class AbstractImage(models.Model):
     def is_landscape(self):
         return (self.height < self.width)
         
-    #! url more useful?
-    
-    #x another what for?
+
+    #! 
+    #@property
+    #def url(self):
+        #return self.src.url
+        
     @property
     def filename(self):
+        '''
+        File as name, no path.
+        Useful for admin displays, and others.
+        '''
         return os.path.basename(self.src.name)
         
     @property
     def alt(self):
-        # The model has no 'alt' field 
-        # Default alt attribute is 
-        # title.lower() + ' image'. 
-        # Subclasses might  provide a field, override this attribute, 
-        # or manipilate template contexts.
-        return self.title.lower() + ' image'
-
+        '''
+        String for an 'alt' field.
+        The base implementation is derived from the filepath of the 
+        uploaded file. 
+        Subclasses might override this attribute to use more refined 
+        data, such as a slug or title.
+        '''
+        #return self.title.lower() + ' image'
+        return Path(self.src.name).stem + ' image'
+        
     def __repr__(self):
-        return "Image(upload_date: {}, title:'{}', src:'{}', auto_delete:{})".format(
+        return "Image(upload_date: {}, src:'{}', auto_delete:{})".format(
             self.upload_date,
-            self.title,
+            #self.title,
             self.src,
             self.auto_delete
         )                
 
     def __str__(self):
-        return self.title
+        return self.src.name
 
     class Meta:
         abstract = True
@@ -315,7 +331,9 @@ class AbstractReform(models.Model):
         # only needs path appending.
         filename = self.src.field.storage.get_valid_name(filename)
 
-        return reform_save_path(filename)
+        # Then respect settings, such as truncation, and relative path 
+        # to storage base
+        return decisions.reform_save_path(filename)
         
     @classmethod
     def check(cls, **kwargs):
