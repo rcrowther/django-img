@@ -4,7 +4,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.utils.functional import cached_property
 from pathlib import Path
 from image.configuration_checks import (
-    check_media_subpath,
+    #check_media_subpath,
     check_image_formats,
     check_jpeg_quality,
     check_positive,
@@ -39,9 +39,9 @@ class Settings():
         self.modules = []
         self.app_dirs = False
         self._max_upload_size = None
-        self.media_subpath_originals = 'originals'
-        self.media_subpath_reforms = 'reforms'
-        self.path_truncate_len = 100
+        #self.media_subpath_originals = 'originals'
+        #self.media_subpath_reforms = 'reforms'
+        #self.path_truncate_len = 100
         
         self.reforms = SimpleNamespace()
         self.reforms.format_override = None
@@ -51,41 +51,41 @@ class Settings():
         if (populate):
             self.populate()
 
-    @property
-    def file_path_originals(self):
-        '''
-        Full path to the image directory.
-        For original image uploads. Note this can be a longish absolute
-        path from server root.
-        '''
-        return Path(settings.media_root) / self.media_subpath_originals
+    # @property
+    # def file_path_originals(self):
+        # '''
+        # Full path to the image directory.
+        # For original image uploads. Note this can be a longish absolute
+        # path from server root.
+        # '''
+        # return Path(settings.media_root) / self.media_subpath_originals
 
-    @property
-    def file_path_reforms(self):
-        '''
-        Full path to the image directory.
-        For reform image uploads. Note this can be a longish absolute
-        path from server root.
-        '''
-        return Path(settings.media_root) / self.media_subpath_reforms
+    # @property
+    # def file_path_reforms(self):
+        # '''
+        # Full path to the image directory.
+        # For reform image uploads. Note this can be a longish absolute
+        # path from server root.
+        # '''
+        # return Path(settings.media_root) / self.media_subpath_reforms
 
-    @property
-    def filename_originals_maxlen(self):
-        '''
-        Length the settings will allow for filenames.
-        '''
-        # These default to something, if settings are None
-        # - 1 for join char 
-        return self.path_truncate_len - len(str(self.file_path_originals)) - 1
+    # @property
+    # def filename_originals_maxlen(self):
+        # '''
+        # Length the settings will allow for filenames.
+        # '''
+        # # These default to something, if settings are None
+        # # - 1 for join char 
+        # return self.path_truncate_len - len(str(self.file_path_originals)) - 1
 
-    @property
-    def filename_reforms_maxlen(self):
-        '''
-        Length the settings will allow for filenames.
-        '''
-        # These default to something, if settings are None
-        # - 1 for join char 
-        return self.path_truncate_len - len(str(self.file_path_reforms)) - 1
+    # @property
+    # def filename_reforms_maxlen(self):
+        # '''
+        # Length the settings will allow for filenames.
+        # '''
+        # # These default to something, if settings are None
+        # # - 1 for join char 
+        # return self.path_truncate_len - len(str(self.file_path_reforms)) - 1
                                 
     @property
     def max_upload_size(self):
@@ -116,37 +116,30 @@ class Settings():
                     'MAX_UPLOAD_SIZE', 
                     self._max_upload_size   
                 ) 
-            if ('PATH_TRUNCATE_LEN' in isettings):
-                self.path_truncate_len = reforms['PATH_TRUNCATE_LEN']    
-                check_positive(
-                    'Django settings', 
-                    'PATH_TRUNCATE_LEN', 
-                    self.path_truncate_len   
-                )  
-            if ('MEDIA_SUBPATH_ORIGINALS' in isettings):
-                self.media_subpath_originals = isettings['MEDIA_SUBPATH_ORIGINALS']
+            # if ('MEDIA_SUBPATH_ORIGINALS' in isettings):
+                # self.media_subpath_originals = isettings['MEDIA_SUBPATH_ORIGINALS']
 
-                # - 12 is a near-arbitary value, allowing space for, 
-                # say, extensions of length 5, a connect char, and 
-                # filename of six chars...
-                check_media_subpath(
-                    'Django settings', 
-                    'MEDIA_SUBPATH_REFORMS',  
-                    self.media_subpath_originals,
-                    self.path_truncate_len - 12
-                )  
-            if ('MEDIA_SUBPATH_REFORMS' in isettings):
-                self.media_subpath_reforms = isettings['MEDIA_SUBPATH_REFORMS']
+                # # - 12 is a near-arbitary value, allowing space for, 
+                # # say, extensions of length 5, a connect char, and 
+                # # filename of six chars...
+                # check_media_subpath(
+                    # 'Django settings', 
+                    # 'MEDIA_SUBPATH_REFORMS',  
+                    # self.media_subpath_originals,
+                    # #self.path_truncate_len - 12
+                # )  
+            # if ('MEDIA_SUBPATH_REFORMS' in isettings):
+                # self.media_subpath_reforms = isettings['MEDIA_SUBPATH_REFORMS']
 
-                # - 12 is a near-arbitary value, allowing space for, 
-                # say, extensions of length 5, a connect char, and 
-                # filename of six chars...
-                check_media_subpath(
-                    'Django settings', 
-                    'MEDIA_SUBPATH_ORIGINALS',  
-                    self.media_subpath_reforms,
-                    self.path_truncate_len - 12
-                )  
+                # # - 12 is a near-arbitary value, allowing space for, 
+                # # say, extensions of length 5, a connect char, and 
+                # # filename of six chars...
+                # check_media_subpath(
+                    # 'Django settings', 
+                    # 'MEDIA_SUBPATH_ORIGINALS',  
+                    # self.media_subpath_reforms,
+                    # #self.path_truncate_len - 12
+                # )  
             if ('REFORMS' in isettings):
                 reforms = isettings['REFORMS']
                 if ('FORMAT_OVERRIDE' in reforms):

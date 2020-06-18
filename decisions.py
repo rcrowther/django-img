@@ -55,31 +55,31 @@ def src_should_delete(image, calling_opinion):
         delete = (image.auto_delete == image.AutoDelete.YES)
     return delete
 
-def media_path_originals(upload_to_dir):
-    '''
-    Relative path to the image directory.
-    For original image uploads.
-    '''
-    # Settings has a say...
-    media_path = settings.media_subpath_originals
+# def media_path_originals(upload_to_dir):
+    # '''
+    # Relative path to the image directory.
+    # For original image uploads.
+    # '''
+    # # Settings has a say...
+    # media_path = settings.media_subpath_originals
     
-    #,,,but model definition wins.
-    if (upload_to_dir):
-        media_path = upload_to_dir
-    return media_path
+    # #,,,but model definition wins.
+    # if (upload_to_dir):
+        # media_path = upload_to_dir
+    # return media_path
     
-def media_path_reforms(upload_to_dir):
-    '''
-    Relative path to the reform directory.
-    For original reform creates.
-    '''
-    # Settings has a say...
-    media_path = settings.media_subpath_reforms
+# def media_path_reforms(upload_to_dir):
+    # '''
+    # Relative path to the reform directory.
+    # For original reform creates.
+    # '''
+    # # Settings has a say...
+    # media_path = settings.media_subpath_reforms
     
-    #,,,but model definition wins.
-    if (upload_to_dir):
-        media_path = upload_to_dir
-    return media_path    
+    # #,,,but model definition wins.
+    # if (upload_to_dir):
+        # media_path = upload_to_dir
+    # return media_path    
     
 def filename_originals_maxlen(field_file, media_path):
     '''
@@ -130,7 +130,8 @@ def image_save_path(obj, filename):
     field_file = obj.src
         
     # Which media path?
-    media_path = media_path_originals(obj.upload_to_dir)
+    #media_path = media_path_originals(obj.upload_to_dir)
+    media_path = obj.upload_to_dir
             
     #! do these two replicate functionality?
     # Quote:
@@ -170,7 +171,8 @@ def reform_save_path(obj, filename):
     field_file = obj.src
 
     # Which media path?
-    media_path = media_path_reforms(obj.upload_to_dir)
+    #media_path = media_path_reforms(obj.upload_to_dir)
+    media_path = obj.upload_to_dir
     
     # Reform is internal, so we have an internal representation of
     # filename already

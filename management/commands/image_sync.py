@@ -3,6 +3,9 @@ from image.models import Image
 from pathlib import Path
 from image.settings import settings
 
+media_subpath_originals = 'originals'
+file_path_originals = '/srv/soundsense/media/originals'
+
 
 
 class Command(BaseCommand):
@@ -10,13 +13,11 @@ class Command(BaseCommand):
     output_transaction = True
     
     def add_arguments(self, parser):
-
         parser.add_argument(
             '--remove-orphaned-files',
             action='store_true',
             help='Delete orphaned files (the default is to register them)',
         )
-
         parser.add_argument(
             '--remove-orphaned-models',
             action='store_true',
@@ -24,7 +25,7 @@ class Command(BaseCommand):
         )        
         
     def originals_fp_list(self):
-        d = settings.file_path_originals
+        d = file_path_originals
         
         # get all file paths
         return [f for f in d.iterdir() if f.is_file()]
@@ -41,10 +42,10 @@ class Command(BaseCommand):
             
     def db_image_list(self):
         ''' 
-        Read all image models for pk, title and src
+        Read all image models for pk and src
         @return object list supplemented with 'full_path' key referencing a Path
         '''
-        val_list = Image.objects.values('pk', 'title', 'src')
+        val_list = Image.objects.values('pk', 'src')
         # do fullpath with src.name?
         media_full_path = Path(settings.media_root)
         for e in val_list:
@@ -66,7 +67,7 @@ class Command(BaseCommand):
                 print("{} model(s) deleted".format(r[0])) 
             if (options['verbosity'] > 2):
                 for m in model_no_file:
-                    print(m['title'])
+                    print(m['src'])
                     
         elif options['remove_orphaned_files']:
             count = 0
@@ -95,7 +96,7 @@ class Command(BaseCommand):
 
             dbl = self.db_image_fp_list()
             file_no_model = set(ml) - set(dbl)
-            media_originals = Path(settings.media_subpath_originals)
+            media_originals = Path(media_subpath_originals)
 
             for path in file_no_model:
                 # Make new models.
@@ -117,7 +118,7 @@ class Command(BaseCommand):
                 # Paths, only strings. Also, it works relative to /media
                 # (so path relativization here)
                 i = Image(
-                    title = path.stem,
+                    #title = path.stem,
                     src = str(media_originals / path.name),
                 ) 
 

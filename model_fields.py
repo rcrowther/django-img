@@ -7,6 +7,12 @@ from django.db import models
 from image import form_fields
 
 class FreeImageField(ImageField):
+    '''
+    A (model) ImageField that defaults to returning a (form) 
+    FreeImageField.
+    '''
+    # This only exists because I can find no way of overriding this 
+    # default on declaration.
     def formfield(self, **kwargs):
         return super().formfield(**{
             'form_class': form_fields.FreeImageField,

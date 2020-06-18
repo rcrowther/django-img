@@ -89,7 +89,7 @@ class AbstractImage(models.Model):
     # Not autopoulated by storage, so funny name.
     # See the property
     _upload_time = models.DateTimeField(_("Datetime of upload"),
-        db_index=True, null=True, editable=False
+        null=True, editable=False
     )
 
     @property
@@ -407,11 +407,11 @@ class Image(AbstractImage):
         verbose_name = _('image')
         verbose_name_plural = _('images')
         indexes = [
-            models.Index(fields=['_upload_time', 'src']),
+            models.Index(fields=['_upload_time']),
         ]
-        constraints = [
-            models.UniqueConstraint(fields=['src'], name='unique_image_image_src') 
-        ]
+        # constraints = [
+            # models.UniqueConstraint(fields=['src'], name='unique_image_image_src') 
+        # ]
 
 
 
@@ -499,9 +499,9 @@ class Reform(AbstractReform):
     class Meta:
         verbose_name = _('reform')
         verbose_name_plural = _('reforms')
-        indexes = [
-            models.Index(fields=['src']),
-        ]
-        constraints = [
-            models.UniqueConstraint(fields=['src'], name='unique_image_reform_src') 
-        ]
+        # indexes = [
+            # models.Index(fields=['src']),
+        # ]
+        # constraints = [
+            # models.UniqueConstraint(fields=['src'], name='unique_image_reform_src') 
+        # ]

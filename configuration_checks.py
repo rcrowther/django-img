@@ -8,19 +8,19 @@ from image.constants import IMAGE_FORMATS
 # These settings checks are used in filters, with the site-wide Django 
 # settings, and this apps summary, Settings. So gathered here.
 
-def check_media_subpath(class_name, setting_name, v, max):
-    if (v and (len(v) > max)):
-        raise ImproperlyConfigured(
-            "In {}, '{}' value '{}' exceeds {} chars."
-            "Set to a smaller value, or set PATH_TRUNCATE_LEN to a"
-            "longer value, then set the 'src' DB field to match."
-            "Path len (in chars): {}".format(
-            class_name,
-            setting_name,
-            v,
-            max,
-            len(v),
-        ))     
+# def check_media_subpath(class_name, setting_name, v, max):
+    # if (v and (len(v) > max)):
+        # raise ImproperlyConfigured(
+            # "In {}, '{}' value '{}' exceeds {} chars."
+            # "Set to a smaller value, or set PATH_TRUNCATE_LEN to a"
+            # "longer value, then set the 'src' DB field to match."
+            # "Path len (in chars): {}".format(
+            # class_name,
+            # setting_name,
+            # v,
+            # max,
+            # len(v),
+        # ))     
 
 def check_image_formats(class_name, setting_name, v):
     if (v and (not(v in IMAGE_FORMATS))):

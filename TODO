@@ -7,17 +7,13 @@ auto_delete tests
 
 == Management
 Is bulk delete really bulk delete?
+Hpw to make cross-model?
 tests
 
 == Images
 
 == Filters
-Thumb not shrinking
-out png
-pillow ResizeSmart
-in 
-png (not resizing)
-jpg resize, but white
+Test Wand
 
 == Reforms
 

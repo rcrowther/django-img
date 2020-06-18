@@ -76,15 +76,14 @@ def fill(pillow, width, height, fill_color="white"):
     bg = PILImage.new('RGB', (width, height), fill_color)
 
     # paste down.
-    # I've tried a couple of ways, thiis mess seems to work ok
+    # I've tried a couple of ways, this mess seems to work ok
     if ((pillow.mode in ('RGBA', 'LA'))): 
         # The image has an alpha layer. But this may well be black, for
         # transparency, and on convert to RGB goes black. Solution,
-        # split layers and paste as mask.
-        # mask from the alpha channel
+        # split alpha layer and paste as mask.
         bg.paste(pillow, (x, y),  mask=pillow.getchannel('A'))
     else:
-        # The image can be simply pasted on
+        # The image can be pasted on
         bg.paste(pillow, (x, y))
     return bg
 

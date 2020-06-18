@@ -1,11 +1,12 @@
-
 from django.forms.fields import ImageField
 from django.core.exceptions import ValidationError
 
 
 class FreeImageField(ImageField):
-    #print('FreeImageField to python')
-
+    '''
+    A (form) Field that skips length verification.
+    '''
+    # This exists because verification is not configuarable.
     def to_python(self, data):
         if data in self.empty_values:
             return None
@@ -16,10 +17,6 @@ class FreeImageField(ImageField):
             file_size = data.size
         except AttributeError:
             raise ValidationError(self.error_messages['invalid'], code='invalid')
-        print('FreeImageField to python')
-        #if self.max_length is not None and len(file_name) > self.max_length:
-        #    params = {'max': self.max_length, 'length': len(file_name)}
-        #    raise ValidationError(self.error_messages['max_length'], code='max_length', params=params)
         if not file_name:
             raise ValidationError(self.error_messages['invalid'], code='invalid')
         if not self.allow_empty_file and not file_size:

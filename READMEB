@@ -691,9 +691,6 @@ Images accepts settings. They look like the Django template settings,
         {
             #'MAX_UPLOAD_SIZE': 1,
             'APP_DIRS': True,
-            # 'MEDIA_SUBPATH_ORIGINALS':
-            # 'MEDIA_SUBPATH_REFORMS':
-            # 'PATH_TRUNCATE_LEN': 200,
         'AUTO_DELETE': True,
         'REFORMS': [
             #'FORMAT_OVERRIDE': 'jpg',
@@ -724,15 +721,6 @@ Deleting files when the model is deleted has downsides, but suits the use-cases 
 
 You may have noticed in Admin that the app offers a switch to set policy by image. Local settings win---the per-image setting overrides the general setting. For example, you may decide to generally erase files when models are deleted. But if you want to set an image against deletion---for example, a banner, a logo or a generic product photo---you can set that image to persist.
 
-PATH_TRUNCATE_LEN
-Truncate filepaths. This is done by truncating the length of filenames (which on the web can become very long). Django limits filepath lengths to 100 chars, to fit in the database fields on FileFields (which must declare length), and to maintain compatibility with some filesystems. Default: 100. If you change this setting, be aware you will also need to expicitly declare the db fields, using the undocumented max_len argument,
-
-    src = models.ImageField(_('image_file'), 
-        upload_to='article_images', 
-        max_len=200,
-    )
-
-This setting applies to both Images and Reforms.
 
 ### Reform settings
 FORMAT_OVERRIDE

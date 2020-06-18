@@ -1,10 +1,11 @@
 from django.core.management.base import BaseCommand, CommandError
 from image.models import Image, Reform
 
+
+
 class Command(BaseCommand):
     help = 'Automatically/bulk delete reform images'
     output_transaction = True
-
 
     def add_arguments(self, parser):
         #parser.add_argument('image_titles', nargs='*', type=str)
@@ -14,7 +15,6 @@ class Command(BaseCommand):
             action='store_true',
             help='Delete reforms by SQL (fast, but less robust)',
         )
-
         
     def handle(self, *args, **options):
         if options['bulk']:
