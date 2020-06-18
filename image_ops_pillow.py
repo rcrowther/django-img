@@ -17,8 +17,12 @@ def resize_aspect(pillow, width, height):
     height_reduce = current_height - height
     if (width_reduce > height_reduce and width_reduce > 0):
         h =  math.floor((width * current_height)/current_width)
-        return pillow.resize((width, h))        
-    elif (height_reduce > width_reduce and height_reduce > 0):
+        return pillow.resize((width, h))
+        
+    #NB the equality. On the not unlikely chance that the width 
+    # reduction is the same as the height reduction (for example, 
+    # squares), reduce by height.
+    elif (height_reduce >= width_reduce and height_reduce > 0):
         w =  math.floor((height * current_width)/current_height)
         return pillow.resize((w, height))
     else:
@@ -67,18 +71,20 @@ def fill(pillow, width, height, fill_color="white"):
     current_height = s[1]
 
     x = (width - current_width) >> 1
-    #x = math.floor((width - current_width) / 2)
     y = (height - current_height) >> 1
         
-    # needed for the split
-    pillow.load() 
     bg = PILImage.new('RGB', (width, height), fill_color)
 
-    # paste down, mask from the alpha channel (usually last)
-    bg.paste(pillow, (x, y),  mask=pillow.split()[-1])
-    
+    # paste down.
+    # I've tried a couple of ways, thiis mess seems to work ok
+    if ((pillow.mode in ('RGBA', 'LA'))): 
+        # The image has an alpha layer. But this may well be black, for
+        # transparency, and on convert to RGB goes black. Solution,
+        # split layers and paste as mask.
+        # mask from the alpha channel
+        bg.paste(pillow, (x, y),  mask=pillow.getchannel('A'))
+    else:
+        # The image can be simply pasted on
+        bg.paste(pillow, (x, y))
     return bg
-
-
-
 

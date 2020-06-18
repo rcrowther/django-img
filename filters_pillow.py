@@ -60,10 +60,10 @@ class PillowProcess:
             else:
                 fc = 'white'
             bg = PILImage.new('RGB', pil_dst.size, fc)
-            bg.paste(pil_dst, pil_dst.split()[-1])
+            bg.paste(pil_dst, pil_dst.getchannel('A'))
             pil_dst = bg
         
-        #! test. I think that;s the name.
+        #! test. I think that's the name.
         write_attrs['quality'] = write_attrs['jpeg_quality']
 
         out_buff = BytesIO()

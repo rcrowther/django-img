@@ -6,13 +6,18 @@ auto_delete tests
 == Model
 
 == Management
-Image delete now bust
+Is bulk delete really bulk delete?
 tests
 
 == Images
 
 == Filters
 Thumb not shrinking
+out png
+pillow ResizeSmart
+in 
+png (not resizing)
+jpg resize, but white
 
 == Reforms
 

@@ -73,7 +73,11 @@ def resize_aspect(wand, width, height):
     if (width_reduce > height_reduce and width_reduce > 0):
         h = math.floor((width * wand.height)/wand.width)
         wand.resize(width, h)        
-    elif (height_reduce > width_reduce and height_reduce > 0):
+
+    #NB the equality. On the not unlikely chance that the width 
+    # reduction is the same as the height reduction (for example, 
+    # squares), reduce by height.
+    elif (height_reduce >= width_reduce and height_reduce > 0):
         w = math.floor((height * wand.width)/wand.height)
         wand.resize(w, height)
     return wand
