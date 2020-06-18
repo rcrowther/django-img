@@ -1,12 +1,19 @@
 from django.db.models import OneToOneField, ImageField
-from image.models import AbstractImage
 from django.core import checks
 from django.db import models
 
-from  django.db.models.fields.mixins import FieldCacheMixin
-from django.utils.functional import cached_property
+#from  django.db.models.fields.mixins import FieldCacheMixin
+#from django.utils.functional import cached_property
+from image import form_fields
 
-    
+class FreeImageField(ImageField):
+    def formfield(self, **kwargs):
+        return super().formfield(**{
+            'form_class': form_fields.FreeImageField,
+            'max_length': self.max_length,
+            **kwargs,
+        })
+        
 # What this needs to do...
 # - if new, send empty data
 # - If exists, send a rel key, and model data to template

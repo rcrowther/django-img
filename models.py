@@ -1,22 +1,24 @@
-from django.db import models
-from django.db.models.signals import pre_delete, pre_save
+from contextlib import contextmanager
 import os.path
 from pathlib import Path
+from collections import OrderedDict
 
-from contextlib import contextmanager
+from django.db import models
+from django.db.models.signals import pre_delete, pre_save
+
 from django.utils.translation import gettext_lazy as _
 from django.utils.functional import cached_property
 from django.utils.safestring import mark_safe
-from django.dispatch.dispatcher import receiver
-from unidecode import unidecode
-from django.forms.utils import flatatt
+#from django.dispatch.dispatcher import receiver
+#from unidecode import unidecode
+#from django.forms.utils import flatatt
 from django.urls import reverse
-from collections import OrderedDict
-from django.utils.functional import cached_property
 from django.core.files.images import ImageFile
 from image import decisions
-print('create models')
 from image.validators import validate_file_size, validate_image_file_extension
+from django.core import checks
+
+print('create models')
  
  
  
@@ -48,49 +50,151 @@ def get_reform_upload_to(instance, filename):
     return instance.get_upload_to(filename)
 
 
-
+from image.model_fields import FreeImageField
 class AbstractImage(models.Model):
     '''
     Data about stored images.
     
-    Provides db fields for width, height and bytesize. Also accessors 
-    for useful derivatives such as 'alt' and 'url'.
-    Finally, machinery provided for creating reforms.
+    Provides db fields for width, height, bytesize and upload_data. 
+    These replace storage backend ingenuity with recorded data.
+    Also provides accessors for useful derivatives such as 'alt' and 
+    'url'.
+    Handles upload_to in a configurable way.
+    And also provides machinery for Reform handling.
     '''
+    # None is 'use settings default'
+    upload_to_dir='originals'
+    
+    # 100 is Django default
+    # Can not be None
+    #! template tag
+    filepath_length=100
+    
+    #! move checks out of class
+    #! needs to check media path
+    @classmethod
+    def _check_available_filelength(cls, **kwargs):
+        '''
+        Does filepath_length allow for filenames?
+        '''
+        errors = []
+        declared_len = int(cls.filepath_length)
+        path_len =  len(cls.upload_to_dir)
+        if (declared_len <= path_len):
+            errors.append(
+                checks.Error(
+                    "'filepath_length' must exceed base path length. 'filepath_length' len: {}, 'upload_to_dir' len: {}".format(
+                     declared_len,
+                     path_len,
+                     ),
+                    id='image_model.E002',
+                )
+            )
+        elif (declared_len <= (path_len + 12)):
+            errors.append(
+                checks.Warning(
+                    "Less than 12 chars avaiable for filenames. 'filepath_length' len: {}, 'upload_to_dir' len: {}".format(
+                     declared_len,
+                     path_len,
+                     ),
+                    id='image_model.W001',
+                )
+            )
+        return errors
+            
+                   
+    @classmethod
+    def _check_image_attrs(cls, **kwargs):
+        """Perform all field checks."""
+        errors = []
+        try:
+            l = int(cls.filepath_length)
+            if (l < 0 or l > 65000):
+                raise ValueError()
+        except (ValueError, TypeError):
+            errors.append(
+                checks.Error(
+                    "'filepath_length' value '%s' must be a number > 0 and < 55000." % cls.filepath_length,
+                    id='image_model.E001',
+                )
+            )
+        return errors
+        
+    @classmethod
+    def check(cls, **kwargs):
+        errors = super().check(**kwargs)
+        if not cls._meta.swapped:
+            errors += [*cls._check_image_attrs(**kwargs)]
+            errors += [*cls._check_available_filelength(**kwargs)]
+        return errors
+        
     class AutoDelete(models.IntegerChoices):
         UNSET = 0, _('Unset')
         NO = 1, _('Dont delete file')
         YES = 2, _('Auto-delete file')        
         
-    upload_date = models.DateTimeField(_("Date of upload"),
-        auto_now_add=True,
+    # can poulate from src.storage.get_created_time
+    # upload_date = models.DateTimeField(_("Date of upload"),
+        # auto_now_add=True,
+        # db_index=True
+    # )
+
+    _upload_time = models.DateTimeField(_("Datetime of upload"),
         db_index=True
     )
-    
+    #! enable
+    @property
+    def upload_time(self):
+        '''
+        upload time of the associated image.
+        Cached in a database field.
+        '''
+        # Although Django Imagefield will autopopulate 
+        # width and height, there is no support for upload_time.
+        if self._upload_time is None:
+            try:
+                # Storage should handle file opening or web hits.
+                self._upload_time = self.src.storage.get_created_time(self.src.name)
+            except Exception as e:
+                # File not found
+                #
+                # Have to catch everything, because the exception
+                # depends on the storage being used.
+                raise SourceImageIOError(str(e))
+
+            self.save(update_fields=['_upload_time'])
+        return self._upload_time
+
     #! not sure that title should be required, even with
     #! prepopulates. And it ain't unique. But what about
     #! the search issue? 
-    title = models.CharField(_('title'),
-        max_length=255,
-        #unique=True, 
-        db_index=True
-    )
+    # title = models.CharField(_('title'),
+        # max_length=255,
+        # #unique=True, 
+        # db_index=True
+    # )
     
     # A note about the name. Even if possible, using the word 'file'
     # triggers my, and probably other, IDEs. Again, even if possible,
     # naming this the same as the model is not a good idea, if only due 
     # to confusion in relations, let alone stray attribute manipulation 
     # in Python code. So, like HTML, it is 'src' 
-    src = models.ImageField(_('image_file'), 
+    
+    src = FreeImageField(_('image_file'), 
+    #src = models.ImageField(_('image_file'), 
         upload_to=get_upload_to, 
         width_field='width', 
         height_field='height',
+        #storage=FileSystemStorage(l
+        #    location=self.media_relative_path
+        #),
+        max_length=filepath_length, 
         #! model validators do not only run on upload, they run on any modification?
         # too much?
         validators = [
             validate_file_size,
             validate_image_file_extension
-        ]
+        ],
     )
     
     auto_delete = models.PositiveSmallIntegerField(_("Delete uploaded files on item deletion"), 
@@ -99,10 +203,10 @@ class AbstractImage(models.Model):
     )    
 
     # Django can use Pillow to provide width and height. So why?
-    # The 'orrible duplication is for cloud storage, to spare web hits. 
-    # Also to stop opening and closing the file, which is how file 
-    # storage attributes are loaded. Sure, they values will be cached, 
-    # but let's get this sorted here.
+    # The 'orrible duplication, which Django supports, is to spare web 
+    # hits on remote storage, and opening and closing the file for data. 
+    # Sure, the values could be cached, but here assuming code needs
+    # a solid reecord.
     width = models.PositiveIntegerField(verbose_name=_('width'), editable=False)
     height = models.PositiveIntegerField(verbose_name=_('height'), editable=False)
 
@@ -110,9 +214,33 @@ class AbstractImage(models.Model):
     # See the property further down.
     _bytesize = models.PositiveIntegerField(null=True, editable=False)
 
+    @property
+    def bytesize(self):
+        '''
+        vysize of the associated image.
+        Cached in a database field.
+        '''
+        # Although Django Imagefield will autopopulate 
+        # width and height, there is no support for bytesize.
+        if self._bytesize is None:
+            try:
+                # Storage should handle file opening or web hits.
+                self._bytesize = self.src.size
+            except Exception as e:
+                # File not found
+                #
+                # Have to catch everything, because the exception
+                # depends on the storage being used.
+                raise SourceImageIOError(str(e))
+
+            self.save(update_fields=['_bytesize'])
+        return self._bytesize
+
     def is_local(self):
         """
-        Returns True if the image is hosted on the local filesystem
+        Is the image on a local filesystem?
+        return
+            True if the image is hosted on the local filesystem
         """
         try:
             self.src.path
@@ -125,27 +253,6 @@ class AbstractImage(models.Model):
         except NotImplementedError:
             return False
 
-    # This exists because, although Django Imagefield will autopopulate 
-    # width and height via Pillow, pillow will not find the filesize.
-    # That can be done by opening a file using Python.
-    #! cache
-    @property
-    def bytesize(self):
-        if self._bytesize is None:
-            try:
-                self._bytesize = self.src.size
-            except Exception as e:
-                # File not found
-                #
-                # Have to catch everything, because the exception
-                # depends on the file subclass, and therefore the
-                # storage being used.
-                raise SourceImageIOError(str(e))
-
-            self.save(update_fields=['_bytesize'])
-            
-        return self._bytesize
-
     def get_upload_to(self, filename):
         # Incoming filename comes from upload machinery, and needs 
         # treatment. Also, path needs appending.
@@ -155,12 +262,14 @@ class AbstractImage(models.Model):
         # filename. Remove leading and trailing spaces; convert other spaces to
         # underscores; and remove anything that is not an alphanumeric, dash,
         # underscore, or dot.
-        filename = self.src.field.storage.get_valid_name(filename)
+        #filename = self.src.field.storage.get_valid_name(filename)
         
         # Then respect settings, such as truncation, and relative path 
         # to storage base
-        filename = decisions.image_save_path(filename)
-       
+        # image_save_path(field_file, upload_to_dir, filename)
+        filename = decisions.image_save_path(self.src, self.upload_to_dir, filename)
+        print('model fielname:')
+        print(str(filename))
         return filename
         
     @contextmanager
@@ -182,8 +291,8 @@ class AbstractImage(models.Model):
 
                 close_src = True
         except IOError as e:
-            # re-throw these as a SourceImageIOError
             # IOError comes from... an IO error. 
+            # re-throw these as a SourceImageIOError
             # so that calling code
             # can distinguish these from IOErrors elsewhere in the 
             # process e.g. currently causes a broken-image display.
@@ -191,14 +300,12 @@ class AbstractImage(models.Model):
 
         # Seek to beginning
         src.seek(0)
-
         try:
             yield src
         finally:
             if close_src:
                 src.close()
 
-    #? unused except for search eror handling
     @classmethod
     def get_reform_model(cls):
         """ Get the Reform models for this Image model """
@@ -226,7 +333,8 @@ class AbstractImage(models.Model):
             # A destination filename. Code needed the filter's
             # decision on the extension.
             p = Path(self.src.name)
-            dst_fname = filter_instance.filename(p.stem, iformat)
+            #dst_fname = filter_instance.filename(p.stem, iformat)
+            dst_fname = p.stem / iformat
             
             # Right, lets make a Django ImageFile from that
             reform_file = ImageFile(reform_buff, name=dst_fname)
@@ -250,12 +358,6 @@ class AbstractImage(models.Model):
     def is_landscape(self):
         return (self.height < self.width)
         
-
-    #! 
-    #@property
-    #def url(self):
-        #return self.src.url
-        
     @property
     def filename(self):
         '''
@@ -277,8 +379,9 @@ class AbstractImage(models.Model):
         return Path(self.src.name).stem + ' image'
         
     def __repr__(self):
-        return "Image(upload_date: {}, src:'{}', auto_delete:{})".format(
-            self.upload_date,
+        return "Image(upload_time: {}, src:'{}', auto_delete:{})".format(
+            #self.upload_date,
+            self.upload_time,
             #self.title,
             self.src,
             self.auto_delete
@@ -297,10 +400,20 @@ class Image(AbstractImage):
     class Meta:
         verbose_name = _('image')
         verbose_name_plural = _('images')
-
+        indexes = [
+            models.Index(fields=['_upload_time', 'src']),
+        ]
+        constraints = [
+            models.UniqueConstraint(fields=['src'], name='unique_image_image_src') 
+        ]
 
 
 class AbstractReform(models.Model):
+    upload_to_dir=None
+
+    # 100 is Django default
+    filepath_length=100
+    
     # For naming, see the note in AbstractImage
     src = models.FileField(
         upload_to=get_reform_upload_to,
@@ -311,7 +424,6 @@ class AbstractReform(models.Model):
     def url(self):
         return self.src.url
 
-    #! cache against lookup?
     @property
     def alt(self):
         return self.image.alt
@@ -329,31 +441,32 @@ class AbstractReform(models.Model):
     def get_upload_to(self, filename):
         # Incoming filename comes from get_reform() in Image, and  
         # only needs path appending.
-        filename = self.src.field.storage.get_valid_name(filename)
+        #filename = self.src.field.storage.get_valid_name(filename)
 
         # Then respect settings, such as truncation, and relative path 
-        # to storage base
-        return decisions.reform_save_path(filename)
+         # to storage base
+        #filename = decisions.image_save_path(self.src, self.upload_to_dir, filename)
+        return decisions.reform_save_path(self, filename)
         
-    @classmethod
-    def check(cls, **kwargs):
-        errors = super(AbstractReform, cls).check(**kwargs)
-        if not cls._meta.abstract:
-            if not any(
-                set(constraint) == set(['src', 'filter_id'])
-                for constraint in cls._meta.unique_together
-            ):
-                errors.append(
-                    checks.Error(
-                        "Custom reform model %r has an invalid unique_together setting" % cls,
-                        hint="Custom reform models must include the constraint "
-                        "('src', 'filter_id') in their unique_together definition.",
-                        obj=cls,
-                        id='images.E001',
-                    )
-                )
+    # @classmethod
+    # def check(cls, **kwargs):
+        # errors = super(AbstractReform, cls).check(**kwargs)
+        # if not cls._meta.abstract:
+            # if not any(
+                # set(constraint) == set(['src', 'filter_id'])
+                # for constraint in cls._meta.unique_together
+            # ):
+                # errors.append(
+                    # checks.Error(
+                        # "Custom reform model %r has an invalid unique_together setting" % cls,
+                        # hint="Custom reform models must include the constraint "
+                        # "('src', 'filter_id') in their unique_together definition.",
+                        # obj=cls,
+                        # id='images.E001',
+                    # )
+                # )
 
-        return errors
+        # return errors
   
     class Meta:
         abstract = True
@@ -371,12 +484,15 @@ class Reform(AbstractReform):
         )
     
     def __str__(self):
-        # Source name includes filter id, so unique
         return self.src.name
          
-         
-    class Meta:
-        unique_together = (
-            ('src', 'filter_id'),
-        )
 
+    class Meta:
+        verbose_name = _('reform')
+        verbose_name_plural = _('reforms')
+        indexes = [
+            models.Index(fields=['src']),
+        ]
+        constraints = [
+            models.UniqueConstraint(fields=['src'], name='unique_image_reform_src') 
+        ]

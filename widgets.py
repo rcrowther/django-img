@@ -9,7 +9,7 @@ class FileChooserDAndD(FileInput):
 
     @property
     def media(self):
-        return forms.Media(
+        return Media(
                 js=('image/js/file_drop.js',),
                 css={'screen': ('image/css/file_drop.css',),}
             )
