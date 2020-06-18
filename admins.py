@@ -49,10 +49,10 @@ class ImageLockedAdmin(admin.ModelAdmin):
     def upload_day(self, obj):
         '''e.g.	17 May 2020'''
         return format_html('{}',
-            obj.upload_date.strftime("%d %b %Y")
+            obj.upload_time.strftime("%d %b %Y")
         )
     upload_day.short_description = 'Upload day'
-    upload_day.admin_order_field = 'upload_date'
+    upload_day.admin_order_field = 'upload_time'
 
     # Choose a style of upload pickers
     formfield_overrides = {

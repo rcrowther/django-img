@@ -85,7 +85,6 @@ def filename_originals_maxlen(field_file, media_path):
     '''
     Length the settings will allow for filenames.
     '''
-    # o.src ImageFieldFile
     truncate_len = field_file.field.max_length
     full_path = field_file.storage.path(media_path)
     
@@ -96,8 +95,6 @@ def filename_reforms_maxlen(field_file, media_path):
     '''
     Length the settings will allow for filenames.
     '''
-    # o.src ImageFieldFile
-
     truncate_len = field_file.field.max_length
     full_path = field_file.storage.path(media_path)
     # -1 for a connector
@@ -129,33 +126,34 @@ def image_save_path(obj, filename):
     filename
         any kind of stringlike filename or path. Should have an extension. 
     '''
+    # Info from field: length limit, mangling and path-build utilities
     field_file = obj.src
-    
-    # Quote implementation:
+        
+    # Which media path?
+    media_path = media_path_originals(obj.upload_to_dir)
+            
+    #! do these two replicate functionality?
+    # Quote:
     # Return the given string converted to a string that can be used for a clean
     # filename. Remove leading and trailing spaces; convert other spaces to
     # underscores; and remove anything that is not an alphanumeric, dash,
     # underscore, or dot.
-    valid_filename = field_file.field.storage.get_valid_name(filename)
+    p = Path(field_file.field.storage.get_valid_name(filename))
 
-    p = Path(valid_filename)
-    
-    # This needs maybe truncation
-    # do a unidecode in the filename and then replace non-ascii 
+    # Unidecode in the filename then replace non-ascii 
     # characters in filename with _ , to sidestep issues with filesystem encoding
-    uni_stem = "".join((i if ord(i) < 128 else '_') for i in unidecode(p.stem))
+    decoded_stem = "".join((i if ord(i) < 128 else '_') for i in unidecode(p.stem))  
 
-    # Which media path?
-    media_path = media_path_originals(obj.upload_to_dir)
-            
-    # truncate filename to prevent path going over maxlen,
+    # make the end-tag
+    tag = p.suffix
+    
+    # Find maxlen for the filename, then truncate
     # accounting for declared paths and filename extensions
     # https://code.djangoproject.com/ticket/9893
-    tag = p.suffix
     stem_limit = filename_originals_maxlen(field_file,  media_path) - len(tag)
-    stem = uni_stem[:stem_limit]
+    stem = decoded_stem[:stem_limit]
 
-    # This needs the /media relative path building.
+    # return the /media relative path.
     return path.join(media_path, stem + tag)
     
 def reform_save_path(obj, filename):
@@ -168,36 +166,35 @@ def reform_save_path(obj, filename):
     filename
         any kind of stringlike filename or path. Should have an extension. 
     '''
+    # Info from field: length limit, mangling and path-build utilities
     field_file = obj.src
-
-    # Quote implementation:
-    # Return the given string converted to a string that can be used for a clean
-    # filename. Remove leading and trailing spaces; convert other spaces to
-    # underscores; and remove anything that is not an alphanumeric, dash,
-    # underscore, or dot.
-    valid_filename = field_file.field.storage.get_valid_name(filename)
-
-    p = Path(valid_filename)
-        
-    # Starts with a filename, needs a path relative to /media.
-    safe_stem = p.stem
-
 
     # Which media path?
     media_path = media_path_reforms(obj.upload_to_dir)
     
-    # Still need to truncate on a reform. It has a filter id appended,
-    # and maybe a new extension.
-    #! issue. Lop respect the filter addition.
-    #! issue: Djano doe truncation, but we want our way? Which mean calculating lengths?
+    # Reform is internal, so we have an internal representation of
+    # filename already
+    p = Path(filename)
+        
+    src_stem = p.stem
     
-    # Storage.locattion does it
-    # self._value_or_setting(self._location, settings.MEDIA_ROOT)
-    # storage.path(name)
-    tag = obj.filter_id + p.suffix
-    stem_limit = filename_reforms_maxlen(field_file, media_path) - len(tag)
-    stem = safe_stem[:stem_limit]        
+    # filterid is a dotted path
+    # It will be added to the reform file path, so make it url-like.
+    # We loose a little of the id by converting, but the file saving
+    # gear will mangle if there is a clash, so rename affects 
+    # no basic functionality. 
+    filter_id = obj.filter_id.lower().replace('.', '_')
 
-    # This needs the /media relative path building.
+    # make the end-tag
+    # e.g. tag = "-image_thumb.png"
+    tag = '-' + filter_id + p.suffix
+
+    # Find maxlen for the filename, then truncate
+    # accounting for declared paths and filename extensions
+    # https://code.djangoproject.com/ticket/9893
+    stem_limit = filename_reforms_maxlen(field_file, media_path) - len(tag)
+    stem = src_stem[:stem_limit]        
+
+    # return the /media relative path.
     return path.join(media_path, stem + tag)
 

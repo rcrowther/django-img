@@ -1,19 +1,17 @@
 = Structure
 How does cloud storage generate reforms?
-Images Admin not removing files (do last)
-Does auto delete work? (Partly)
+Does auto delete work? (Check again)
 auto_delete tests
-Django is checking filename length
 
 == Model
-Test making new models
-Remove title
 
 == Management
 
 
 == Images
 
+== Filters
+Thumb not shrinking
 
 == Reforms
 
@@ -21,12 +19,12 @@ Remove title
 == Filters
 For cloud, what do you get to make reforms? so what source goes into the filter?
 Register, want an instance? Admin want Model?
+Check positioning staticly?
 
 == Admin
 
 == Tags
-Can title be part of general tag? No...
-
+Test query
 
 == Utils
 
@@ -34,10 +32,9 @@ Can title be part of general tag? No...
 
 == Settings
 ? Cache filepaths, and the like
-
+Sort this crisis in model config and settings.
 
 == Widgets
-Make no_data_message on RemoteControlWidget an attribute too
 No mark_safe in RemoteControlWidget?
 D&D wiget not work with prepopulattion--a click on the label fixes that?
 
@@ -61,8 +58,6 @@ For filter format (size)?
 Test quickstart
 
 = General
-STATIC_OR_URL
-and switch between them
 SVG upload?
 Theres a request issue round auto_discover?
 

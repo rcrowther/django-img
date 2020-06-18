@@ -72,10 +72,10 @@ Declare in Django settings,
             ...
         ]
 
-migrate now, or declare a field (see below) then migrate,
+migrate now,
 
-    ./manage.py makemigrations
-    ./manage.py migrate
+    ./manage.py makemigrations image
+    ./manage.py migrate image
 
 If you have Django Admin, you can now upload images.
 
@@ -93,23 +93,40 @@ You can create, meaning upload and register, fifteen or twenty images in a few s
 
 
 ## Viewing images
-Ok, let's show an image. Find a web view template. Nearly any template will do (maybe not a JSON REST interface, something visible).
+Ok, let's see an image, as you would on site. Two ways.
 
-Have a look at the images you uploaded. Add this tag to the template, 
+### Via a view 
+Find a web view template. Nearly any template will do (maybe not a JSON REST interface, something visible).
 
-        {{ imagebytitle image.Thumb "someTitle" }}
+Add this tag to the template,
 
-'image.Thumb' is a predefined filter, the only one the app contains. It makes a 64x64 pixel Thumbnail. You are searching for an image by title, which you state.  
+    {% load img_tags %}
+    ...
+    {% imagequery "pk=1" image.Thumb %}
 
-Visit the page, have a look at the result. The app will generate the reformed image automatically, 
+'image.Thumb' is a predefined filter, the only one the app contains. It makes a 64x64 pixel Thumbnail. You are searching for an image by a very low method, "pk=1", which will do for now.  
+
+Visit the page, have a look at the result. The app will generate the filtered 'reform' image automatically, 
 
 To change how the image is filtered, size and so on, see Filters. Or read on.
 
 
-## Filters
-Perhaps your firat request will be how to make a new filter. So, a slight deviation from a Quickstart.
+### Don't have a view?
+Yeh, new or experimental site, I know,.. Image has a builtin view. Goto urls.py, add this,
 
-Make a new file called 'image filters'. Put it in the top level of any app, or in the site folder (alongside url.py and wsgi.py). Put something like this in it (adapt if you wish),
+    path('image/<int:pk>/', ImageDetailView.as_view(), name='image-detail'),
+
+Now visit (probably),
+
+    http://localhost:8000/image/1/
+
+To see some *real* web code.
+
+
+## Filters
+Perhaps your firat request will be how to make a new filter. So, a slight deviation.
+
+Make a new file called 'image filters'. Put it in the top level of any app, or in the site folder (alongside url.py and wsgi.py). Put something in it like this (adapt if you wish),
 
     from image import Resize, registry
 
@@ -120,15 +137,13 @@ Make a new file called 'image filters'. Put it in the top level of any app, or i
 
     registry.register(MediumImage)
  
-Now adapt the template tag to point at the new filter,
+Now adapt the template tag to point at the new filter (or in image/templates/image/image_detail.html),
 
-        {{ imagebytitle someAppName.MediumImage "someTitle" }}
+    {% imagequery "pk=1" someAppName.MediumImage %}
 
 Visit the page again. Image sees the new filter definition, finds it has no record of a reform for that image and filter, so generates a new one, then displays it.
 
-I hope you can see what you are doing here. You made a new filter definition, deriving from a base filter called ''Resize'. You registered the filter, in the same way you might register an app admin. You then asked the template tag to use it. The app did the resize, saved the reform image, returned it's filepath.
-
-If you want to continue, you probably have many questions. Goto the main documentation.
+Ok, you changed the image size, and maybe the format. If you want to continue, you probably have many questions. Goto the main documentation.
 
 
 
@@ -156,7 +171,8 @@ That's it, gone.
 # Full documentation
 The documenation is split into general areas. 
 
-- Attaching images to models, creating other tables
+- Attaching images to models
+- Creating other tables
 - Filters
 - Viewing images
 - Uploading
@@ -253,40 +269,76 @@ will leave images in storage and the models on the db.
 Also, null=True and blank=True means you can delay adding an image until later. And related_name='*' means that Images will not start tracking the model you are creating. Se Django documentation of model fields for more details.
 
 
-### Creating new tables
-#### Overview
-Its fun to tweak with settings, but sometimes, maybe even often, this is not the best approach.
+## Creating new Image-handling tables
+Image is equipped, and it is expected, that you will create new models from the base models. New image models have new DB tables, new upload folders and different configuration.
 
-Let's say you have a website which gathers photos that are joined to NewsArticle. Those photos are linked for sure to the Article, and can probably be created and deleted with the NewsAreticle. But you may also have a need to be uploading images for the site in general. Perhaps for banner displays. Not only the deletion policy, but the banner display has a need for titles that are easy to refer to and administer as a pool. Wheras the NewsArticle photos will not need to be pooled, but may need extra information attached such as captions, credits, dates, and/or data for semantic rendering.
+Two scenarios where you may want to do this,
+
+### Extend data associated with images
+There is a lot of extra data you may want to associate with an image. 
+
+Many people's first thought would be a title. That said, a title is often not displayed, and/or a simple duplication of a filename, which should be avoided. That's why Image does not provide titles by default.
+
+But other kinds of information can be attached such as captions, credits, dates, and/or data for semantic rendering. All of these can legitimately viewed as 'part of the image' or 'an aspect of the image'.
+
+### Splitting needs
+Its fun to tweak with settings, but sometimes, maybe often, this is not the best approach.
+
+Let's say you have a website which gathers photos that are joined to NewsArticle. Those photos are linked for sure to the Article, and can probably be created and deleted with the NewsArticle. They may also need license, credit, extra date, caption and semantic text fields.
+
+But you may also have a need to upload images for the site in general. Perhaps for banner displays. This is an image pool. The deletion policy is different. There may be no need for credits.
  
-I know the business of uploading images is difficult in website software, so it is tempting to think about the action, about getting the job done, But I encourage you to think in terms of the basics of data structure and semantics. In those terms, the needs listed above describe two seperate apps.
+These are two seperate apps. Avoid complex configuration, make two apps.
 
-The image app contains a lot of functionality, so if you are sure you want a general pool, go ahead and create it. Or you can use another app alongside image.
- 
-In this case, it will be better to create a new image app. Image and Reform models are created with an abstract base. So you can create what is, in effect, another app, with seperate database tables, configured differently.
+## Creating new tables
+In an app, do this. 
 
-### Creating new tables
-In an app, do this,
-
-from image.models import AbstractImage, AbstractReform
+    from image.models import AbstractImage, AbstractReform
 
     class NewssArticleImage(AbstractImage):
+        upload_to_dir='news_originals'
+        filepath_length=100
+
         # AbstractImage has a title and upload_date
-        caption = models.CharField(_('title'),
+        caption = models.CharField(_('Caption'),
             max_length=255,
         )
 
-        author = models.CharField(_('title'),
+        author = models.CharField(_('Author'),
             max_length=255,
             db_index=True
         )
 
         etc.
 
-    class NewssArticleReform(AbstractReform):
-        pass
+        class Meta:
+            constraints = [
+                models.UniqueConstraint(
+                    fields=['src'], 
+                    name='unique_newsarticle_reform_src'
+                ) 
 
-That's it. You now have a new image upload app. It has it's own DB tables. It's configuration can be set to auto-delete. Refer to it in the models,
+    class NewssArticleReform(AbstractReform):
+        upload_to_dir='news_reforms'
+        filepath_length=100
+
+        image = models.ForeignKey(NewssArticleImage, on_delete=models.CASCADE, related_name='reforms')
+
+        class Meta:
+            constraints = [
+                models.UniqueConstraint(
+                    fields=['src'], 
+                    name='unique_newsarticle_reform_src'
+                ) 
+            ]
+
+Sorry it's not the last word in DRY coding, but you should be able to work out what the code is there for. Note the two configuration variables. Useful. Think about them before you migrate.
+
+Then migrate,
+
+    ./manage.py migrate NewsArticle
+
+You now have a new image upload app. It has it's own DB tables. Change it's configuration. Refer to it in the models,
 
     class NewsArticle(models.Model):
 
@@ -299,6 +351,29 @@ That's it. You now have a new image upload app. It has it's own DB tables. It's 
             )
 
         etc.
+
+### Things to do with subcalsses of models
+
+You may want to configure a Meta. If you have titles or slugs, for example, you may be interested in making them into unique constrained groups or adding indexes,
+
+    class NewssArticleImage(AbstractImage):
+        upload_to_dir='news_originals'
+        filepath_length=100
+
+        etc.
+
+        class Meta:
+            verbose_name = _('news_image')
+            verbose_name_plural = _('news_images')
+            indexes = [
+                models.Index(fields=['author']),
+            ]
+            constraints = [
+                models.UniqueConstraint(
+                    fields=['title', 'author'], 
+                    name='unique_newsarticle_reform_src'
+                )
+
 
 
 ## Filters

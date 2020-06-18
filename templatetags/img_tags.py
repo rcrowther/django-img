@@ -68,7 +68,7 @@ def filter_id_resolve(context, filter_id):
         # to look for. In case there is some sly tampering, or edge 
         # usecase, though the message is unhelpful...
         if (not(view)):
-            raise ImproperlyConfigured("A short filter reference has been provided, but the template context has no view to supply a full path. filter_id:{}".format(
+            raise ImproperlyConfigured("A short filter reference has been provided, but the template context has no view information to supply a full path. filter_id:{}".format(
                 filter_id,
             ))
         app_name = view.__module__.split('.', 1)[0]
@@ -77,16 +77,16 @@ def filter_id_resolve(context, filter_id):
 
 
 
-class ImageByTitleNode(template.Node):
-    def __init__(self, image_model, filter_id, kwargs):
-        self.image = image_model
+class ImgFromImageInstanceNode(template.Node):
+    def __init__(self, instance, filter_id, kwargs):
+        self.instance = instance
         self.filter_id = filter_id      
         self.kwargs = kwargs
         
     def render(self, context):
         try:
             ifilter = registry(filter_id_resolve(context, self.filter_id))      
-            reform = get_reform_or_not_found(self.image, ifilter)
+            reform = get_reform_or_not_found(self.instance, ifilter)
             attrs = reform.attrs_dict.copy()
             attrs.update(self.kwargs)
             return mark_safe('<img {} />'.format(flatatt(attrs)))
@@ -100,12 +100,16 @@ def image_by_title_tag(parser, token):
     Lookup an image by filter, and title.
     If a view has already generated a context with models, this is not 
     a prefered method, as it makes a database lookup.
-    @img_title string reference to an image by title e.g. 'taunton_skyscraper'
-    @filter_id string module path to a Filter e.g. "image.Format". If 
-    the Filter is only named, the app location of the calling view is 
-    added e.g. if "Large" is called from a view in 'page', the filter 
-    become "page.Large" 
-    @kwargs added as attributes to the final tag.
+    img_title string 
+        reference to an image by title e.g. 'taunton_skyscraper'
+    filter_id 
+        string module path to a Filter e.g. "image.Format". If 
+        the Filter is only named, the app location of the calling view is 
+        added e.g. if "Large" is called from a view in 'page', the filter 
+        become "page.Large"
+     
+    kwargs 
+        added as attributes to the final tag.
     ''' 
     lumps = token.split_contents()
 
@@ -121,9 +125,50 @@ def image_by_title_tag(parser, token):
     image_title = arg_unquote(lumps[1], token, 'image title')
     image_model = Image.objects.get(title=image_title)
 
-    return ImageByTitleNode(image_model, filter_id, kwargs)
+    return ImgFromImageInstanceNode(image_model, filter_id, kwargs)
 
+@register.tag(name="imagequery")
+def image_from_query_tag(parser, token):
+    '''
+    Lookup an image by query (and filter).
+    This is not a prefered method, It only works on the base image 
+    model, and if a view has already generated a context with models, 
+    it duplicates a database lookup. But it is useful for fixed images 
+    and debugging.
+    
+    If you need to lookup by filepath, it is difficult, you need the
+    media-relative filepath, not only the filename.
+    
+    img_filename string 
+        reference to an image by filename e.g. 'taunton_skyscraper'
+    filter_id 
+        string module path to a Filter e.g. "image.Format". If 
+        the Filter is only named, the app location of the calling view is 
+        added e.g. if "Large" is called from a view in 'page', the filter 
+        become "page.Large"
+     
+    kwargs 
+        added as attributes to the final tag.
+    ''' 
+    lumps = token.split_contents()
 
+    if(len(lumps) < 3):
+        raise template.TemplateSyntaxError(
+            "Imagefromquery tag needs two arguments. tag:{}".format(
+                token.contents,
+            ))
+            
+    tag_name = lumps[0]
+    query = arg_unquote(lumps[1], token, 'query')
+    filter_id = lumps[2]
+    kwargs = to_kwargs(token, lumps[3:])
+    
+    # what a faff
+    #? self.model.DoesNotExist. Or are we ok with broken image?
+    e = query.split('=',1)  
+    image_model = Image.objects.get(**{e[0]: e[1]})
+    return ImgFromImageInstanceNode(image_model, filter_id, kwargs)
+    
 
 class ImageNode(template.Node):
     def __init__(self, image_model, filter_id, kwargs):
@@ -149,17 +194,18 @@ def image_tag(parser, token):
     Lookup and display an image. 
     Search is by image details, passed in a context, and filter id.
     If a view has already generated a context with models, this is the
-    prefered method.
+    prefered method. The tag will also work for subclasses of the app
+    models.
     
     image_model 
         reference to an image in the template context (NB: 
-    the parameter can handle dotted notation e.g. page.image)
+        the parameter can handle dotted notation e.g. page.image)
     
     filter_id 
         string module path to a Filter e.g. "image.Format". If 
-    the Filter only is named, the app location of the calling view is 
-    added e.g. if "Large" is called from a view in 'page', the filter 
-    becomes "page.Large"
+        the Filter only is named, the app location of the calling view is 
+        added e.g. if "Large" is called from a view in 'page', the filter 
+        becomes "page.Large"
      
     kwargs 
         Will be added as attribut4es to the final tag.

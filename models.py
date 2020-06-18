@@ -59,90 +59,39 @@ class AbstractImage(models.Model):
     These replace storage backend ingenuity with recorded data.
     Also provides accessors for useful derivatives such as 'alt' and 
     'url'.
-    Handles upload_to in a configurable way.
-    And also provides machinery for Reform handling.
+    
+    Handles upload_to in a configurable way, and also provides 
+    machinery for Reform handling.
+    
+    A note on configuration. An Image or Reform is always expected to 
+    point at a file, it is never null. To not point at a file is an 
+    error---see shortcuts and 'broken image'. Whatever model keys an 
+    Image/Reform is still free to be null.
+    
+    An Images/Reform model is locked to a file folder. New models, even 
+    if given files from the same folder, are file-renamed by Django. 
+    Thus each file is unique, and each file field in the model is 
+    unique.  
     '''
     # None is 'use settings default'
     upload_to_dir='originals'
     
     # 100 is Django default
-    # Can not be None
     #! template tag
     filepath_length=100
-    
-    #! move checks out of class
-    #! needs to check media path
-    @classmethod
-    def _check_available_filelength(cls, **kwargs):
-        '''
-        Does filepath_length allow for filenames?
-        '''
-        errors = []
-        declared_len = int(cls.filepath_length)
-        path_len =  len(cls.upload_to_dir)
-        if (declared_len <= path_len):
-            errors.append(
-                checks.Error(
-                    "'filepath_length' must exceed base path length. 'filepath_length' len: {}, 'upload_to_dir' len: {}".format(
-                     declared_len,
-                     path_len,
-                     ),
-                    id='image_model.E002',
-                )
-            )
-        elif (declared_len <= (path_len + 12)):
-            errors.append(
-                checks.Warning(
-                    "Less than 12 chars avaiable for filenames. 'filepath_length' len: {}, 'upload_to_dir' len: {}".format(
-                     declared_len,
-                     path_len,
-                     ),
-                    id='image_model.W001',
-                )
-            )
-        return errors
-            
-                   
-    @classmethod
-    def _check_image_attrs(cls, **kwargs):
-        """Perform all field checks."""
-        errors = []
-        try:
-            l = int(cls.filepath_length)
-            if (l < 0 or l > 65000):
-                raise ValueError()
-        except (ValueError, TypeError):
-            errors.append(
-                checks.Error(
-                    "'filepath_length' value '%s' must be a number > 0 and < 55000." % cls.filepath_length,
-                    id='image_model.E001',
-                )
-            )
-        return errors
-        
-    @classmethod
-    def check(cls, **kwargs):
-        errors = super().check(**kwargs)
-        if not cls._meta.swapped:
-            errors += [*cls._check_image_attrs(**kwargs)]
-            errors += [*cls._check_available_filelength(**kwargs)]
-        return errors
         
     class AutoDelete(models.IntegerChoices):
         UNSET = 0, _('Unset')
         NO = 1, _('Dont delete file')
         YES = 2, _('Auto-delete file')        
         
-    # can poulate from src.storage.get_created_time
-    # upload_date = models.DateTimeField(_("Date of upload"),
-        # auto_now_add=True,
-        # db_index=True
-    # )
 
+    # Not autopoulated by storage, so funny name.
+    # See the property
     _upload_time = models.DateTimeField(_("Datetime of upload"),
-        db_index=True
+        db_index=True, null=True, editable=False
     )
-    #! enable
+
     @property
     def upload_time(self):
         '''
@@ -178,10 +127,10 @@ class AbstractImage(models.Model):
     # triggers my, and probably other, IDEs. Again, even if possible,
     # naming this the same as the model is not a good idea, if only due 
     # to confusion in relations, let alone stray attribute manipulation 
-    # in Python code. So, like HTML, it is 'src' 
-    
+    # in Python code. So, like HTML, it is 'src'     
     src = FreeImageField(_('image_file'), 
     #src = models.ImageField(_('image_file'), 
+        unique=True,
         upload_to=get_upload_to, 
         width_field='width', 
         height_field='height',
@@ -211,7 +160,7 @@ class AbstractImage(models.Model):
     height = models.PositiveIntegerField(verbose_name=_('height'), editable=False)
 
     # Not autopoulated by storage, so funny name.
-    # See the property further down.
+    # See the property
     _bytesize = models.PositiveIntegerField(null=True, editable=False)
 
     @property
@@ -267,7 +216,7 @@ class AbstractImage(models.Model):
         # Then respect settings, such as truncation, and relative path 
         # to storage base
         # image_save_path(field_file, upload_to_dir, filename)
-        filename = decisions.image_save_path(self.src, self.upload_to_dir, filename)
+        filename = decisions.image_save_path(self, filename)
         print('model fielname:')
         print(str(filename))
         return filename
@@ -330,11 +279,11 @@ class AbstractImage(models.Model):
             with self.open_src() as fsrc:
                 (reform_buff, iformat) = filter_instance.process(fsrc)
 
-            # A destination filename. Code needed the filter's
+            # A destination filename. Code needs the filter's
             # decision on the extension.
             p = Path(self.src.name)
             #dst_fname = filter_instance.filename(p.stem, iformat)
-            dst_fname = p.stem / iformat
+            dst_fname = p.stem + '.' + iformat
             
             # Right, lets make a Django ImageFile from that
             reform_file = ImageFile(reform_buff, name=dst_fname)
@@ -348,16 +297,8 @@ class AbstractImage(models.Model):
             )
 
             reform.save()
-
         return reform
 
-
-    def is_portrait(self):
-        return (self.width < self.height)
-
-    def is_landscape(self):
-        return (self.height < self.width)
-        
     @property
     def filename(self):
         '''
@@ -365,7 +306,7 @@ class AbstractImage(models.Model):
         Useful for admin displays, and others.
         '''
         return os.path.basename(self.src.name)
-        
+
     @property
     def alt(self):
         '''
@@ -375,8 +316,73 @@ class AbstractImage(models.Model):
         Subclasses might override this attribute to use more refined 
         data, such as a slug or title.
         '''
-        #return self.title.lower() + ' image'
         return Path(self.src.name).stem + ' image'
+                
+    def is_portrait(self):
+        return (self.width < self.height)
+
+    def is_landscape(self):
+        return (self.height < self.width)
+        
+    #? move checks out of class
+    #! needs to check media path
+    @classmethod
+    def _check_available_filelength(cls, **kwargs):
+        '''
+        Does filepath_length allow for filenames?
+        '''
+        errors = []
+        declared_len = int(cls.filepath_length)
+        path_len =  len(cls.upload_to_dir)
+        if (declared_len <= path_len):
+            errors.append(
+                checks.Error(
+                    "'filepath_length' must exceed base path length. 'filepath_length' len: {}, 'upload_to_dir' len: {}".format(
+                     declared_len,
+                     path_len,
+                     ),
+                    id='image_model.E002',
+                )
+            )
+        elif (declared_len <= (path_len + 12)):
+            errors.append(
+                checks.Warning(
+                    "Less than 12 chars avaiable for filenames. 'filepath_length' len: {}, 'upload_to_dir' len: {}".format(
+                     declared_len,
+                     path_len,
+                     ),
+                    id='image_model.W001',
+                )
+            )
+        return errors
+            
+    @classmethod
+    def _check_image_attrs(cls, **kwargs):
+        '''
+        Check filepath_length in a reasonable (modern OS) range.
+        '''
+        errors = []
+
+        try:
+            l = int(cls.filepath_length)
+            if (l < 0 or l > 65000):
+                raise ValueError()
+        except (ValueError, TypeError):
+            errors.append(
+                checks.Error(
+                    "'filepath_length' value '%s' must be a number > 0 and < 65000." % cls.filepath_length,
+                    id='image_model.E001',
+                )
+            )
+        return errors
+        
+    @classmethod
+    def check(cls, **kwargs):
+        errors = super().check(**kwargs)
+        if not cls._meta.swapped:
+            errors += [*cls._check_image_attrs(**kwargs)]
+            errors += [*cls._check_available_filelength(**kwargs)]
+        return errors
         
     def __repr__(self):
         return "Image(upload_time: {}, src:'{}', auto_delete:{})".format(
@@ -408,14 +414,17 @@ class Image(AbstractImage):
         ]
 
 
+
 class AbstractReform(models.Model):
-    upload_to_dir=None
+    # None is 'use settings default'
+    upload_to_dir='reforms'
 
     # 100 is Django default
     filepath_length=100
     
     # For naming, see the note in AbstractImage
     src = models.FileField(
+        unique=True,
         upload_to=get_reform_upload_to,
         )
     filter_id = models.CharField(max_length=255, db_index=True)

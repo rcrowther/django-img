@@ -29,7 +29,6 @@ class Filter():
     other codebases to bue used in a filler without changing calling 
     code.
     '''
-      
     #? cache
     @classmethod
     def _module_path_human(cls):
@@ -60,7 +59,7 @@ class Filter():
         id for the filter.
         Used to refer in the registry and templates, so is human 
         readable. 
-        Currently based on the module path and classname.
+        Currently based on a dotted module path and classname.
         '''
         p = cls._module_path_human()
         p.append( cls.__name__ )
@@ -71,6 +70,7 @@ class Filter():
         # the path.
         return ".".join(p)
         
+    #x unused?
     def filename(self, stem, extension):
         '''
         Generate a filename from a base string.
