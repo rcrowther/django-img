@@ -5,11 +5,6 @@ from . import common
 
 
 
-media_subpath_originals = 'originals'
-file_path_originals = '/srv/soundsense/media/originals'
-
-
-
 class Command(BaseCommand):
     help = 'Resync local image files to the database. Default is to print status.'
     output_transaction = True
@@ -155,12 +150,11 @@ class Command(BaseCommand):
             if ( (model_count != file_count) or options['verbosity'] > 0):
                 print("model_count: {}".format(model_count))
                 print("file_count: {}".format(file_count))
-                print()
             if (model_count > file_count):
-                print('files appear to be missing. Try --remove-orphaned-models')
+                print('[warning] files appear to be missing. Try --remove-orphaned-models')
             elif (file_count > model_count):
-                print('models appear to be missing. Try --add-orphaned-files or --remove-orphaned-files')
+                print('[warning] models appear to be missing. Try --add-orphaned-files or --remove-orphaned-files')
             else:
-                print('No sync issues detected.')
+                print('** No sync issues detected')
             
             
