@@ -20,8 +20,8 @@ class TestReforms(TestCase):
         self.filter = Thumb()
         self.reform = self.image.get_reform(self.filter)
 
-    def test_upload_to_dir(self):
-        self.assertEqual(self.reform.upload_to_dir, 'reforms')
+    def test_upload_dir(self):
+        self.assertEqual(self.reform.upload_dir, 'reforms')
 
     def test_filepath_length(self):
         self.assertEqual(self.reform.filepath_length, 100)

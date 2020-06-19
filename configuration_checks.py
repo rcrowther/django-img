@@ -32,7 +32,6 @@ def check_image_formats(class_name, setting_name, v):
             v,
             "', '".join(IMAGE_FORMATS),
         ))
-        
 
 def check_jpeg_quality(class_name, setting_name, v):
     if (v and (v < 1 or v > 100)):

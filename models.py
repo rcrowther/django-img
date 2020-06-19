@@ -74,7 +74,7 @@ class AbstractImage(models.Model):
     unique.  
     '''
     # None is 'use settings default'
-    upload_to_dir='originals'
+    upload_dir='originals'
     
     # 100 is Django default
     #! template tag
@@ -215,7 +215,7 @@ class AbstractImage(models.Model):
         
         # Then respect settings, such as truncation, and relative path 
         # to storage base
-        # image_save_path(field_file, upload_to_dir, filename)
+        # image_save_path(field_file, upload_dir, filename)
         filename = decisions.image_save_path(self, filename)
         print('model fielname:')
         print(str(filename))
@@ -333,11 +333,11 @@ class AbstractImage(models.Model):
         '''
         errors = []
         declared_len = int(cls.filepath_length)
-        path_len =  len(cls.upload_to_dir)
+        path_len =  len(cls.upload_dir)
         if (declared_len <= path_len):
             errors.append(
                 checks.Error(
-                    "'filepath_length' must exceed base path length. 'filepath_length' len: {}, 'upload_to_dir' len: {}".format(
+                    "'filepath_length' must exceed base path length. 'filepath_length' len: {}, 'upload_dir' len: {}".format(
                      declared_len,
                      path_len,
                      ),
@@ -347,7 +347,7 @@ class AbstractImage(models.Model):
         elif (declared_len <= (path_len + 12)):
             errors.append(
                 checks.Warning(
-                    "Less than 12 chars avaiable for filenames. 'filepath_length' len: {}, 'upload_to_dir' len: {}".format(
+                    "Less than 12 chars avaiable for filenames. 'filepath_length' len: {}, 'upload_dir' len: {}".format(
                      declared_len,
                      path_len,
                      ),
@@ -417,7 +417,7 @@ class Image(AbstractImage):
 
 class AbstractReform(models.Model):
     # None is 'use settings default'
-    upload_to_dir='reforms'
+    upload_dir='reforms'
 
     # 100 is Django default
     filepath_length=100
@@ -454,7 +454,7 @@ class AbstractReform(models.Model):
 
         # Then respect settings, such as truncation, and relative path 
          # to storage base
-        #filename = decisions.image_save_path(self.src, self.upload_to_dir, filename)
+        #filename = decisions.image_save_path(self.src, self.upload_dir, filename)
         return decisions.reform_save_path(self, filename)
         
     # @classmethod

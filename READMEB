@@ -296,7 +296,7 @@ In an app, do this.
     from image.models import AbstractImage, AbstractReform
 
     class NewssArticleImage(AbstractImage):
-        upload_to_dir='news_originals'
+        upload_dir='news_originals'
         filepath_length=100
 
         # AbstractImage has a title and upload_date
@@ -319,7 +319,7 @@ In an app, do this.
                 ) 
 
     class NewssArticleReform(AbstractReform):
-        upload_to_dir='news_reforms'
+        upload_dir='news_reforms'
         filepath_length=100
 
         image = models.ForeignKey(NewssArticleImage, on_delete=models.CASCADE, related_name='reforms')
@@ -357,7 +357,7 @@ You now have a new image upload app. It has it's own DB tables. Change it's conf
 You may want to configure a Meta. If you have titles or slugs, for example, you may be interested in making them into unique constrained groups or adding indexes,
 
     class NewssArticleImage(AbstractImage):
-        upload_to_dir='news_originals'
+        upload_dir='news_originals'
         filepath_length=100
 
         etc.

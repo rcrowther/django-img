@@ -1,7 +1,9 @@
 from django.core.management.base import BaseCommand
 from image.models import Image
 from pathlib import Path
-from image.settings import settings
+from . import common
+
+
 
 media_subpath_originals = 'originals'
 file_path_originals = '/srv/soundsense/media/originals'
@@ -9,14 +11,21 @@ file_path_originals = '/srv/soundsense/media/originals'
 
 
 class Command(BaseCommand):
-    help = 'Resync local image files to the database. The default (no options) adds models for orphan files.'
+    help = 'Resync local image files to the database. Default is to print status.'
     output_transaction = True
     
     def add_arguments(self, parser):
+        common.add_model_argument(parser)
         parser.add_argument(
             '--remove-orphaned-files',
             action='store_true',
-            help='Delete orphaned files (the default is to register them)',
+            help='Delete orphaned files',
+        )
+        parser.add_argument(
+            '-a',
+            '--add-orphaned-files',
+            action='store_true',
+            help='Add models for orphaned files (model attributes default)',
         )
         parser.add_argument(
             '--remove-orphaned-models',
@@ -24,45 +33,51 @@ class Command(BaseCommand):
             help='Delete orphaned models (with no matching file)',
         )        
         
-    def originals_fp_list(self):
-        d = file_path_originals
-        
-        # get all file paths
-        return [f for f in d.iterdir() if f.is_file()]
+    def originals_fp_list(self, file_dir):
+        return [f for f in file_dir.iterdir() if f.is_file()]
 
-    def db_image_fp_list(self):
+    def db_image_fp_list(self, Model, storage_location):
         ''' 
         Read all image model paths
-        @return full-path Paths
+        return 
+            full-path Paths
         '''
-        val_list = Image.objects.values_list('src', flat=True)
-        media_full_path = Path(settings.media_root)
-        
-        return [media_full_path / rel_path for rel_path in val_list]
+        val_list = Model.objects.values_list('src', flat=True)
+        return [storage_location / rel_path for rel_path in val_list]
             
-    def db_image_list(self):
+    def db_image_list(self, Model, storage_location):
         ''' 
         Read all image models for pk and src
-        @return object list supplemented with 'full_path' key referencing a Path
+        return
+            list -> dict {fieldname: fieldvalue} supplemented with 'full_path' key/value
         '''
-        val_list = Image.objects.values('pk', 'src')
-        # do fullpath with src.name?
-        media_full_path = Path(settings.media_root)
+        val_list = Model.objects.values('pk', 'src')
         for e in val_list:
-            e['full_path']  = media_full_path / e['src']
-        
+            e['full_path']  = storage_location / e['src']
         return  val_list  
 
+    def db_image_count(self, Model):
+        return Model.objects.count()
+        
     def handle(self, *args, **options):        
-        ml = self.originals_fp_list()
+        Model = common.get_model(options, allow_reform=False)
+        
+        # get the model dir path
+        # Mad Django
+        storage = Model._meta.get_field('src').storage   
+        location = Path(storage.location)
+        file_dir = Path(storage.path(Model.upload_dir))    
+        fl = self.originals_fp_list(file_dir)
 
+        #print(str(options))
+        #print(str([p.name for p in dbl]))
+        #raise Exception()
+        
         if options['remove_orphaned_models']:            
-            dbl = self.db_image_list()          
-            model_no_file = [m for m in dbl if not(m['full_path'] in ml)]           
+            dbl = self.db_image_list(Model, location)
+            model_no_file = [m for m in dbl if not(m['full_path'] in fl)]           
             pks = [m['pk'] for m in model_no_file]
-                
             r = Image.objects.filter(pk__in=pks).delete()
-
             if (options['verbosity'] > 0):
                 print("{} model(s) deleted".format(r[0])) 
             if (options['verbosity'] > 2):
@@ -72,32 +87,27 @@ class Command(BaseCommand):
         elif options['remove_orphaned_files']:
             count = 0
             fail = []
-            
-            dbl = self.db_image_fp_list()
-            file_no_model = set(ml) - set(dbl)
-
+            dbl = self.db_image_fp_list(Model, location)
+            file_no_model = set(fl) - set(dbl)
             for path in file_no_model:
                 try:
                     path.unlink()
                     count += 1
                 except Exception:
                     fail.append(p)
-                                        
             if (options['verbosity'] > 0):
                 print("{} image(s) deleted".format(count)) 
                 if (len(fail) > 0):
                     print("{} image(s) failed to delete. Path: '{}'".format(
                         len(fail),
                         "', '".join(fail),
-                        )) 
-        else:
+                        ))
+        elif options['add_orphaned_files']:
+            # Add models for orphaned files
             count = 0
             fail = []
-
-            dbl = self.db_image_fp_list()
-            file_no_model = set(ml) - set(dbl)
-            media_originals = Path(media_subpath_originals)
-
+            dbl = self.db_image_fp_list(Model, location)
+            file_no_model = set(fl) - set(dbl)
             for path in file_no_model:
                 # Make new models.
                 # Worth explaining:
@@ -111,17 +121,15 @@ class Command(BaseCommand):
                 # committed. Interesingly, a simple string path, as 
                 # opposed to an open File or Imagefile, assumes the
                 # image is commited.
-                
+                #
                 # Presuming files in /media are already truncated by
                 # configuration.
                 # The update effect in Imagefields will not work with 
                 # Paths, only strings. Also, it works relative to /media
                 # (so path relativization here)
                 i = Image(
-                    #title = path.stem,
-                    src = str(media_originals / path.name),
+                    src = str(file_dir / path.name),
                 ) 
-
                 try:
                     i.save()
                     count += 1
@@ -135,3 +143,24 @@ class Command(BaseCommand):
                         len(fail),
                         "', '".join(fail),
                         )) 
+        else:
+            # status report
+            if (options['verbosity'] > 0):
+                header = "SYNC STATUS: {}".format(Model.__name__)
+                print("-" * (len(header) + 1))
+                print(header)
+                print("-" * (len(header) + 1))
+            model_count = self.db_image_count(Model)
+            file_count = len(fl)
+            if ( (model_count != file_count) or options['verbosity'] > 0):
+                print("model_count: {}".format(model_count))
+                print("file_count: {}".format(file_count))
+                print()
+            if (model_count > file_count):
+                print('files appear to be missing. Try --remove-orphaned-models')
+            elif (file_count > model_count):
+                print('models appear to be missing. Try --add-orphaned-files or --remove-orphaned-files')
+            else:
+                print('No sync issues detected.')
+            
+            

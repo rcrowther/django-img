@@ -1,15 +1,16 @@
 from django.core.management.base import BaseCommand, CommandError
 from image.models import Image, Reform
+from . import common
 
 
 
+#! do a selective delete?
 class Command(BaseCommand):
     help = 'Automatically/bulk delete reform images'
     output_transaction = True
 
     def add_arguments(self, parser):
-        #parser.add_argument('image_titles', nargs='*', type=str)
-
+        common.add_model_argument(parser)
         parser.add_argument(
             '--bulk',
             action='store_true',
@@ -17,9 +18,15 @@ class Command(BaseCommand):
         )
         
     def handle(self, *args, **options):
+        Model = common.get_model(options, allow_reform=True)
+
+        # hackety hack
+        if (not issubclass(Model, Reform)):
+            raise CommandError("Given class not a subclass of Reform: '{}'".format(options['model']))
+
         if options['bulk']:
             #! this going to work on relationship table? I hope so.
-            r = Reform.objects.all().delete()
+            r = Model.objects.all().delete()
             if (options['verbosity'] > 0):
                 print("{} reforms deleted".format(r[0])) 
         else:
@@ -28,7 +35,7 @@ class Command(BaseCommand):
                    # print('no args, very safe?')
             # else:
             count = 0
-            qs = Reform.objects.all()
+            qs = Model.objects.all()
             for im in qs:
                 r = im.delete()
                 

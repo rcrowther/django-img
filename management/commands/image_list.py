@@ -1,22 +1,22 @@
-from django.core.management.base import BaseCommand, CommandError
-from image.models import Image, Reform
 import datetime
+
+from django.core.management.base import BaseCommand, CommandError
+from . import common
 
 
 
 class Command(BaseCommand):
-    help = 'List images'
+    help = 'List images. Default model is the core app.'
     output_transaction = True
     
     def add_arguments(self, parser):
-
+        common.add_model_argument(parser)
         parser.add_argument(
             '-c',
             '--contains',
             type=str,
-            help='Search for titles containing this text',
+            help='Search for filenames containing this text',
         )
-
         parser.add_argument(
             '-w',
             '--weeks-back',
@@ -26,12 +26,14 @@ class Command(BaseCommand):
                 
                 
     def handle(self, *args, **options):
-        qs = Image.objects
+        Model = common.get_model(options, allow_reform=True)
+
+        qs = Model.objects
         
         if (options["contains"]):
             #if (not options["contains"]):
                 #raise CommandError("Value of --contains option reads empty?")            
-            qs = qs.filter(title__icontains=options["contains"])
+            qs = qs.filter(src__icontains=options["contains"])
             
         if (options["weeks_back"]):
             week_num_now =  datetime.date.isocalendar(datetime.date.today())[1]
@@ -41,6 +43,6 @@ class Command(BaseCommand):
             week_num_back = week_num_now - options["weeks_back"]
             qs = qs.filter(upload_date__week__gte=week_num_back)
                 
-        qs = qs.values_list('pk', 'title', named=True)
-        for e in qs:
-            print("{} '{}'".format(e.pk, e.title))
+        #qs = qs.values_list('pk', 'src', named=True)
+        for e in qs.all():
+            print("{} {}".format(e.pk, e.filename))

@@ -22,8 +22,8 @@ class TestImage(TestCase):
             auto_delete=Image.AutoDelete.YES,
         )
 
-    def test_upload_to_dir(self):
-        self.assertEqual(self.image.upload_to_dir, 'originals')
+    def test_upload_dir(self):
+        self.assertEqual(self.image.upload_dir, 'originals')
 
     def test_filepath_length(self):
         self.assertEqual(self.image.filepath_length, 100)
