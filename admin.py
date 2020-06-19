@@ -5,7 +5,7 @@ from image.models import Image, Reform
           
                           
                                     
-# Custom admin interface disalows deletion of files from models.
+# Custom admin interface for administering an Image collection.
 class ImageAdmin(ImageLockedAdmin):
     
 # Stock admin interface.

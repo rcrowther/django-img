@@ -31,11 +31,11 @@
     <body>
         <article>
         <h2>Image</h2>
-        <p>This is the image as rendered from a template tag through the builtin filter 'Thumb':</pp>
+        <p>This is the image as rendered from a template tag through the builtin filter 'image.Thumb':</pp>
         <figure>
                 {% image image Thumb class="imagedetail-img" %}
         </figure>
-        <p>This information is held on the DB model:</pp>
+        <p>This information is held on the original DB model:</pp>
         <dl>
             <dt>upload_time</dt>
             <dd>{{ image.upload_time }}</dd>
@@ -55,7 +55,7 @@
             <dt>filename</dt>
             <dd>{{ image.filename }}</dd>
             <dt>alt</dt>
-            <dd>{{ image.alt }}</dd>        
+            <dd>"{{ image.alt }}"</dd>        
         </dl>
         </article>
     </body>
