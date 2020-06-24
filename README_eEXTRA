@@ -1,0 +1,71 @@
+## Parts available
+The prebuilt packages above rely on several pieces of code, which you can use yourself. But using them yourself may involve some thought. 
+
+For example, the prepopulate code is somethig Django users sometimes ask about. The standard Django.form prepopulate() will not work away from slug fields, especially for widgets as complex as a File browser. But it works here? Because it uses a Javascript modification of the Django Admin code. So to use it in your own Admin, you need to add a Media class, and declare model fields as SingleImage. 
+
+So integrating one part of the functionality of these packages may not be as easy as you think. If you want to do that, go look in admins.py, where the code is gathered and heavily commented.
+
+
+
+###################################
+Images are made available in admin. Reforms are not (they autogenerate from template tags, autodelete their files, and are generally regarded as automatic).
+
+Images are mainly intended to be attached to other models. So the admin display is only intended for dev and maintencence. Therefore the displays are basic, and will not display images, to speed lookups and save visual space.
+
+The model admin forms have prepopulate code for titles. If you don't want that, comment out the prepopulate attribute, and preferably the media property declaration.
+
+########
+# Other usages
+ but for resons of ecomomy, Django doesn't automatically use full clean.. This to thoroughtly check the slug in a 
+
+ So maybe a DetailView,
+
+    class ArticleDetailView(DetailView):
+        model = Article
+        context_object_name = 'article'
+        
+Then, it's a waste of the Wagtail setup, but you can summon the original in a template  as simply as,
+
+        {{ article.img.img_tag }}
+        <caption>{{ article.img,title }}</caption>
+
+
+##############
+I think the best way to say this is that this app not intended to be 'powerful'. 
+
+The app is designed for images, so of limited use for other documents and media. It won't be useful for a large number of images, for that you will need to abandon use of Django admin. It is limited for use with a small numbers of images, because you may want more help with image previews and gallery handling. It can not be used to offer users image processing options.
+
+
+############################################
+
+# Full notes
+
+With the image app you do most of your work in the app which uses the images, not the app itself.
+
+<div style="background-color=pink; border:1px solid red;"><
+*Warning*: This app does not let you write filters with parameters other than a filter name into templates.
+/div>
+
+You write a filter, then reference it in templates. It's easier this way, and why would you write variable into templates any more than you would hard-set inline CSS? I tell you this now, in case this app, in it's basic state, is not for you.
+
+
+
+
+This works for me---inside an app called Page I can have a file of filters e.g. Large/Medium/Small, made for Page styling. Inside an app called BlogPost, I can place another set of filters Medium/Small/Thumb, made for BlogPost styling.
+
+Put this in an 'image_filters.py' file somewhere,
+
+   from image import filters
+
+   class Large(filters.SmartResize):
+        width=382
+        height=256
+        # optional. By default, 'white'
+        background_colour="#34578"
+        # optional. By default, the format of the source.
+        iformat='png'
+
+###########
+https://github.com/ebertti/django-admin-easy/blob/master/README.rst
+
+https://pypi.org/project/django-reverse-admin/#modal-close

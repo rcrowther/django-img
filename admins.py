@@ -1,38 +1,31 @@
 import copy
 from django.contrib import admin
-#from django.utils.translation import gettext_lazy as _
-from django.forms import Media
 from django.utils.html import format_html
-from django import forms
 from django.db.models import ImageField
-                         
-from image.widgets import FileChooserDAndD
+from image.model_fields import FreeImageField
+#from django.contrib.admin.widgets import AdminFileWidget
+#from ddfilechooser.widgets import DDFileChooser
 
 
-                                    
-class ImageLockedAdmin(admin.ModelAdmin):
+class ImageCoreAdmin(admin.ModelAdmin):
     '''
-    Locks files to images by disallowing editing.. 
-    Also makes the the changelist more utilitarian.
-    Build for use administering an image collection. Not for front
-    end presentation. 
+    Admin devised for maintenence on an Image/Reform model.
+    Not intended for end users (unless those users are trusted). It
+    administers the models, not the use of the images in other models. 
+    It has these features:
+    - Locks files to image models by disallowing editing.. 
+    - Reorganises the changelist to be cleaner and more utilitarian.
     '''
     #! All the below can be commented or adapted to remove/change 
     # particular effects.
     # See the notes.
     #
-    # case-insensitive contains match
+    # case-insensitive 'contains' match
     search_fields = ['src']
     
     # Style the lists.
     # See the support code below
-    #! how about delete button?
     list_display = ('filename', 'upload_day', 'image_delete', 'image_view',)
-
-    # Enhance file pickers, sometimes, with a drop area. 
-    # See note on Media.
-    #! throws a dependency error on change files
-    #prepopulated_fields = {"title": ("src",)}
 
     def __init__(self, model, admin_site):
         # Consistent API here, please. I'd use a set, but Python tells
@@ -58,7 +51,7 @@ class ImageLockedAdmin(admin.ModelAdmin):
     def upload_day(self, obj):
         '''e.g.	17 May 2020'''
         return format_html('{}',
-            obj._upload_time.strftime("%d %b %Y")
+            obj.upload_time.strftime("%d %b %Y")
         )
     upload_day.short_description = 'Upload day'
     upload_day.admin_order_field = '_upload_time'
@@ -84,13 +77,24 @@ class ImageLockedAdmin(admin.ModelAdmin):
            if ('src'in self.readonly_fields): 
                 self.readonly_fields.remove('src')
         return super().get_form( request, obj, change, **kwargs)
+
+    # if you want to change the filechooser on the add form, you
+    # can do it here. The default is Django
+    # admin.widgets..AdminFileWidget
+    #formfield_overrides = {
+        ## For example, Drag and drop Image picker from,
+        ## https://github.com/rcrowther/DDFileChooser
+        #FreeImageField: {'widget': DDFileChooser},
+    #}        
         
         
-        
-        
-        
+######################################        
+
+    #! throws a dependency error on change files
+    #prepopulated_fields = {"title": ("src",)}
+    
     # Choose a style of upload pickers
-    formfield_overrides = {
+    #formfield_overrides = {
         # Basic django browse button.
         #ImageField: {'widget': forms.FileInput},
         
@@ -100,7 +104,7 @@ class ImageLockedAdmin(admin.ModelAdmin):
         
         # Image picker has a simple drop field
         #ImageField: {'widget': FileChooserDAndD},
-    }
+    #}
     
     # Code for prepopulation, with special handling of 
     # SingleImageFields. See 'prepopulate' attribute.

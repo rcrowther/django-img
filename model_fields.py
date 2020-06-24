@@ -6,6 +6,8 @@ from django.db import models
 #from django.utils.functional import cached_property
 from image import form_fields
 
+
+
 class FreeImageField(ImageField):
     '''
     A (model) ImageField that defaults to returning a (form) 
