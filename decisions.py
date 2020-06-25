@@ -43,17 +43,17 @@ def reform_save_info(ifilter, src_format):
             jpeg_quality = ifilter.jpeg_quality
     return {'format': iformat, 'jpeg_quality': jpeg_quality}
 
-def src_should_delete(image, calling_opinion):
-    delete = calling_opinion
+# def src_should_delete(image, calling_opinion):
+    # delete = calling_opinion
     
-    # Settings can override...
-    if (not(settings.auto_delete is None)):
-        delete = settings.auto_delete
+    # # Settings can override...
+    # if (not(settings.auto_delete is None)):
+        # delete = settings.auto_delete
 
-    #,,,but Model wins.
-    if (image.auto_delete != image.AutoDelete.UNSET):
-        delete = (image.auto_delete == image.AutoDelete.YES)
-    return delete
+    # #,,,but Model wins.
+    # if (image.auto_delete != image.AutoDelete.UNSET):
+        # delete = (image.auto_delete == image.AutoDelete.YES)
+    # return delete
 
 # def media_path_originals(upload_dir):
     # '''

@@ -67,6 +67,10 @@ class ImageManyToOneField(ImageRelationFieldMixin, ForeignKey):
     - Deletion of the image sets the field to null
     - Deletion of the model will not delete the image 
     - The image can not refer back to the model
+    
+    auto_delete
+        delete image model on deletion of a model with this field.
+        Needs to be enabled in signals. Default False.
     '''
     def __init__(self, to, related_query_name=None,
                  limit_choices_to=None, parent_link=False,
@@ -107,6 +111,10 @@ class ImageOneToOneField(ImageRelationFieldMixin, OneToOneField):
     - Deletion of the image sets the field to null
     - Deletion of the model deletes the image 
     - The image can not refer back to the model
+
+    auto_delete
+        delete image model on deletion of a model with this field.
+        Needs to be enabled in signals. Default True
     '''
     auto_delete = True
 

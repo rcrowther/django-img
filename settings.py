@@ -47,7 +47,7 @@ class Settings():
         self.reforms.format_override = None
         self.reforms.jpeg_quality = 85
         
-        self.auto_delete = False
+        #self.auto_delete = False
         if (populate):
             self.populate()
 
@@ -156,8 +156,8 @@ class Settings():
                         'REFORMS[JPEG_QUALITY]', 
                         self.reforms.jpeg_quality
                     )
-            if ('AUTO_DELETE' in isettings):
-                self.auto_delete = isettings['AUTO_DELETE']                             
+            #if ('AUTO_DELETE' in isettings):
+            #    self.auto_delete = isettings['AUTO_DELETE']                             
             if ('MODULES' in isettings):
                 self.modules = isettings['MODULES']
             

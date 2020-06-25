@@ -37,12 +37,15 @@ The app includes code to upload images. The Django admin for the base applicatio
 
 
 
-## For those who know have done this before
+## If you have done this before
 Decide if you want to use the core collection. If you want an app-based collection, [subclass the models for Image and Reform](## Creating new tables).
 
 [Add fields](## Model Fields) to models which need them.
 
+[Add auto deletion](#Autodeletion) if you want models carrying image fields to delete images automatically.
+
 Migrate new tables.
+
 <a id="user-content-filters-1" class="anchor" aria-hidden="true" href="#filters-1"></a>
 Create a file called 'image_filters.py' in the app. [Sublass a few filters](# Filters),
 
@@ -67,7 +70,7 @@ Insert tags into the relevant templates,
 
 (optional) [Change settings](## Settings) as required.
 
-There's plenty more, but you probably know where to go for informattion.
+There's plenty more, but you probably know what to do.
 
 
 
@@ -331,6 +334,7 @@ In an app, do this.
     class NewssArticleImage(AbstractImage):
         upload_dir='news_originals'
         filepath_length=100
+        auto_delete_files=True
 
         # AbstractImage has a file and upload_date
         caption = models.CharField(_('Caption'),
@@ -373,7 +377,7 @@ You now have a new image upload app. It has it's own DB tables. Change it's conf
         etc.
 
 #### Autodeletion
-##### Rant
+##### Overview
 Sadly, it is impossible to auto-delete an image if the carrying model is removed.
 
 Isn't this what CASCADE is for, you say? Yes, but cascade deletes the model carrying the foreign key. In our terms, it will remove a model if the image is removed (not usually the action you want).
@@ -389,7 +393,8 @@ You insist, model.delete() has a keep_parent parameter, that will do it! No, it 
 Of these messy solutions, I prefer the targetted signals solution. It's unecessary code (the data and structures are there already), but it is stock Django and the action we would like. 
 
 ##### Auto-delete
-The solution only works if 
+The solution only works if the model uses fields with the ImageRelationFieldMixin i.e. ImageManyToOneField and ImageOneToOneField.
+
 Add this to your app.ready(),
 
     from image.actions import _image_delete
@@ -739,7 +744,6 @@ Images accepts some settings. They look like the Django template settings,
         {
             #'MAX_UPLOAD_SIZE': 1,
             'APP_DIRS': True,
-        'AUTO_DELETE': True,
         'REFORMS': [
             #'FORMAT_OVERRIDE': 'jpg',
             #'JPEG_QUALITY': 28,
@@ -762,12 +766,6 @@ Defines if 'image_filters.py' files will be sought in apps. If false, the app on
 MODULES
 Defines extra places to put modules. The above example suggests a site-wide filter collection in the site directory, same as the site-wide template and CSS collections most Djangos have in the same directory. The setting takes module paths, not filepaths, because filter files are live code.
 
-AUTO_DELETE
-When Django started, AFAIK, when models were deleted, attached files were deleted. But default strategy has changed, and now Django will not delete files. They stay in storage, even if untracked.
-
-Deleting files when the model is deleted has downsides, but suits the use-cases of this app. The default of this app is like Django, it will not delete files. But this setting allows you to use clean-on-delete.
-
-You may have noticed in Admin that the app offers a switch to set policy by image. Local settings win---the per-image setting overrides the general setting. For example, you may decide to generally erase files when models are deleted. But if you want to set an image against deletion---for example, a banner, a logo or a generic product photo---you can set that image to persist.
 
 
 ### Reform settings
@@ -793,6 +791,8 @@ There's nothing special about using the Image model in forms. Stock Django. Use 
 
 ## Model Fields
 Preconfigured overrides of Django relative fields,
+
+They both have an attribute auto_delete. This needs to be enabled in signals, and will delete the image associated with the field.
 
 An ImageManyToOneField allows the field to be null, will set the field to null if the image is deleted, and will not delete the image if the model is deleted,
   

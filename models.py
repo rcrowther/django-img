@@ -80,6 +80,10 @@ class AbstractImage(models.Model):
     #! template tag
     filepath_length=100
         
+    # If the model s deleted, delete the file
+    # Django stadard is False, but see documentation.
+    auto_delete_files = False
+    
     class AutoDelete(models.IntegerChoices):
         UNSET = 0, _('Unset')
         NO = 1, _('Dont delete file')
@@ -113,15 +117,6 @@ class AbstractImage(models.Model):
 
             self.save(update_fields=['_upload_time'])
         return self._upload_time
-
-    #! not sure that title should be required, even with
-    #! prepopulates. And it ain't unique. But what about
-    #! the search issue? 
-    # title = models.CharField(_('title'),
-        # max_length=255,
-        # #unique=True, 
-        # db_index=True
-    # )
     
     # A note about the name. Even if possible, using the word 'file'
     # triggers my, and probably other, IDEs. Again, even if possible,
