@@ -1,4 +1,4 @@
-from django.db.models import OneToOneField, ImageField
+from django.db.models import ForeignKey, OneToOneField, ImageField
 from django.core import checks
 from django.db import models
 
@@ -7,7 +7,7 @@ from django.db import models
 from image import form_fields
 
 
-#! rename FreePathImageField
+
 class FreePathImageField(ImageField):
     '''
     A (model) ImageField that defaults to returning a (form) 
@@ -22,39 +22,13 @@ class FreePathImageField(ImageField):
             'max_length': self.max_length,
             **kwargs,
         })
+
         
-# What this needs to do...
-# - if new, send empty data
-# - If exists, send a rel key, and model data to template
-# When recieves, 
-# - save change/new item data,
-# - save the data for changes to key field, if new creation  
-# (In our case, this is not allowedd, readonly)
-class ImageSingleField(OneToOneField):
-    '''
-    A preconfigured model field for Images.
-    This is a OneToOneField, so not suitable for referring to several 
-    images e.g gallery use. Also, becaue OneToOneField, once it has an
-    image no other model in that table can share the image 
-    (unique=True). Mainly intended for images coupled to models e.g
-    'Sales product' -> 'Product image'.
-    Mild configuration to delete image if model is deleted, and
-    not to be able to track the image back to the model (the model
-    can find it's image, though). 
-    '''
-    on_delete=models.CASCADE,
-    related_name='+'
-        
-    def check(self, **kwargs):
-        # run after the core checks
-        return [
-            *super().check(**kwargs),
-            *self._check_relation_model_is_image_model(),
-            ]
-            
+# RelatedField
+class ImageRelationFieldMixin():
     def _check_relation_model_is_image_model(self):
         # These checks are run in 'show migrations' and 'runmigrations'.
-        # By this check, it has been checked the related model exists.
+        # By this check, the related model must exist.
         remote_class = self.remote_field.model
 
         # ...but that attribute may be by lazy string, which means
@@ -64,7 +38,6 @@ class ImageSingleField(OneToOneField):
             remote_class = self.opts.apps.all_models[remote_class]
 
         if (not(issubclass(remote_class, AbstractImage))):
-            
             # More rooting about. Fun, huh? 
             model_name = self.remote_field.model if rel_is_string else self.remote_field.model._meta.object_name
             return [
@@ -78,32 +51,88 @@ class ImageSingleField(OneToOneField):
         return []
 
 
-# # draft
-# class ImageSingleRelField(OneToOneField):
-    # '''
-    # A preconfigured model field for Images.
-    # This is a OneToOneField, so not suitable for referring to several 
-    # images e.g gallery use. Also, becaue OneToOneField, once it has an
-    # image no other model in that table can share the image 
-    # (unique=True). Mainly intended for images coupled to models e.g
-    # 'Sales product' -> 'Product image'.
-    # Mild configuration to delete image if model is deleted, and
-    # not to be able to track the image back to the model (the model
-    # can find it's image, though). 
-    # '''
-    # on_delete=models.CASCADE,
-    # related_name='+'
+
+class ImageManyToOneField(ImageRelationFieldMixin, ForeignKey):
+    '''
+    A preconfigured ManyToOne model field for Images.
+
+    This is a ForeignKey, so several models can refer to one image.
+    It is suitable for referring to images intended as a pool e.g. 
+    for gallery use.
+    
+    The field has some dafaults, which can be overridden,
+    - The field is nullable
+    - Deletion of the image sets the field to null
+    - Deletion of the model will not delete the image 
+    - The image can not refer back to the model
+    '''
+    #on_delete = models.SET_NULL
+    #blank = True
+    #null = True
+    #related_name = '+'
+
+    def __init__(self, to, related_name=None, related_query_name=None,
+                 limit_choices_to=None, parent_link=False,
+                 db_constraint=True, **kwargs):
+        # Use a default
+        on_delete = models.SET_NULL
+        kwargs['blank'] = kwargs.get('blank', True) 
+        kwargs['null'] = kwargs.get('null', True) 
+        kwargs['related_name'] = kwargs.get('related_name', '+')           
+        kwargs['to_field'] = None
+        super().__init__(to, on_delete, related_name, related_query_name,
+                 limit_choices_to, parent_link,
+                 db_constraint, **kwargs)
+                         
+    def check(self, **kwargs):
+        # run after the core checks
+        return [
+            *super().check(**kwargs),
+            *self._check_relation_model_is_image_model(),
+            ]
+            
+            
+            
+
+#class ImageSingleField(OneToOneField):
+class ImageOneToOneField(ImageRelationFieldMixin, OneToOneField):
+    '''
+    A preconfigured OneToOne model field for Images.
+    
+    This is a OneToOneField, so suitable when the model containing the 
+    field is locked to one image (which other models can not use) e.g.
+    'Sales product' -> 'Product image'.
+
+    The field has some dafaults, which can be overridden,
+    - The field is nullable
+    - Deletion of the image sets the field to null
+    - Deletion of the model deletes the image 
+    - The image can not refer back to the model
+    '''
+    #on_delete = models.SET_NULL
+    #blank = True
+    #null = True
+    #related_name = '+'
+    
+    def __init__(self, to, **kwargs):
+        # Use a default
+        on_delete = models.SET_NULL
+        kwargs['blank'] = kwargs.get('blank', True) 
+        kwargs['null'] = kwargs.get('null', True) 
+        kwargs['related_name'] = kwargs.get('related_name', '+') 
+        kwargs['to_field'] = None
+        super().__init__(to, on_delete, **kwargs)
         
-    # def check(self, **kwargs):
-        # # run after the core checks
-        # return [
-            # *super().check(**kwargs),
-            # *self._check_relation_model_is_image_model(),
-            # ]
+    def check(self, **kwargs):
+        # run after the core checks
+        return [
+            *super().check(**kwargs),
+            *self._check_relation_model_is_image_model(),
+            ]
             
     # def _check_relation_model_is_image_model(self):
         # # These checks are run in 'show migrations' and 'runmigrations'.
-        # # By this check, it has been checked the related model exists.
+        # # By this check, the related model must exist.
         # remote_class = self.remote_field.model
 
         # # ...but that attribute may be by lazy string, which means
@@ -125,3 +154,5 @@ class ImageSingleField(OneToOneField):
                 # )
             # ]
         # return []
+
+

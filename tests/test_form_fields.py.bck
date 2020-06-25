@@ -2,7 +2,7 @@ from django.test import TestCase
 
 from django.db import models
 from image.models import Image
-from image.model_fields import ImageSingleField
+from image.model_fields import ImageOneToOneField
 from image.form_fields import ModelFixedField
 from .utils import get_test_image_file_jpg
 
@@ -21,7 +21,7 @@ class TestFormFields(TestCase):
             src=get_test_image_file_jpg(),
             auto_delete=Image.AutoDelete.YES,
         )  
-        mfield = ImageSingleField(
+        mfield = ImageOneToOneField(
             Image,
             null=True, 
             blank=True,

@@ -50,7 +50,7 @@ def get_reform_upload_to(instance, filename):
     return instance.get_upload_to(filename)
 
 
-from image.model_fields import FreeImageField
+from image.model_fields import FreePathImageField
 class AbstractImage(models.Model):
     '''
     Data about stored images.
@@ -128,18 +128,12 @@ class AbstractImage(models.Model):
     # naming this the same as the model is not a good idea, if only due 
     # to confusion in relations, let alone stray attribute manipulation 
     # in Python code. So, like HTML, it is 'src'     
-    src = FreeImageField(_('image_file'), 
-    #src = models.ImageField(_('image_file'), 
+    src = FreePathImageField(_('image_file'), 
         unique=True,
         upload_to=get_upload_to, 
         width_field='width', 
         height_field='height',
-        #storage=FileSystemStorage(l
-        #    location=self.media_relative_path
-        #),
-        max_length=filepath_length, 
-        #! model validators do not only run on upload, they run on any modification?
-        # too much?
+        max_length=filepath_length,
         validators = [
             validate_file_size,
             validate_image_file_extension

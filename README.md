@@ -43,7 +43,7 @@ Decide if you want to use the core collection. If you want an app-based collecti
 [Add fields](## Model Fields) to models which need them.
 
 Migrate new tables.
-
+<a id="user-content-filters-1" class="anchor" aria-hidden="true" href="#filters-1"></a>
 Create a file called 'image_filters.py' in the app. [Sublass a few filters](# Filters),
 
 
@@ -643,7 +643,7 @@ FreeImageField. Loads a FreeImageField as default (see below).
 FreeImageField. This skips path length verification on forms. Both this module, AND Django core, set and truncate lengths on upload. If you prefer that a user can upload files with any length of filename, but that the filename will be truncated, then use this.
 
 ### Images in other models
-
+<b>Warning:</b> The attitude of this app is that the Image/Reform model *is* the image. If the model you intend is an image (you want to add captions, alt texts, semantic markup, credits etc.) then you should be using [Image subclassing](# Creating new Image-handling tables). These fields are intended for when you attach an image to some other model..
 
 
 
@@ -765,30 +765,35 @@ There's nothing special about using the Image model in forms. Stock Django. Use 
 
 
 ## Model Fields
-There's a helper for model fields. It's a small override of a OneToOneField,
+Preconfigured overrides of Django relative fields,
 
-ImageSingleField
-    A preconfigured model field for Images.
-    This is a OneToOneField, so not suitable for referring to several 
-    images e.g gallery use. Also, becaue OneToOneField, once it has an
-    image no other model in that table can share the image 
-    (unique=True). Mainly intended for images coupled to models e.g
-    'Sales product' -> 'Product image'.
-    Mild configuration to delete image if model is deleted, and
-    not to be able to track the image back to the model (the model
-    can find it's image, though). 
+An ImageManyToOneField allows the field to be null, will set the field to null if the image is deleted, and will not delete the image if the model is deleted,
+  
+    from image.form_fields import ImageManyToOneField
 
-e.g.
 
     class Page(models.Model):
 
-        img = image.ImageSingleField(
+        ...
+    
+        img = image.ImageManyToManyField(
             'image.Image',
-            null=True, 
-            blank=True,
+        )
+        
+ 
+An ImageOneToOneField allows the field to be null, will set the field to null if the image is deleted, and will delete the image if the model is deleted,
+
+    from image.form_fields import ImageManyToOneField
+
+    class Page(models.Model):
+
+        img = image.ImageOneToOneField(
+            'image.Image',
         )
 
 
+    
+        
 ## Utilities
 ### The View
 Image has a builtin view. It's main purpose is to test filter code. The view template reforms from images in the core folder. As a test and trial device, it is not enabled by default.

@@ -2,11 +2,11 @@ import unittest
 
 from django.test import TestCase
 from image.models import Image
-from image.model_fields import ImageSingleField
+from image.model_fields import ImageOneToOneField
 from django.db import models
 
 def mkImageField(model):
-    return ImageSingleField(
+    return ImageOneToOneField(
                 model,
                 null=True, 
                 blank=True,
@@ -24,7 +24,7 @@ def mkModel(model):
     return  type('FieldTest', (models.Model,), attrs)
 
      
-#! Build somehow. But  needs Djago paraphenalia
+#! Build somehow. But needs Djago paraphenalia
 class TestFields(TestCase):
 
     def test_non_model_raises(self):
