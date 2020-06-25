@@ -2,7 +2,7 @@ from django.forms.fields import ImageField
 from django.core.exceptions import ValidationError
 
 
-class FreeImageField(ImageField):
+class FreePathImageField(ImageField):
     '''
     A (form) Field that skips length verification.
     '''

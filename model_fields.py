@@ -7,17 +7,18 @@ from django.db import models
 from image import form_fields
 
 
-
-class FreeImageField(ImageField):
+#! rename FreePathImageField
+class FreePathImageField(ImageField):
     '''
     A (model) ImageField that defaults to returning a (form) 
-    FreeImageField.
+    FreePathImageField.
+    FreePathImageField allows on input any length of file path.
     '''
     # This only exists because I can find no way of overriding this 
     # default on declaration.
     def formfield(self, **kwargs):
         return super().formfield(**{
-            'form_class': form_fields.FreeImageField,
+            'form_class': form_fields.FreePathImageField,
             'max_length': self.max_length,
             **kwargs,
         })

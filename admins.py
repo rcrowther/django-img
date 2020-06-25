@@ -2,7 +2,7 @@ import copy
 from django.contrib import admin
 from django.utils.html import format_html
 from django.db.models import ImageField
-from image.model_fields import FreeImageField
+from image.model_fields import FreePathImageField
 #from django.contrib.admin.widgets import AdminFileWidget
 #from ddfilechooser.widgets import DDFileChooser
 
@@ -84,7 +84,7 @@ class ImageCoreAdmin(admin.ModelAdmin):
     #formfield_overrides = {
         ## For example, Drag and drop Image picker from,
         ## https://github.com/rcrowther/DDFileChooser
-        #FreeImageField: {'widget': DDFileChooser},
+        #FreePathImageField: {'widget': DDFileChooser},
     #}        
         
         

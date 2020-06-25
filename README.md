@@ -7,7 +7,11 @@ The front end, by which I mean 'programmer API' is designed for a particular pur
 
 
 ## Why you may not want this app
-This may not be the app for you. <div style="border:2px solid green; border-radius: 12px;">The app API does not let you write template tags with adjustable parameters, filters with runtime parameter processing, create filter chains, or categorise/tag images.</div>
+This may not be the app for you.
+
+<div style="border:2px solid green; border-radius: 12px;">
+The app API does not let you write template tags with adjustable parameters, filters with runtime parameter processing, create filter chains, or categorise/tag images.
+</div>
 
 All these facilities can be built in to the base code. But then the app wil not be, for you, a plug and go solution.
  
