@@ -66,26 +66,21 @@ class ImageManyToOneField(ImageRelationFieldMixin, ForeignKey):
     - Deletion of the model will not delete the image 
     - The image can not refer back to the model
     '''
-    #on_delete = models.SET_NULL
-    #blank = True
-    #null = True
-    #related_name = '+'
-
-    def __init__(self, to, related_name=None, related_query_name=None,
+    def __init__(self, to, related_query_name=None,
                  limit_choices_to=None, parent_link=False,
                  db_constraint=True, **kwargs):
         # Use a default
         on_delete = models.SET_NULL
         kwargs['blank'] = kwargs.get('blank', True) 
         kwargs['null'] = kwargs.get('null', True) 
-        kwargs['related_name'] = kwargs.get('related_name', '+')           
-        kwargs['to_field'] = None
+        related_name = kwargs.get('related_name', '+')           
+        to_field = None
         super().__init__(to, on_delete, related_name, related_query_name,
-                 limit_choices_to, parent_link,
+                 limit_choices_to, parent_link, to_field,
                  db_constraint, **kwargs)
                          
     def check(self, **kwargs):
-        # run after the core checks
+        #NB run after the core checks
         return [
             *super().check(**kwargs),
             *self._check_relation_model_is_image_model(),
@@ -94,7 +89,6 @@ class ImageManyToOneField(ImageRelationFieldMixin, ForeignKey):
             
             
 
-#class ImageSingleField(OneToOneField):
 class ImageOneToOneField(ImageRelationFieldMixin, OneToOneField):
     '''
     A preconfigured OneToOne model field for Images.
@@ -109,11 +103,6 @@ class ImageOneToOneField(ImageRelationFieldMixin, OneToOneField):
     - Deletion of the model deletes the image 
     - The image can not refer back to the model
     '''
-    #on_delete = models.SET_NULL
-    #blank = True
-    #null = True
-    #related_name = '+'
-    
     def __init__(self, to, **kwargs):
         # Use a default
         on_delete = models.SET_NULL
@@ -124,35 +113,8 @@ class ImageOneToOneField(ImageRelationFieldMixin, OneToOneField):
         super().__init__(to, on_delete, **kwargs)
         
     def check(self, **kwargs):
-        # run after the core checks
+        #NB run after the core checks
         return [
             *super().check(**kwargs),
             *self._check_relation_model_is_image_model(),
             ]
-            
-    # def _check_relation_model_is_image_model(self):
-        # # These checks are run in 'show migrations' and 'runmigrations'.
-        # # By this check, the related model must exist.
-        # remote_class = self.remote_field.model
-
-        # # ...but that attribute may be by lazy string, which means
-        # # rooting about for a model class
-        # rel_is_string = isinstance(remote_class, str)
-        # if (rel_is_string):
-            # remote_class = self.opts.apps.all_models[remote_class]
-
-        # if (not(issubclass(remote_class, AbstractImage))):
-            
-            # # More rooting about. Fun, huh? 
-            # model_name = self.remote_field.model if rel_is_string else self.remote_field.model._meta.object_name
-            # return [
-                # checks.Error(
-                    # "ImageSingleField defines a relation with model '%s', which is "
-                    # "not a subclass of AbstractImage." % model_name,
-                    # obj=self,
-                    # id='fields.E300',
-                # )
-            # ]
-        # return []
-
-
