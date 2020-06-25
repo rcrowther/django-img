@@ -8,3 +8,4 @@ f#rom django.forms import BaseForm
 from django.db import models
 from inspect import isclass
 
+from django.core.checks import Error, register

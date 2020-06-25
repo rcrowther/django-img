@@ -372,6 +372,33 @@ You now have a new image upload app. It has it's own DB tables. Change it's conf
 
         etc.
 
+#### Autodeletion
+##### Rant
+Sadly, it is impossible to auto-delete an image if the carrying model is removed.
+
+Isn't this what CASCADE is for, you say? Yes, but cascade deletes the model carrying the foreign key. In our terms, it will remove a model if the image is removed (not usually the action you want).
+
+Well, then, you say, what about Django signals? But we allow freeform renaming of inherited models. Signal handlers need to be registered. Do we register every new subclass of Image?
+
+Use a general handler, you press, use post_delete and check the models. Not good. Signal handlers are expensive. Signal code should be small and light. Checking every post_delete to test if it is an Image derivative is possible, but not good.
+
+Ok, you say, override the model delete() method! That works for sure. But the issue is that it won't work on bulk deletes. [Bulk deletes bypass the delete method]{https://docs.djangoproject.com/en/3.0/topics/db/models/} (though they do emit signals).
+
+You insist, model.delete() has a keep_parent parameter, that will do it! No, it won't, that parameeter has nothing to do with table relationships, it's for model inheritance.
+
+Of these messy solutions, I prefer the targetted signals solution. It's unecessary code (the data and structures are there already), but it is stock Django and the action we would like. 
+
+##### Auto-delete
+The solution only works if 
+Add this to your app.ready(),
+
+    from image.actions import _image_delete
+
+    def ready()
+        post_delete.connect(_image_delete, sender=SomeModel, weak=False)
+
+
+
 #### Things to do with subcalsses of models
 
 You may want to configure a Meta. If you have titles or slugs, for example, you may be interested in making them into unique constrained groups or adding indexes,

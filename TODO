@@ -30,6 +30,7 @@ Check positioning staticly?
 
 == Tags
 Test query
+from django.db.models.utils import make_model_tuple
 
 == Utils
 

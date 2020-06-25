@@ -14,7 +14,7 @@ class FreePathImageField(ImageField):
     FreePathImageField.
     FreePathImageField allows on input any length of file path.
     '''
-    # This only exists because I can find no way of overriding this 
+    # This class exists because I can find no way of overriding this 
     # default on declaration.
     def formfield(self, **kwargs):
         return super().formfield(**{
@@ -24,8 +24,10 @@ class FreePathImageField(ImageField):
         })
 
         
-# RelatedField
+
 class ImageRelationFieldMixin():
+    auto_delete = False
+    
     def _check_relation_model_is_image_model(self):
         # These checks are run in 'show migrations' and 'runmigrations'.
         # By this check, the related model must exist.
@@ -69,8 +71,11 @@ class ImageManyToOneField(ImageRelationFieldMixin, ForeignKey):
     def __init__(self, to, related_query_name=None,
                  limit_choices_to=None, parent_link=False,
                  db_constraint=True, **kwargs):
-        # Use a default
-        on_delete = models.SET_NULL
+        if ('auto_delete' in kwargs):
+            self.auto_delete = kwargs['auto_delete']
+
+        # not kwrd, set a default
+        on_delete = kwargs.get('on_delete', models.SET_NULL)
         kwargs['blank'] = kwargs.get('blank', True) 
         kwargs['null'] = kwargs.get('null', True) 
         related_name = kwargs.get('related_name', '+')           
@@ -103,9 +108,14 @@ class ImageOneToOneField(ImageRelationFieldMixin, OneToOneField):
     - Deletion of the model deletes the image 
     - The image can not refer back to the model
     '''
+    auto_delete = True
+
     def __init__(self, to, **kwargs):
-        # Use a default
-        on_delete = models.SET_NULL
+        if ('auto_delete' in kwargs):
+            self.auto_delete = kwargs['auto_delete']
+            
+        # not kwrd, set a default
+        on_delete = kwargs.get('on_delete', models.SET_NULL)
         kwargs['blank'] = kwargs.get('blank', True) 
         kwargs['null'] = kwargs.get('null', True) 
         kwargs['related_name'] = kwargs.get('related_name', '+') 
