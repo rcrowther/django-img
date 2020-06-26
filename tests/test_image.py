@@ -2,7 +2,7 @@ import unittest
 
 from django.test import TestCase
 from image.models import Image, SourceImageIOError
-from .utils import get_test_image_file_jpg
+from .utils import get_test_image
 
 
 # A fundamental issue throughout the tests is that image uploading 
@@ -11,16 +11,13 @@ from .utils import get_test_image_file_jpg
 #Ratther than using TestTransaction, which is less clean, these tests 
 # are littered with rearDown() methods to clean up orphaned files 
 # (poor orphans, unwanted...). 
-# ./manage.py test image.tests.test_model_image
+# ./manage.py test image.tests.test_image
 class TestImage(TestCase):
     '''
     Base tests avoid reform creation, object deletion, subclassing
     '''
     def setUp(self):
-        self.image = Image.objects.create(
-            src=get_test_image_file_jpg(),
-            auto_delete=Image.AutoDelete.YES,
-        )
+        self.image = get_test_image()
 
     def test_upload_dir(self):
         self.assertEqual(self.image.upload_dir, 'originals')

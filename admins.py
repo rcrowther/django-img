@@ -3,13 +3,12 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.db.models import ImageField
 from image.model_fields import FreePathImageField
-#from django.contrib.admin.widgets import AdminFileWidget
-#from ddfilechooser.widgets import DDFileChooser
+
 
 
 class ImageCoreAdmin(admin.ModelAdmin):
     '''
-    Admin devised for maintenence on an Image/Reform model.
+    Admin devised for maintenence of Image/Reform models.
     Not intended for end users (unless those users are trusted). It
     administers the models, not the use of the images in other models. 
     It has these features:
@@ -60,8 +59,9 @@ class ImageCoreAdmin(admin.ModelAdmin):
         return obj.filename
     filename.admin_order_field = 'src'
     
-    # Block filechoosing on uploaded Image models.
     def get_form(self, request, obj=None, change=False, **kwargs):
+        # Block filechoosing on uploaded Image models.
+        #
         # I don't currently see a way in aside from
         # push/popping the attribute, like Javascript.
         #
@@ -79,8 +79,8 @@ class ImageCoreAdmin(admin.ModelAdmin):
         return super().get_form( request, obj, change, **kwargs)
 
     # if you want to change the filechooser on the add form, you
-    # can do it here. The default is Django
-    # admin.widgets..AdminFileWidget
+    # can do it here. The default is
+    # admin.widgets.AdminFileWidget
     #formfield_overrides = {
         ## For example, Drag and drop Image picker from,
         ## https://github.com/rcrowther/DDFileChooser
@@ -88,31 +88,54 @@ class ImageCoreAdmin(admin.ModelAdmin):
     #}        
         
         
-######################################        
+        
+class LinkedImageAdmin(admin.ModelAdmin):
+    '''
+    Admin for models that contain image foreign keys.
+    The main action is to disallow editing of image fields if an image 
+    has been allocated.
+    A small override that can be mixed with other Admin 
+    code with no unexpected effects.
+    '''
+    def __init__(self, model, admin_site):
+        # Consistent API here, please. I'd use a set, but Python tells
+        # me that's unhashable. Also, think it needs to be a copy.
+        # Needed for the upload locking.
+        self.readonly_fields = list(copy.deepcopy(self.readonly_fields))
+        
+        # ok, lets get the fields concerned
+        self.image_fields = []
+        for f in model._meta.fields:
+            if issubclass(f, ImageRelationFieldMixin):
+                self.image_fields.appenf(f.name)
+        super().__init__(model, admin_site)
 
-    #! throws a dependency error on change files
-    #prepopulated_fields = {"title": ("src",)}
-    
-    # Choose a style of upload pickers
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        # Block filechoosing on linked Image fields.
+        #
+        # I don't currently see a way in aside from
+        # push/popping the attribute, like Javascript.
+        #
+        # Only way I can think of differentiating between the two forms.
+        # change attribute behaves inconsistently. But object
+        # detection detects add/change forms.
+        #
+        # by the by, this stinks. I say so. RC.
+        for fn in self.image_fields:
+            if (not(obj) or (not (getattr(fn, obj).path))):
+                if (not(fn in self.readonly_fields)): 
+                    self.readonly_fields.append(fn)
+            else:
+                if (fn in self.readonly_fields): 
+                    self.readonly_fields.remove(fn)
+                
+        return super().get_form( request, obj, change, **kwargs)
+
+    # if you want to change the filechooser on the forms, you
+    # can do it here. The default is admin.widgets.AdminFileWidget.
     #formfield_overrides = {
-        # Basic django browse button.
-        #ImageField: {'widget': forms.FileInput},
-        
-        # Admin picker enhanced with current file display. Admin 
-        # default. Some don't like it, some do.
-        #ImageField: {'widget': admin.widgets.AdminFileWidget},
-        
-        # Image picker has a simple drop field
-        #ImageField: {'widget': FileChooserDAndD},
-    #}
-    
-    # Code for prepopulation, with special handling of 
-    # SingleImageFields. See 'prepopulate' attribute.
-    # @property
-    # def media(self):
-        # base = super().media
-        # for jslist in base._js_lists:
-            # for i, e in enumerate(jslist): 
-                # if e == 'admin/js/prepopulate.js':
-                    # jslist[i] = 'image/js/prepopulate.js'
-        # return base
+        ## For example, Drag and drop Image picker from,
+        ## https://github.com/rcrowther/DDFileChooser
+        #FreePathImageField: {'widget': DDFileChooser},
+    #}  
+

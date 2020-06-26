@@ -6,6 +6,7 @@ from .utils import get_test_image_file_jpg
 from pathlib import Path
 
 # ./manage.py test image.tests.test_broken
+#! look in utils for model
 class TestShortcuts(TransactionTestCase):
 
     def setUp(self):
@@ -15,7 +16,6 @@ class TestShortcuts(TransactionTestCase):
         good_image = Image.objects.create(
             title="Test image",
             src=get_test_image_file_jpg(),
-            auto_delete=Image.AutoDelete.YES,
         )
         reform = get_reform_or_not_found(good_image, self.filter)
         name = Path(reform.src.name).name
@@ -26,7 +26,6 @@ class TestShortcuts(TransactionTestCase):
         bad_image = Image.objects.create(
             title="Test image",
             src=get_test_image_file_jpg(),
-            auto_delete=Image.AutoDelete.YES,
         )
 
         bad_image.src.delete(False) 

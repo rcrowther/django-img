@@ -1,7 +1,6 @@
 ## Parts available
 The prebuilt packages above rely on several pieces of code, which you can use yourself. But using them yourself may involve some thought. 
 
-For example, the prepopulate code is somethig Django users sometimes ask about. The standard Django.form prepopulate() will not work away from slug fields, especially for widgets as complex as a File browser. But it works here? Because it uses a Javascript modification of the Django Admin code. So to use it in your own Admin, you need to add a Media class, and declare model fields as SingleImage. 
 
 So integrating one part of the functionality of these packages may not be as easy as you think. If you want to do that, go look in admins.py, where the code is gathered and heavily commented.
 

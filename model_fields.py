@@ -1,9 +1,6 @@
 from django.db.models import ForeignKey, OneToOneField, ImageField
 from django.core import checks
 from django.db import models
-
-#from  django.db.models.fields.mixins import FieldCacheMixin
-#from django.utils.functional import cached_property
 from image import form_fields
 
 

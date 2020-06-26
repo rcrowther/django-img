@@ -3,22 +3,18 @@ import unittest
 from django.test import TestCase
 from image.models import Image, Reform, SourceImageIOError
 from image.image_filters import Thumb
-from .utils import get_test_image_file_jpg
+from .utils import get_test_reform
 
 
 
-# ./manage.py test image.tests.test_model_reform
+# ./manage.py test image.tests.test_reform
+#! look in utils for model
 class TestReforms(TestCase):
     '''
     Base tests avoid object deletion and subclassing
     '''
     def setUp(self):
-        self.image = Image.objects.create(
-            src=get_test_image_file_jpg(),
-            auto_delete=Image.AutoDelete.YES,
-        )
-        self.filter = Thumb()
-        self.reform = self.image.get_reform(self.filter)
+        self.reform = get_test_reform()
 
     def test_upload_dir(self):
         self.assertEqual(self.reform.upload_dir, 'reforms')
@@ -50,6 +46,6 @@ class TestReforms(TestCase):
     def test_alt(self):
         self.assertEqual(self.reform.alt, "test image")
 
-    def tearDown(self):    
+    def tearDown(self):
+        self.reform.image.src.delete(False)
         self.reform.src.delete(False)
-        self.image.src.delete(False)

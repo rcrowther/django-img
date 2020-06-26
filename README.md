@@ -327,11 +327,11 @@ But you may also have a need to upload images for the site in general. Perhaps f
 These are two seperate apps. Make two apps. Avoid complex configuration.
 
 ### Creating new tables
-In an app, do this. 
+In the models.py file in an app, do this. 
 
     from image.models import AbstractImage, AbstractReform
 
-    class NewssArticleImage(AbstractImage):
+    class NewsArticleImage(AbstractImage):
         upload_dir='news_originals'
         filepath_length=100
         auto_delete_files=True
@@ -350,13 +350,13 @@ In an app, do this.
 
 
 
-    class NewssArticleReform(AbstractReform):
+    class NewsArticleReform(AbstractReform):
         upload_dir='news_reforms'
         filepath_length=100
 
         image = models.ForeignKey(NewssArticleImage, on_delete=models.CASCADE, related_name='reforms')
 
-Sorry it's not the last word in DRY coding, but you should be able to work out what the code is there for. Note the two configuration variables. Useful. Think about them before you migrate.
+Not the last word in DRY coding, but you should be able to work out what the code is there for. Note the configuration variables. Useful. Think about them before you migrate.
 
 Then migrate,
 
@@ -623,7 +623,7 @@ In this system, models that use the Image models are still free to be null and b
 
 
 ### Package solutions
-#### Core admin
+#### ImageCoreAdmin
 For administration and maintenance of the image collections. This is a rather specialised use, which would only be visible to end users if they are trusted.
 
 If you go to the admin.py file in the app, you will find an alternative Admin file builtin. This is for handling the images and image DB itself (not images attached to models in other apps),
@@ -664,6 +664,21 @@ You may provide no core admin at all. You can use the ./manage.py commands to do
 IF you prefer your own core admin, have a look at the code for ImageCoreAdmin in '/image/admins.py'. It provides some useful clues about how to do formfield overrides, and other customisations.
 
 If using subclassed Image/Reform models, you may find it more maintainable to duplicate and modify the admin code, rather than import and override.
+
+
+#### LinkedImageAdmin
+For administration of models that contain foreign key links to images.
+
+This is a small override that should not interfere with other admin code. It disallows image editing once an image has been connected to a field (by upload or selection). e.g.
+
+    from image.addmins import LinkedImageAdmin
+
+        class NewsArticleAdmin(LinkedImageAdmin, admin.ModelAdmin):
+            pass
+            
+            
+        admin.site.register(NewsArticle, NewsArticleAdmin)
+
 
 ### Form parts
 Both the below are used in the base Image model. There's not much use in them unless you you are building forms to control directly Image models (rare).

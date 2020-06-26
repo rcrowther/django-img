@@ -84,10 +84,10 @@ class AbstractImage(models.Model):
     # Django stadard is False, but see documentation.
     auto_delete_files = False
     
-    class AutoDelete(models.IntegerChoices):
-        UNSET = 0, _('Unset')
-        NO = 1, _('Dont delete file')
-        YES = 2, _('Auto-delete file')        
+    # class AutoDelete(models.IntegerChoices):
+        # UNSET = 0, _('Unset')
+        # NO = 1, _('Dont delete file')
+        # YES = 2, _('Auto-delete file')        
         
 
     # Not autopoulated by storage, so funny name.
@@ -135,10 +135,10 @@ class AbstractImage(models.Model):
         ],
     )
     
-    auto_delete = models.PositiveSmallIntegerField(_("Delete uploaded files on item deletion"), 
-        choices=AutoDelete.choices,
-        default=AutoDelete.UNSET,
-    )    
+    # auto_delete = models.PositiveSmallIntegerField(_("Delete uploaded files on item deletion"), 
+        # choices=AutoDelete.choices,
+        # default=AutoDelete.UNSET,
+    # )    
 
     # Django can use Pillow to provide width and height. So why?
     # The 'orrible duplication, which Django supports, is to spare web 
@@ -374,12 +374,11 @@ class AbstractImage(models.Model):
         return errors
         
     def __repr__(self):
-        return "Image(upload_time: {}, src:'{}', auto_delete:{})".format(
+        return "Image(upload_time: {}, src:'{}')".format(
             #self.upload_date,
             self.upload_time,
             #self.title,
             self.src,
-            self.auto_delete
         )                
 
     def __str__(self):
@@ -472,6 +471,9 @@ class AbstractReform(models.Model):
 
 
 class Reform(AbstractReform):
+    # When subclassing, it's important to include this attribute.
+    # This is how Image finds the reform class. It needs too keep this
+    # related_name
     image = models.ForeignKey(Image, related_name='reforms', on_delete=models.CASCADE)
 
     def __repr__(self):
