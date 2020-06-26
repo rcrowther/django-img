@@ -219,8 +219,8 @@ The documenation is split into general areas.
 - Aministration support
 
 
-### Attaching images to models, creating other tables
-#### Quickstart
+## Attaching images to models, creating other tables
+### Quickstart
 Pick an app. Maybe you have a test app? For illustration I'm going to call the app Page, but pick your own. In models.py, add this field,
 
 
@@ -249,23 +249,23 @@ You will note the tag is called 'image', not 'imagequery'. image.thumb refers to
 The 'image' tag avoids the extra database hit of 'imagequery', and can flex to different models.
 
 
-#### Creating Image fields
-##### The SingleImage model field
-Works from OneToOne field, so can only handle one unique image (presumably an image attached to a model, e.g. a lead image for an Article),
+### Creating Image fields
+Two ways,
 
-    from image.model_fields import SingleImage
+#### The ImageRelationFieldMixin model fields
+There are two, ImageManyToOneField and ImageOneToOneField,
+
+    from image.model_fields import ImageManyToOneField
+
 
 
     class Page(models.Model):
 
-        img = SingleImage(
-            null=True,
-            blank=True,
-            on_delete=models.CASCADE,
-            related_name='+'
+        img = ImageManyToOneField(
+            'page.Image'
             )
 
-##### Stock Django declaration,
+#### Stock Django declaration,
 You can also use a stock Django foreign key declaration,
 
     from image.models import Image
@@ -274,38 +274,49 @@ You can also use a stock Django foreign key declaration,
     class Page(models.Model):
 
         img = models.ForeignKey(
-            'image.Image',
+            'page.Image',
             null=True,
             blank=True,
-            on_delete=models.CASCADE,
+            on_delete=models.SET_NULL,
             related_name='+'
             )
 
          etc.
 
+null=True and blank=True means you can delay adding an image until later. And related_name='*' means that Images will not track the models you are creating. See Django documentation of model fields for more details.
+
+Only use models.CASCADE if you are sure this is what you want. It means, if an image is deleted, your model that carries the image is deleted too. This is usually not what you want.
+
+
 #### Choosing between the two
-Which you prefer depends on what you find explicit, maintainable, concise, and so forth. SingleImage is little more than a rename, and only validates that it is a filefield. However, you will need to use SingleImage if you wish to try the builtin admin. By renaming the field, the app namespaces itself away from doing anything unexpected with the admin.
+ImageOneToOneField/ImageManyToOneField
+- tidy
+- Work with preconfigured admin and auto-delete
 
-Then again, the stock Django declartion is slightly more flexible, you could use other model.fields such as ManyToOne.
+Foreign Field
+- Django stock
+- explicit
+- flexible configuration
 
 
-##### File deletion and other settings
+### Auto-delete
+The solution only works if the model uses fields with the ImageRelationFieldMixin i.e. ImageManyToOneField and ImageOneToOneField.
+
+Add this to your app.ready(),
+
+    from image.actions import _image_delete
+
+    def ready()
+        post_delete.connect(_image_delete, sender=SomeModel, weak=False)
+
+
 The above settings will remove images when the model is deleted. If you prefer,
 
- img = models.ForeignKey(
-        'image.Image',
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name='+'
-    )
-
-will leave images in storage and the models on the db. 
-
-Also, null=True and blank=True means you can delay adding an image until later. And related_name='*' means that Images will not start tracking the model you are creating. Se Django documentation of model fields for more details.
 
 
-### Creating new Image-handling tables
+
+## Creating new Image-handling tables
+### Overview
 Image is equipped, and it is expected, that you will create new models from the base models. New image models have new DB tables, new upload folders and can have different configuration.
 
 Two scenarios where you may want to do this,
@@ -326,14 +337,18 @@ But you may also have a need to upload images for the site in general. Perhaps f
  
 These are two seperate apps. Make two apps. Avoid complex configuration.
 
-### Creating new tables
+### Subclassing image/reform 
 In the models.py file in an app, do this. 
 
     from image.models import AbstractImage, AbstractReform
 
     class NewsArticleImage(AbstractImage):
         upload_dir='news_originals'
+
+        #! Must be migrated
         filepath_length=100
+
+        #! in subclasses, must be enabled with a post_save signal. 
         auto_delete_files=True
 
         # AbstractImage has a file and upload_date
@@ -354,58 +369,43 @@ In the models.py file in an app, do this.
         upload_dir='news_reforms'
         filepath_length=100
 
+        # this is important. It is how the image model finds the reform model
+        #! do not change the related_name
         image = models.ForeignKey(NewssArticleImage, on_delete=models.CASCADE, related_name='reforms')
 
-Not the last word in DRY coding, but you should be able to work out what the code is there for. Note the configuration variables. Useful. Think about them before you migrate.
+Not the last word in DRY coding, but you should be able to work out what the code is doing. Note the configuration variables. Useful. Think about them before you migrate.
 
 Then migrate,
 
     ./manage.py migrate NewsArticle
 
-You now have a new image upload app. It has it's own DB tables. Change it's configuration. Refer to it in the models,
+You now have a new image upload app. It has it's own DB tables. Change it's configuration. Refer to it in other models,
 
     class NewsArticle(models.Model):
 
-        img = SingleImage(
+        img = ImageManyToOneField(
             "image.NewssArticleImage"
-            null=True,
-            blank=True,
-            on_delete=models.CASCADE,
-            related_name='+'
             )
 
         etc.
 
-#### Autodeletion
-##### Overview
-Sadly, it is impossible to auto-delete an image if the carrying model is removed.
+### Things to consider with subcalsses of models
+#### Auto-delete
+Let's say that when an image model is deleted, you want to auto-delete the file (Django used to do this, now it does not). The core implementation in this app auto-deletes,  but subclasses will not. If you want a subclass to auto-delete, set 'autto_delete_files = True' in the image subclass, then add this to app.py,
 
-Isn't this what CASCADE is for, you say? Yes, but cascade deletes the model carrying the foreign key. In our terms, it will remove a model if the image is removed (not usually the action you want).
 
-Well, then, you say, what about Django signals? But we allow freeform renaming of inherited models. Signal handlers need to be registered. Do we register every new subclass of Image?
-
-Use a general handler, you press, use post_delete and check the models. Not good. Signal handlers are expensive. Signal code should be small and light. Checking every post_delete to test if it is an Image derivative is possible, but not good.
-
-Ok, you say, override the model delete() method! That works for sure. But the issue is that it won't work on bulk deletes. [Bulk deletes bypass the delete method]{https://docs.djangoproject.com/en/3.0/topics/db/models/} (though they do emit signals).
-
-You insist, model.delete() has a keep_parent parameter, that will do it! No, it won't, that parameeter has nothing to do with table relationships, it's for model inheritance.
-
-Of these messy solutions, I prefer the targetted signals solution. It's unecessary code (the data and structures are there already), but it is stock Django and the action we would like. 
-
-##### Auto-delete
-The solution only works if the model uses fields with the ImageRelationFieldMixin i.e. ImageManyToOneField and ImageOneToOneField.
-
-Add this to your app.ready(),
-
-    from image.actions import _image_delete
+    from image.signals import register_file_delete_handlers
 
     def ready()
-        post_delete.connect(_image_delete, sender=SomeModel, weak=False)
+        super().ready()
+        from models import NewsArticleImage, NewsArticleReform          
+        register_file_delete_handlers(NewsArticleImage, NewsArticleReform)
 
 
+Note the position of the model import. It must be in the ready callback, not the main module.
 
-#### Things to do with subcalsses of models
-
+ 
+#### Meta information
 You may want to configure a Meta. If you have titles or slugs, for example, you may be interested in making them into unique constrained groups or adding indexes,
 
     class NewssArticleImage(AbstractImage):

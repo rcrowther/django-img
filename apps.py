@@ -1,5 +1,6 @@
 from django.apps import AppConfig
 from django.utils.translation import gettext_lazy as _
+from image.signals import register_file_delete_handlers
 
 
 
@@ -15,5 +16,5 @@ class ImageConfig(AppConfig):
     def ready(self):
         super().ready()
         self.module.autodiscover()
-        from image.signals import register_signal_handlers
-        register_signal_handlers()
+        from image.models import Image, Reform
+        register_file_delete_handlers(Image, Reform)

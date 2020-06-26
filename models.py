@@ -77,12 +77,14 @@ class AbstractImage(models.Model):
     upload_dir='originals'
     
     # 100 is Django default
-    #! template tag
+    #! must be migrated
     filepath_length=100
         
-    # If the model s deleted, delete the file
+    # If the model is deleted, delete the file
     # Django stadard is False, but see documentation.
-    auto_delete_files = False
+    #! in subclasses, must be enabled with a post_save signal. 
+    #! (this core model is pre-coded)
+    auto_delete_files = True
     
     # class AutoDelete(models.IntegerChoices):
         # UNSET = 0, _('Unset')
