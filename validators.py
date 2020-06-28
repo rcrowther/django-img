@@ -70,9 +70,9 @@ def validate_image_file_extension(file):
     extensions. Then does a Pillow read, to see what Pillow thinks,
     and compares the two.  So a bit more than Django's
     FileExtensionValidator.
-    
-    @file One of Django's file wraps, typically an ImageFieldFile. .
-    The internal 'file' attribute must be open.
+
+    file
+        a Django file class. The file must be open.    
     '''
     fp = Path(file.name)
     raw_extension = fp.suffix
@@ -107,15 +107,21 @@ def validate_image_file_extension(file):
             ))
         
 
-def validate_file_size(file):
-       # Don't try if no max upload size declared
-        if not(settings.max_upload_size):
-            return
+def validate_file_size(max_upload_size, file):
+    '''
+    max_upload_size
+        in bytes
+    file
+        a Django file class. The file must be open.
+    '''
+    # Don't try if no max upload size declared
+    if not(max_upload_size):
+        return
 
-        # Check filesize
-        if (file.size > settings.max_upload_size):
-            raise ValidationError(
-                "This file is too big* ({}). Maximum filesize {}.".format(
-                    filesizeformat(file.size),
-                    filesizeformat(settings.max_upload_size)
-                ))
+    # Check filesize
+    if (file.size > max_upload_size):
+        raise ValidationError(
+            "This file is too big* ({}). Maximum filesize {}.".format(
+                filesizeformat(file.size),
+                filesizeformat(max_upload_size)
+            ))

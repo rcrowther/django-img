@@ -6,6 +6,14 @@ from importlib import import_module
 print('create utils')
 
 
+def bytes2mb(v):
+    # This is how Django does it, I think, binary MB
+    return v << 20
+
+def mb2bytes(v):
+    # This is how Django does it, I think, binary MB
+    return v >> 20
+
 def path_absolute_static_aware(self, path):
     """
     Given a relative or absolute path to a static asset, return an 

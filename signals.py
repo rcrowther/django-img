@@ -1,6 +1,5 @@
 from django.db.models.signals import post_delete
 from django.db import transaction
-#from image import settings
 
 
 def _image_delete(instance, **kwargs):

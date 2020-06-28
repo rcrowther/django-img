@@ -209,14 +209,14 @@ That's it, gone.
 ## Full documentation
 The documenation is split into general areas. 
 
-- Attaching images to models
-- Creating other tables
-- Filters
-- Viewing images
-- Uploading
-- Settings
-
-- Aministration support
+- [Attaching images to models]
+- [Creating new tables]
+- [Filters]
+- [Viewing images]
+- [Uploading]
+- [Settings]
+- [Aministration support]
+- [utils]
 
 
 ## Attaching images to models, creating other tables
@@ -337,7 +337,7 @@ But you may also have a need to upload images for the site in general. Perhaps f
  
 These are two seperate apps. Make two apps. Avoid complex configuration.
 
-### Subclassing image/reform 
+### Subclassing Image/Reform 
 In the models.py file in an app, do this. 
 
     from image.models import AbstractImage, AbstractReform
@@ -366,12 +366,10 @@ In the models.py file in an app, do this.
 
 
     class NewsArticleReform(AbstractReform):
+        reform_from_model = NewsArticleImage
         upload_dir='news_reforms'
         filepath_length=100
 
-        # this is important. It is how the image model finds the reform model
-        #! do not change the related_name
-        image = models.ForeignKey(NewssArticleImage, on_delete=models.CASCADE, related_name='reforms')
 
 Not the last word in DRY coding, but you should be able to work out what the code is doing. Note the configuration variables. Useful. Think about them before you migrate.
 
@@ -753,11 +751,39 @@ But try not to create a tangle between your apps. You would not do that with CSS
 
 
 ## Settings
-Images accepts some settings. They look like the Django template settings,
+### Overview
+Image accepts settings in several places. The app has moved away from using the site-wide settings.py towards other placements, with consistent override behaviour. Here is a summary, in order of last placement wins,
+
+upload_dir
+    default='originals'/'reforms', Image/Reform attribute
+    
+filepath_length
+    default=100, Image/Reform attribute, (if overridden) Image/Reform field 
+        
+auto_delete_files
+    (if enabled) Image/Reform attribute
+
+max_upload_size
+    default=2MB, Image/Reform attribute
+
+reform_format
+    default=original format, filter attribute, Reform attribute
+
+reform_jpg_quality
+    default=80, filter attribute, Reform attribute
+
+filters_search_apps
+    default=True, site-wide
+
+filters_search_modules
+    site-wide
+
+
+### Site-wide settings
+Images accepts some site-wide settings. They look like the Django template settings,
 
     IMAGES = [
         {
-            #'MAX_UPLOAD_SIZE': 1,
             'APP_DIRS': True,
         'REFORMS': [
             #'FORMAT_OVERRIDE': 'jpg',
@@ -772,9 +798,6 @@ Images accepts some settings. They look like the Django template settings,
 
 
 ### General settings
-MAX_UPLOAD_SIZE
-If not set or None, any size allowed. In MB. Fractions allowed.
-
 APP_DIRS
 Defines if 'image_filters.py' files will be sought in apps. If false, the app only uses filters defined in the core app.
 

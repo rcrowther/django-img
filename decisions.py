@@ -42,44 +42,6 @@ def reform_save_info(ifilter, src_format):
         if hasattr(ifilter, 'jpeg_quality') and ifilter.jpeg_quality:
             jpeg_quality = ifilter.jpeg_quality
     return {'format': iformat, 'jpeg_quality': jpeg_quality}
-
-# def src_should_delete(image, calling_opinion):
-    # delete = calling_opinion
-    
-    # # Settings can override...
-    # if (not(settings.auto_delete is None)):
-        # delete = settings.auto_delete
-
-    # #,,,but Model wins.
-    # if (image.auto_delete != image.AutoDelete.UNSET):
-        # delete = (image.auto_delete == image.AutoDelete.YES)
-    # return delete
-
-# def media_path_originals(upload_dir):
-    # '''
-    # Relative path to the image directory.
-    # For original image uploads.
-    # '''
-    # # Settings has a say...
-    # media_path = settings.media_subpath_originals
-    
-    # #,,,but model definition wins.
-    # if (upload_dir):
-        # media_path = upload_dir
-    # return media_path
-    
-# def media_path_reforms(upload_dir):
-    # '''
-    # Relative path to the reform directory.
-    # For original reform creates.
-    # '''
-    # # Settings has a say...
-    # media_path = settings.media_subpath_reforms
-    
-    # #,,,but model definition wins.
-    # if (upload_dir):
-        # media_path = upload_dir
-    # return media_path    
     
 def filename_originals_maxlen(field_file, media_path):
     '''
@@ -100,21 +62,7 @@ def filename_reforms_maxlen(field_file, media_path):
     # -1 for a connector
     return truncate_len - len(str(full_path)) - 1
     
-#@property
-# def file_path_originals(self, upload_dir):
-    # '''
-    # Full path to the image directory.
-    # For original image uploads. Note this can be a longish absolute
-    # path from server root.
-    # '''
-    # # Settings has a say...
-    # media_path = settings.media_subpath_originals
-    
-    # #,,,but model definition wins.
-    # if (upload_dir,):
-        # media_path = upload_dir
-    # return Path(settings.media_root) / media_path
-        
+
 from os import path
 def image_save_path(obj, filename):
     '''
@@ -122,7 +70,9 @@ def image_save_path(obj, filename):
     This calculates and truncates lengths. For example, the stock 
     Django DB Filefield allows 100 chars path length. And Win32 
     operating systems can only handle 255 char path lengths. 
-    
+
+    obj
+        An image model (unfinished)
     filename
         any kind of stringlike filename or path. Should have an extension. 
     '''
@@ -163,7 +113,9 @@ def reform_save_path(obj, filename):
     This calculates and truncates lengths. For example, the stock 
     Django DB Filefield allows 100 chars path length. And Win32 
     operating systems can only handle 255 char path lengths. 
-    
+
+    obj
+        An image model (unfinished)    
     filename
         any kind of stringlike filename or path. Should have an extension. 
     '''

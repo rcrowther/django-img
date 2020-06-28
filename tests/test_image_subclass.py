@@ -2,21 +2,21 @@ import unittest
 
 from django.test import TestCase
 from image.models import Image, SourceImageIOError
-from .utils import get_image_subclass
+from .utils import get_subclass_image, create_subclass
 
 
 # ./manage.py test image.tests.test_image_subclass
-#! SQLite schema editor cannot be used while foreign key constraint checks are enabled.
-#? but how?
+#! NOT WORKING
 class TestImageSubclass(TestCase):
     '''
     Base tests avoid reform creation, object deletion, subclassing
     '''
     def setUp(self):
-        self.image = get_image_subclass()
+        create_subclass()
+        self.image = get_subclass_image()
 
-    # def test_upload_dir(self):
-        # self.assertEqual(self.image.upload_dir, 'originals')
+    def test_upload_dir(self):
+        self.assertEqual(self.image.upload_dir, 'originals')
 
     # def test_filepath_length(self):
         # self.assertEqual(self.image.filepath_length, 100)
