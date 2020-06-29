@@ -1,6 +1,8 @@
 from django.apps import AppConfig
 from django.utils.translation import gettext_lazy as _
 from image.signals import register_file_delete_handlers
+from django.core import checks
+from image.checks import check_filters
 
 
 
@@ -16,5 +18,8 @@ class ImageConfig(AppConfig):
     def ready(self):
         super().ready()
         self.module.autodiscover()
+        
+        #? why not explicit in admen when autodiscover used?
+        checks.register(check_filters, 'image_filters')
         from image.models import Image, Reform
         register_file_delete_handlers(Image, Reform)

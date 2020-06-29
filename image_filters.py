@@ -10,7 +10,6 @@ class Thumb(filters_pillow.ResizeSmart):
     format='png'
 
 
-
 @register()
 class Format(filters_wand.Format):
     jpeg_quality = 85

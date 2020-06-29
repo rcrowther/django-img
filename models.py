@@ -15,6 +15,8 @@ from django.utils.functional import cached_property
 from image import decisions
 from image.validators import validate_file_size, validate_image_file_extension
 from image import utils
+from image import checks
+
 
 print('create models')
  
@@ -258,7 +260,10 @@ class AbstractImage(models.Model):
             # make a new, reformed image and record for Reform DB table
             # Open the file then produce a reformed image.
             with self.open_src() as fsrc:
-                (reform_buff, iformat) = filter_instance.process(fsrc)
+                (reform_buff, iformat) = filter_instance.process(fsrc,
+                Reform.file_format, 
+                Reform.jpeg_quality
+                )
 
             # A destination filename. Code needs the filter's
             # decision on the extension.
@@ -419,8 +424,7 @@ class AbstractReform(models.Model):
     #@classmethod
     #def _get_filepath_length(cls):
     #    return cls._meta.get_field('image').related_model.filepath_length
-
-    reform_from_model = Image
+    image_model = Image
     
     # None is 'use settings default'
     upload_dir='reforms'
@@ -428,6 +432,8 @@ class AbstractReform(models.Model):
     # 100 is Django default
     filepath_length=100
     print('build reform')
+    file_format = None
+    jpeg_quality = 80
     
     # For naming, see the note in AbstractImage
     src = models.FileField(
@@ -438,7 +444,7 @@ class AbstractReform(models.Model):
     filter_id = models.CharField(max_length=255, db_index=True)
 
     image = models.ForeignKey(
-        reform_from_model, 
+        image_model, 
         related_name='reforms', 
         # If the original image model is removed, so are the reform 
         # models.
@@ -469,50 +475,33 @@ class AbstractReform(models.Model):
         #filename = self.src.field.storage.get_valid_name(filename)
 
         # Then respect settings, such as truncation, and relative path 
-         # to storage base
+        # to storage base
         #filename = decisions.image_save_path(self.src, self.upload_dir, filename)
         return decisions.reform_save_path(self, filename)
 
-    @classmethod
-    def _check_reform_from_model(cls, **kwargs):
-        #NB Django checks stop this being an abstract model.
-        errors = []
-        if (not(issubclass(cls.reform_from_model, AbstractImage))):
-            errors.append(
-                checks.Error(
-                    "'reform_from_model' value '%s' must be a subclass of AbstractImage." % cls.reform_from_model.__name__,
-                    id='image_reform.E001',
-                )
-            )
-        return errors        
-
     # @classmethod
-    # def check(cls, **kwargs):
-        # errors = super(AbstractReform, cls).check(**kwargs)
-        # if not cls._meta.abstract:
-            # if not any(
-                # set(constraint) == set(['src', 'filter_id'])
-                # for constraint in cls._meta.unique_together
-            # ):
-                # errors.append(
-                    # checks.Error(
-                        # "Custom reform model %r has an invalid unique_together setting" % cls,
-                        # hint="Custom reform models must include the constraint "
-                        # "('src', 'filter_id') in their unique_together definition.",
-                        # obj=cls,
-                        # id='images.E001',
-                    # )
+    # def _check_image_model(cls, **kwargs):
+        # #NB Django checks stop this being an abstract model.
+        # errors = []
+        # if (not(issubclass(cls.image_model, AbstractImage))):
+            # errors.append(
+                # checks.Error(
+                    # "'image_model' value '%s' must be a subclass of AbstractImage." % cls.reform_from_model.__name__,
+                    # id='image_reform.E001',
                 # )
-
-        # return errors
-
+            # )
+        # return errors        
         
     @classmethod
     def check(cls, **kwargs):
         errors = super().check(**kwargs)
         if not cls._meta.swapped:
             errors += [
-            *cls._check_reform_from_model(**kwargs),
+            #NB field checks check image_model is not abstract.
+            *checks.check_is_subclass(cls.image_model, AbstractImage, 'image_reform.E001', **kwargs),
+            *checks.check_image_format(cls.file_format, 'image_reform.E002', **kwargs),
+            *checks.check_jpeg_quality(cls.jpeg_quality, 'image_reform.E003', **kwargs),
+            *checks.check_jpeg_legible(cls.jpeg_quality, 'image_reform.W001', **kwargs),
             ]
         return errors
           

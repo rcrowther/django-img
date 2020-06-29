@@ -49,7 +49,6 @@ class PillowProcess:
         # across different filters
         pil_dst = self.modify(src_image) or src_image
 
-
         # PIL raises error if given RGBA for JPEG output
         # in that case, no transparency
         if ((pil_dst.mode in ('RGBA', 'LA')) and (app_format == 'jpg')):            
@@ -65,14 +64,11 @@ class PillowProcess:
         
         #! test. I think that's the name.
         write_attrs['quality'] = write_attrs['jpeg_quality']
-
         out_buff = BytesIO()
-
         pil_dst.save(
             out_buff,
             **write_attrs
         )
-        
         return (out_buff, app_format)
 
     def modify(self, lib_image):

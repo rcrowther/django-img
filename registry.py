@@ -8,9 +8,9 @@ class AlreadyRegistered(KeyError):
 class NotRegistered(KeyError):
     pass
     
+    
 class Unregisterable(Exception):
     pass
-
 
 
 class ClassRegistry:
@@ -54,7 +54,7 @@ class ClassRegistry:
 
     def __call__(self, k, **kwargs):
         '''
-        Return an instane of the registered class.
+        Return an instance of the registered class.
         '''
         f = None
         try:

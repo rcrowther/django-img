@@ -137,7 +137,7 @@ You can create, meaning upload and register, fifteen or twenty images in a few s
 ### Viewing images
 Ok, let's see an image, as you would on site. Two ways.
 
-#### Via a view 
+#### Use a view 
 Find a web view template. Nearly any template will do (maybe not a JSON REST interface, something visible).
 
 Add this tag to the template,
@@ -146,7 +146,7 @@ Add this tag to the template,
     ...
     {% imagequery "pk=1" image.Thumb %}
 
-'image.Thumb' is a predefined filter, the only one the app contains. It makes a 64x64 pixel Thumbnail. The tag we use here searchs for an image by a very low method, "pk=1". This will do for now.  
+'image.Thumb' is a predefined filter. It makes a 64x64 pixel Thumbnail. The tag we use here searchs for an image by a very low method, "pk=1". This will do for now.  
 
 Visit the page. The app will generate the filtered 'reform' image automatically, To change how the image is filtered, size and so on, see Filters.
 
@@ -366,7 +366,7 @@ In the models.py file in an app, do this.
 
 
     class NewsArticleReform(AbstractReform):
-        reform_from_model = NewsArticleImage
+        image_model = NewsArticleImage
         upload_dir='news_reforms'
         filepath_length=100
 
@@ -430,17 +430,31 @@ You may want to configure a Meta. If you have titles or slugs, for example, you 
 ### Overview
 Filters are used to describe how an original uploaded image should be modified for display. In the background, the app will automatically adjust the image to the given spacification (or use a cached version).
  
-A few filters are predefined. These are base filters, which you configure. They are (centre-anchored) Crop, Resize, SmartCrop, SmartResize. If you only need different image sizes, then you only need to configure these. But if you want to pass some time with image-processing code, you can add extra filters to generate ''PuddingColour' and other filters.
+A few filters are predefined. A couple of utility filters,
+
+Format
+    Change the format of an uploaded image
+Thumb
+    A 64x64 pixel square
+
+And some base filters, which you can configure. These are all centre-anchored, 
+
+- Crop
+- Resize
+- SmartCrop
+- SmartResize
+
+If you only need different image sizes, then you only need to configure these. But if you want to pass some time with image-processing code, you can add extra filters to generate ''PuddingColour' and other filters.
 
 
 ### Filter declarations
 All builtin filter bases accept these attributes,
 
-    width
-    height
-    format
+- width
+- height
+- format
 
-Most filter code demands width and height, but format is optional. Without a stated format, the image stays as it was (unless an overall setting is in place). formats accepted are,
+Most filter code demands width and height, but format is optional. Without a stated format, the image stays as it was (unless another setting is in place). Formats accepted are,
 
     gif, png, jpg, bmp, tiff, webp 
 
@@ -484,7 +498,7 @@ If you would prefer to gether all filters together in one place, define the sett
             ],
     }
 
-Then put a file image_filters.py in the 'sitename' directory. If you do this, you will probably need to namespace filters,
+Then put a file image_filters.py in the 'sitename' directory. If you do this, you should namespace the filters,
 
     BlogPostLarge:
         width : 256
@@ -492,7 +506,7 @@ Then put a file image_filters.py in the 'sitename' directory. If you do this, yo
 
 
 ### Registering filters
-Filters need to be registered. The style is like a ModelAdmin. Registration is to the image.registry (this is how templatetags finds them).
+Filters need to be registered. Registration style is like ModelAdmin, templates etc. Registration is to the image.registry (this is how templatetags finds them).
 
 You can use the declaration used in the examples above,
 
@@ -502,7 +516,7 @@ You can use the declaration used in the examples above,
 
     registry.register(single_or_list_of_filters)
 
-There is also (like ModelAdmin) a decorator available,
+Like ModelAdmin, there is also a decorator available,
 
     from image import register, ResizeSmart
 
@@ -515,7 +529,7 @@ There is also (like ModelAdmin) a decorator available,
 
 
 ### Wand filters
-The base filters in the Wand filter set have more attributes available. The module needs Wand to be installed on the host computer, and a deliberate import. Assuming that, you gain these extra effects on every Wand filter,
+The base filters in the Wand filter set have more attributes available. The 'wand' code needs Wand to be installed on the host computer, and a imported into the image_filters file. Assuming that, you gain these effects on every Wand filter,
 
     from image import registry
     from image.wand_filters import ResizeSmart
@@ -552,7 +566,7 @@ strong
 no
     Draw a red cross across the image
 watermark
-    Accepts a filepath to a watermark image template.
+    Accepts a URL to a watermark image template.
 
 Watermark deserves some explanation. This does not draw on the image, as text metrics are tricky to handle. Provide a URL stub to an image, here's a builtin,
 
@@ -754,6 +768,7 @@ But try not to create a tangle between your apps. You would not do that with CSS
 ### Overview
 Image accepts settings in several places. The app has moved away from using the site-wide settings.py towards other placements, with consistent override behaviour. Here is a summary, in order of last placement wins,
 
+### Image
 upload_dir
     default='originals'/'reforms', Image/Reform attribute
     
@@ -764,14 +779,21 @@ auto_delete_files
     (if enabled) Image/Reform attribute
 
 max_upload_size
-    default=2MB, Image/Reform attribute
+    default=2MB, Image attribute
 
-reform_format
-    default=original format, filter attribute, Reform attribute
 
-reform_jpg_quality
-    default=80, filter attribute, Reform attribute
+### Reform
+image_model
+    default='image.Image', Reform attribute
 
+file_format
+    default=original format, Reform attribute, filter attribute
+
+jpeg_quality
+    default=80, Reform attribute, filter attribute
+
+
+### Site-wide
 filters_search_apps
     default=True, site-wide
 

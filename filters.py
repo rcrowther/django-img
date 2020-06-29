@@ -1,12 +1,5 @@
+from image import checks
 
-from image.configuration_checks import (
-    check_jpeg_quality, 
-    check_image_formats, 
-    check_value_range, 
-    check_positive,
-    check_boolean,
-    check_file,
-)
 
 print('create filters')
 
@@ -63,6 +56,7 @@ class Filter():
         '''
         p = cls._module_path_human()
         p.append( cls.__name__ )
+        
         # That is unique, but we encourage users to place filters in a 
         # module called image_filters'. This would involve a lot of
         # repetition in template code. At the risk of a collision with
@@ -87,7 +81,11 @@ class Filter():
             extension
         )
         
-        
+    @classmethod
+    def check(cls, **kwargs):
+        print('filter check {}'.format(cls.human_id()))
+        return []
+
     def process(self, src_file):
         '''
         Wrap a Python file handle for processing a reform.
@@ -109,7 +107,7 @@ class Filter():
         
         
         
-# Class code here on is mixins. They estabish attributes and checks, 
+# Classes here on are mixins. They estabish attributes and checks, 
 # skeletons to hang image-processing code on.
 
 class FormatMixin():
@@ -120,11 +118,15 @@ class FormatMixin():
     format=None
     jpeg_quality=None
     
-    def __new__(cls, *args, **kwargs):
-        check_image_formats(cls.__name__, 'format', cls.format)    
-        check_jpeg_quality(cls.__name__, 'jpeg_quality', cls.jpeg_quality)  
-        return super().__new__(cls, *args, **kwargs)
-
+    @classmethod
+    def check(cls, **kwargs):
+        errors = super().check(**kwargs)
+        errors += [
+            *checks.check_image_format(cls.format, 'image_filter.E001', **kwargs),
+            *checks.check_jpeg_quality(cls.jpeg_quality, 'image_filter.E002', **kwargs),
+            *checks.check_jpeg_legible(cls.jpeg_quality, 'image_reform.W001', **kwargs),
+        ]
+        return errors
 
 
 class PhotoFXMixin():
@@ -141,18 +143,22 @@ class PhotoFXMixin():
     no=False
     watermark=''
     
-    def __new__(cls, *args, **kwargs):
-        check_boolean(cls.__name__, 'pop', cls.pop)    
-        check_boolean(cls.__name__, 'greyscale', cls.greyscale)    
-        check_boolean(cls.__name__, 'night', cls.night)    
-        check_boolean(cls.__name__, 'warm', cls.warm)    
-        check_boolean(cls.__name__, 'strong', cls.strong)    
-        check_boolean(cls.__name__, 'film', cls.film)    
-        check_boolean(cls.__name__, 'no', cls.no)    
-        check_file(cls.__name__, 'watermark', cls.watermark)    
-        return super().__new__(cls, *args, **kwargs)
-                   
-                   
+    @classmethod
+    def check(cls, **kwargs):
+        errors = super().check(**kwargs)
+        errors += [
+            *checks.check_boolean('pop', cls.pop, 'image_filter.E003', **kwargs),
+            *checks.check_boolean('greyscale', cls.greyscale, 'image_filter.E004', **kwargs),
+            *checks.check_boolean('night', cls.night, 'image_filter.E005', **kwargs),
+            *checks.check_boolean('warm', cls.warm, 'image_filter.E006', **kwargs),
+            *checks.check_boolean('strong', cls.strong, 'image_filter.E007', **kwargs),
+            *checks.check_boolean('film', cls.film, 'image_filter.E008', **kwargs),
+            *checks.check_boolean('no', cls.no, 'image_filter.E009', **kwargs),
+            #*checks.check_url_file_exists('watermark', cls.watermark, 'image_filter.E010', **kwargs),
+        ]
+        return errors
+        
+                           
                                 
 class ResizeCropMixin():
     '''Resize n image.
@@ -163,11 +169,14 @@ class ResizeCropMixin():
     width = None
     height = None
     
-    def __new__(cls, *args, **kwargs):
-        check_positive(cls.__name__, 'width', cls.width)
-        check_positive(cls.__name__, 'height', cls.height)
-        return super().__new__(cls, *args, **kwargs)
-        
+    @classmethod
+    def check(cls, **kwargs):
+        errors = super().check(**kwargs)
+        errors += [
+            *checks.check_positive('width', cls.width, 'image_filter.E011', **kwargs),
+            *checks.check_positive('height', cls.height, 'image_filter.E012', **kwargs),
+        ]
+        return errors
         
                                     
 class ResizeCropSmartMixin(ResizeCropMixin):
@@ -177,9 +186,11 @@ class ResizeCropSmartMixin(ResizeCropMixin):
     A base class
     '''
     fill_color="white"
-    
-    
-    def __new__(cls, *args, **kwargs):
-        #? No test for color
-        return super().__new__(cls, *args, **kwargs)
 
+    @classmethod
+    def check(cls, **kwargs):
+        errors = super().check(**kwargs)
+        errors += [
+        #? No test for color
+        ]
+        return errors
