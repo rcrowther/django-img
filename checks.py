@@ -6,8 +6,8 @@ from django.core import checks
 #from django.forms import BaseForm
 #from django.core.exceptions import FieldDoesNotExist
 #from django.contrib.admin import checks as admincheck
-from django.db import models
-from inspect import isclass
+#from django.db import models
+#from inspect import isclass
 
 from django.core.checks import Error, register
 from image.constants import IMAGE_FORMATS
@@ -101,6 +101,20 @@ def check_positive(setting_name, v, eid, **kwargs):
         ))
     return errors 
 
+        
+# def check_numeric_range(class_name, setting_name, v, min, max):
+    # check_int(class_name, setting_name, v)
+    # if (v and (v > min or v > max)):
+        # raise ValueError(
+            # "In {}, '{}' smust be {}--{}."
+            # " value: {}".format(
+            # class_name, 
+            # setting_name, 
+            # min,
+            # max,
+            # v
+        # )) 
+        
 def check_boolean(setting_name, v, eid, **kwargs):
     errors = []
     if (v and (not(type(v)==bool))):

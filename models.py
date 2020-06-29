@@ -259,10 +259,14 @@ class AbstractImage(models.Model):
         except Reform.DoesNotExist:
             # make a new, reformed image and record for Reform DB table
             # Open the file then produce a reformed image.
+            model_args = {
+                'file_format': Reform.file_format, 
+                'jpeg_quality': Reform.jpeg_quality
+            }
             with self.open_src() as fsrc:
-                (reform_buff, iformat) = filter_instance.process(fsrc,
-                Reform.file_format, 
-                Reform.jpeg_quality
+                (reform_buff, iformat) = filter_instance.process(
+                fsrc,
+                model_args
                 )
 
             # A destination filename. Code needs the filter's

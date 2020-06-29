@@ -25,13 +25,14 @@ class PillowProcess:
             # im.convert("RGB")
 
             
-    def process(self, src_file):
+    def process(self, src_file, model_args):
         src_image = PILImage.open(src_file)
         
         # write_attrs currently {format, jpeg_quality}
         write_attrs = reform_save_info(
                     self,
                     FORMAT_UCLIB_APP[src_image.format],
+                    model_args,
                     )
 
         # stash the returned app format

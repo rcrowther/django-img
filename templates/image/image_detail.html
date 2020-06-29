@@ -35,7 +35,7 @@
         <figure>
                 {% image image Thumb class="imagedetail-img" %}
         </figure>
-        <p>This information is held on the original DB model:</pp>
+        <p>Information from the original DB model:</pp>
         <dl>
             <dt>upload_time</dt>
             <dd>{{ image.upload_time }}</dd>
@@ -47,15 +47,15 @@
             <dd>{{ image.height }}</dd>
             <dt>bytesize</dt>
             <dd>{{ image.bytesize }}</dd>
-            <dt>auto_delete (the associated file)</dt>
-            <dd>{{ image.auto_delete }}</dd>
         </dl>
-        <p>This information is derived from DB model data:</pp>
+        <p>Information derived from the DB model:</pp>
         <dl>        
+            <dt>auto_delete (the associated file)</dt>
+            <dd>{{ image.auto_delete_files }} </dd>
             <dt>filename</dt>
             <dd>{{ image.filename }}</dd>
             <dt>alt</dt>
-            <dd>"{{ image.alt }}"</dd>        
+            <dd>"{{ image.alt }}"</dd>
         </dl>
         </article>
     </body>

@@ -770,10 +770,10 @@ Image accepts settings in several places. The app has moved away from using the 
 
 ### Image
 upload_dir
-    default='originals'/'reforms', Image/Reform attribute
+    default='originals', Image attribute
     
 filepath_length
-    default=100, Image/Reform attribute, (if overridden) Image/Reform field 
+    default=100, Image attribute, (if overridden) Image field 
         
 auto_delete_files
     (if enabled) Image/Reform attribute
@@ -783,6 +783,12 @@ max_upload_size
 
 
 ### Reform
+upload_dir
+    default='reforms', Reform attribute
+
+filepath_length
+    default=100, Reform attribute, (if overridden) Reform field 
+            
 image_model
     default='image.Image', Reform attribute
 
@@ -793,51 +799,24 @@ jpeg_quality
     default=80, Reform attribute, filter attribute
 
 
-### Site-wide
-filters_search_apps
-    default=True, site-wide
-
-filters_search_modules
-    site-wide
-
 
 ### Site-wide settings
 Images accepts some site-wide settings. They look like the Django template settings,
 
     IMAGES = [
         {
-            'APP_DIRS': True,
-        'REFORMS': [
-            #'FORMAT_OVERRIDE': 'jpg',
-            #'JPEG_QUALITY': 28,
-
-        ],
-            'MODULES': [
+            'SEARCH_APP_DIRS': True,
+            'SEARCH_MODULES': [
                         "someSiteName",
             ],
         },
     ]
 
+SEARCH_APP_DIRS
+Find 'image_filters.py' files in apps. If False, the app only uses filters defined in the core app and SEARCH_MODULES setting.
 
-### General settings
-APP_DIRS
-Defines if 'image_filters.py' files will be sought in apps. If false, the app only uses filters defined in the core app.
-
-MODULES
-Defines extra places to put modules. The above example suggests a site-wide filter collection in the site directory, same as the site-wide template and CSS collections most Djangos have in the same directory. The setting takes module paths, not filepaths, because filter files are live code.
-
-
-
-### Reform settings
-FORMAT_OVERRIDE
-Set a preferred image format. Locality wins. If a filter sets an 'iformat' attribute, that wins. After, if this site-wide setting is present, it wins. After, the filter will attempt to make the file in whatever format it originally detected.
-
-JPEG_QUALITY
-Quality of reform JPGs. Basic is '85' of '100', which is high quality. You can go down to '28', say, and get a vast reduction in file sizes.
-
-Locality wins. If a filter sets a 'jpeg_quality' attribute, that wins. After, if this site-wide setting is present, it wins. Otherwise, the quality defaults to '85'.
-
-
+SEARCH_MODULES
+Defines extra places to find 'image_filter.py' files. The above example suggests a site-wide filter collection in the site directory (most page-based Django sites have central collections of templates and CSS in the same directory). The setting takes module paths, not filepaths, because 'image_filter.py' files are live code.
 
 
 

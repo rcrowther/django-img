@@ -1,6 +1,7 @@
 = README
 Markdown sanitation stripping tags
 Relative links
+Remove prepop code
 
 = Structure
 How does cloud storage generate reforms?
@@ -17,6 +18,7 @@ tests
 
 == Filters
 Test Wand
+url conversion for watermark check
 
 == Reforms
 
@@ -34,11 +36,12 @@ from django.db.models.utils import make_model_tuple
 
 == Utils
 
-
+== Requests
+Test for permissions
 
 == Settings
 ? Cache filepaths, and the like
-Sort this crisis in model config and settings.
+? Test paths are not idiotic
 
 == Widgets
 No mark_safe in RemoteControlWidget?
@@ -50,12 +53,6 @@ Prepopulate in other forms
 
 
 == Widget
-Since when was Mozilla file browser D&D?
-- How to test?
-Some of the hover drop effects not working, why?
-
-Try test for writability of ''files'
-
 
 = Tests
 For filter format (size)?

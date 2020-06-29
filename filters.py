@@ -83,10 +83,9 @@ class Filter():
         
     @classmethod
     def check(cls, **kwargs):
-        print('filter check {}'.format(cls.human_id()))
         return []
 
-    def process(self, src_file):
+    def process(self, src_file, model_args):
         '''
         Wrap a Python file handle for processing a reform.
         Return should be a BytesIO buffer or similar. Some APIs do not
@@ -100,8 +99,10 @@ class Filter():
         needs the source format, then checks with overall and filter 
         settings, then returns decisions on 'format' and 'jpeg_quality'.
                 
-        @src_file an open Python file handle 
-        @return a BytesIO or similar
+        src_file 
+            an open Python file handle 
+        return 
+            a BytesIO or similar
         '''
         raise NotImplementedError
         

@@ -2,43 +2,43 @@ from pathlib import Path
 from unidecode import unidecode
 import os.path
 from django.utils.functional import cached_property
-
-from image.settings import settings
 from image.constants import extensions_maxlen
 
 print('decisions')
 
 # methods that negociate with calling opinions and settings to decide
 # or gain info for actions.
-# These pieces of code do not sit happily in their associated objects,
-# with external dependencies. Besides, they are also relatives of user 
-# parameters and settings. So they are here. 
-
-
-
-def reform_save_info(ifilter, src_format):
+# These pieces of code do not sit happily in their calling objects. 
+# Besides, they are also relative to user parameters and settings. 
+# So they are here. 
+def reform_save_info(ifilter, src_format, model_args):
     '''
     Gather and choose between configs about how to save filter results.
-    Probes into several settings. If present, settings file wins, 
-    filter config wins, discovered state. 
-
+    Probes into several settings. 
+    For output_format, if present, last of discovered state, model 
+    setting, filter config. 
+    For jpeg_quality, if present, last of default 85, model setting,
+    filter config.
+    
     ifilter 
         instance of a Filter
+    model_args
+        args from a an external call, usually attributes from a reform.    
+    return
+        {output_format, jpeg_quality}
     '''
     # defaults
     iformat = src_format
-    jpeg_quality = settings.reforms.jpeg_quality
     
-    # Overrides of output format. Settings first...
-    if (settings.reforms.format_override):
-        iformat = settings.reforms.format_override
-
+    # Overrides of output format. Model attributes first...
+    if (model_args['file_format']):
+        iformat = model_args['file_format']
+    jpeg_quality = model_args['jpeg_quality']
+    
     #,,,but Filter wins.
     if hasattr(ifilter, 'format') and ifilter.format:
         iformat = ifilter.format
-
     if iformat == 'jpg':
-        # Overrides of JPEG compression quality. Filter wins.
         if hasattr(ifilter, 'jpeg_quality') and ifilter.jpeg_quality:
             jpeg_quality = ifilter.jpeg_quality
     return {'format': iformat, 'jpeg_quality': jpeg_quality}

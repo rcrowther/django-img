@@ -15,16 +15,16 @@ from image.decisions import reform_save_info
 
 class WandProcess():
     '''
-    Not: Imagemagik/Wand modifies in place, so there is no need for 
-    returns from on modify() or image_ops.
     '''
-    def process(self, src_file):
+    
+    def process(self, src_file, model_args):
         image = Image(file=src_file)
  
         # write_attrs currently {format, jpeg_quality}
         write_attrs = reform_save_info(
                     self,
                     FORMAT_UCLIB_APP[image.format],
+                    model_args,
                     )
  
         # break out processing, it's the only action that changes
