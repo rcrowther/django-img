@@ -155,7 +155,8 @@ class PhotoFXMixin():
             *checks.check_boolean('strong', cls.strong, 'image_filter.E007', **kwargs),
             *checks.check_boolean('film', cls.film, 'image_filter.E008', **kwargs),
             *checks.check_boolean('no', cls.no, 'image_filter.E009', **kwargs),
-            #*checks.check_url_file_exists('watermark', cls.watermark, 'image_filter.E010', **kwargs),
+            #NB Would test for watermark existance, but it is URL access,
+            # thus server dependant.
         ]
         return errors
         

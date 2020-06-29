@@ -1,4 +1,4 @@
-from image.utils import path_absolute_static_aware
+from image.utils import url_absolute_static_aware
 from wand.image import Image
 from wand.color import Color
 from wand.drawing import Drawing
@@ -43,7 +43,7 @@ def photoFX(wand, pop, grayscale, warm, night, strong, no, watermark):
             draw(wand)
             
     if (watermark):
-        url = path_absolute_static_aware(watermark)
+        url = url_absolute_static_aware(watermark)
         scale_width = wand.width >> 1
         
         with Image(filename=watermark) as overlay:

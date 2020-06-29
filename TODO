@@ -7,6 +7,8 @@ Remove prepop code
 How does cloud storage generate reforms?
 Does auto delete work? (Check again)
 auto_delete tests
+move auto delete into model?
+
 
 == Model
 
@@ -18,19 +20,16 @@ tests
 
 == Filters
 Test Wand
-url conversion for watermark check
 
 == Reforms
-
 
 == Filters
 For cloud, what do you get to make reforms? so what source goes into the filter?
 Register, want an instance? Admin want Model?
-Check positioning staticly?
 
 == Admin
 
-== Tags
+== TemplateTags
 Test query
 from django.db.models.utils import make_model_tuple
 
@@ -44,25 +43,19 @@ Test for permissions
 ? Test paths are not idiotic
 
 == Widgets
-No mark_safe in RemoteControlWidget?
-D&D wiget not work with prepopulattion--a click on the label fixes that?
 
 == Forms
-Prepopulate in other forms
- #! throws a dependency error on change files
-
 
 == Widget
 
 = Tests
-For filter format (size)?
+Subclass [sigh]
 
 == Documentation
 Test quickstart
 
 = General
 SVG upload?
-Theres a request issue round auto_discover?
 
 == Performance
 

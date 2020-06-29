@@ -16,7 +16,6 @@ from image.decisions import reform_save_info
 class WandProcess():
     '''
     '''
-    
     def process(self, src_file, model_args):
         image = Image(file=src_file)
  

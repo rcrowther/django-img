@@ -241,7 +241,6 @@ class AbstractImage(models.Model):
     @classmethod
     def get_reform_model(cls):
         """ Get the Reform models for this Image model """
-        #return get_related_model(cls.reforms.related)
         return cls.reforms.rel.related_model
 
 
@@ -269,7 +268,7 @@ class AbstractImage(models.Model):
                 model_args
                 )
 
-            # A destination filename. Code needs the filter's
+            # A destination filename. Code needed the filter's
             # decision on the extension.
             p = Path(self.src.name)
             #dst_fname = filter_instance.filename(p.stem, iformat)
@@ -285,7 +284,6 @@ class AbstractImage(models.Model):
                 filter_id = filter_instance.human_id(),
                 src = reform_file,
             )
-
             reform.save()
         return reform
 

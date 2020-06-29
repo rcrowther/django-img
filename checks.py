@@ -1,22 +1,11 @@
-#from itertools import chain
-from pathlib import Path
-
 from django.core import checks
-#from django.contrib.admin.checks import BaseModelAdminChecks
-#from django.forms import BaseForm
-#from django.core.exceptions import FieldDoesNotExist
-#from django.contrib.admin import checks as admincheck
-#from django.db import models
-#from inspect import isclass
-
-from django.core.checks import Error, register
 from image.constants import IMAGE_FORMATS
 
-
-
 def check_filters(**kwargs):
+    '''
+    Check registered filters with Django static checks framework.
+    '''
     from image import registry
-    print('check all image filters')
     errors = []
     for f in registry.list.values():
         errors.extend(f.check())
@@ -120,7 +109,7 @@ def check_boolean(setting_name, v, eid, **kwargs):
     if (v and (not(type(v)==bool))):
         errors.append(
             checks.Error(
-            "'{}' value '{}' must be a boolean.".format(
+            "'{}b' value '{}' must be a boolean.".format(
             setting_name, 
             v
             ),
@@ -128,34 +117,16 @@ def check_boolean(setting_name, v, eid, **kwargs):
         ))
     return errors 
 
-def check_file_exists(setting_name, v, eid, **kwargs):    
-    errors = []
-    if (v and (not(Path(v).is_file()))):
-        errors.append(
-            checks.Error(
-            "'{}' value '{}' can not be deetected as an existing file".format(
-            setting_name, 
-            v
-            ),
-            id=eid,
-        ))
-    return errors 
-
-# Look how watermark does it.
-# def check_url_file_exists(setting_name, v, eid, **kwargs):
-    # '''
-    # Static aware
-    # '''    
+# def check_file_exists(setting_name, v, eid, **kwargs):    
     # errors = []
-    # if (v):
-        # p = url_to_filepath(v)
-         # if(not(Path(p).is_file())):
-            # errors.append(
-                # checks.Error(
-                # "'{}' value '{}' can not be deetected as an existing file".format(
-                # setting_name, 
-                # v
-                # ),
-                # id=eid,
-            # ))
+    # if (v and (not(Path(v).is_file()))):
+        # errors.append(
+            # checks.Error(
+            # "'{}' value '{}' can not be deetected as an existing file".format(
+            # setting_name, 
+            # v
+            # ),
+            # id=eid,
+        # ))
     # return errors 
+

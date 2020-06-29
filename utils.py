@@ -2,7 +2,7 @@ from django.utils.functional import cached_property
 from django.apps import apps
 from django.templatetags.static import static
 from importlib import import_module
-
+from django.utils.module_loading import module_has_submodule
 print('create utils')
 
 
@@ -14,11 +14,17 @@ def mb2bytes(v):
     # This is how Django does it, I think, binary MB
     return v >> 20
 
-def path_absolute_static_aware(self, path):
+def url_absolute_static_aware(path):
     """
     Given a relative or absolute path to a static asset, return an 
-    absolute path. An absolute path will be returned unchanged while a 
-    relative path will be passed to django.templatetags.static.static().
+    absolute path. 
+    
+    return
+        An absolute path will be returned unchanged while a 
+        relative path will be passed to 
+        django.templatetags.static.static(). This prefixes with 
+        STATIC_URL or a staticfiles_storage.storage defined prefix 
+        (usually '/static/').
     """
     # Straight lift from django.forms.widgets.Media
     if path.startswith(('http://', 'https://', '/')):
@@ -123,11 +129,12 @@ def autodiscover_modules(
         for name in module_names:
             # Attempt to import the app's module.
             try:
-                p = ModulePath(module_parent).extend(name).str
+                p = module_parent + '.' + name
                 import_module(p)
                 r.append(p)
-            except Exception as e:
-                #print("exception on {} {}".format(p, e))
-                pass
-            
+            except Exception:
+                # if the module doesn't exist, ignore the error, if
+                # it does and threw an error, bubble up.
+                if module_has_submodule(module_parent, name):
+                    raise
     return r
