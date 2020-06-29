@@ -11,6 +11,7 @@ from django.core.files.images import ImageFile
 #from django.db.models.signals import pre_delete, pre_save
 from django.utils.translation import gettext_lazy as _
 from django.utils.functional import cached_property
+from django.apps import apps
 #from django.utils.safestring import mark_safe
 from image import decisions
 from image.validators import validate_file_size, validate_image_file_extension
@@ -73,6 +74,8 @@ class AbstractImage(models.Model):
     Thus each file is unique, and each file field in the model is 
     unique.  
     '''
+    reform_model = 'Reform'
+
     # None is 'use settings default'
     upload_dir='originals'
     
@@ -241,8 +244,11 @@ class AbstractImage(models.Model):
     @classmethod
     def get_reform_model(cls):
         """ Get the Reform models for this Image model """
-        return cls.reforms.rel.related_model
+        return apps.get_model(cls._meta.app_label, cls.reform_model)
 
+    @classmethod
+    def get_reforms(cls):
+        return cls.get_reform_model().objects
 
     def get_reform(self, filter_instance):
         ''' Generate a reform for this image.
@@ -252,7 +258,7 @@ class AbstractImage(models.Model):
         Reform = self.get_reform_model()
 
         try:
-            reform = self.reforms.get(
+            reform = self.get_reforms().get(
                 filter_id=filter_instance.human_id(),
             )
         except Reform.DoesNotExist:
@@ -436,7 +442,7 @@ class AbstractReform(models.Model):
     print('build reform')
     file_format = None
     jpeg_quality = 80
-    
+            
     # For naming, see the note in AbstractImage
     src = models.FileField(
         unique=True,
@@ -447,12 +453,12 @@ class AbstractReform(models.Model):
 
     image = models.ForeignKey(
         image_model, 
-        related_name='reforms', 
+        related_name='+', 
         # If the original image model is removed, so are the reform 
         # models.
         on_delete=models.CASCADE
     )
-        
+                
     @property
     def url(self):
         return self.src.url

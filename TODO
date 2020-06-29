@@ -1,7 +1,5 @@
 = README
 Markdown sanitation stripping tags
-Relative links
-Remove prepop code
 
 = Structure
 How does cloud storage generate reforms?
@@ -31,16 +29,14 @@ Register, want an instance? Admin want Model?
 
 == TemplateTags
 Test query
-from django.db.models.utils import make_model_tuple
 
 == Utils
 
 == Requests
-Test for permissions
 
 == Settings
 ? Cache filepaths, and the like
-? Test paths are not idiotic
+? Test media paths are not idiotic
 
 == Widgets
 

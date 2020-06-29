@@ -61,14 +61,15 @@ from django.core.management import call_command
 def create_subclass():
     # needs to install the app
     #call_command('mkmigrations', 'image.tests.test_image_subclass')
-    #call_command('migrate', 'image.tests.test_image_subclass')
+    #call_command('migrate', 'image.tests.test_app')
 
 #! SQLite schema editor cannot be used while foreign key constraint checks are enabled.
 #? but how?
 # https://stackoverflow.com/questions/7020966/how-to-create-table-during-django-tests-with-managed-false
 #
     with connection.schema_editor() as schema_editor:
-        schema_editor.create_model(NewsArticleImage)
+        #schema_editor.create_model(NewsArticleImage)
+        schema_editor.create_model(NewsArticleReform)
 
         if NewsArticleImage._meta.db_table not in connection.introspection.table_names():
             raise ValueError("Table `{table_name}` is missing in test database.".format(

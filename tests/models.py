@@ -4,8 +4,8 @@ from django.utils.translation import gettext_lazy as _
 
 
 
-class NewsArticleImage(AbstractImage):
-    upload_dir='news_originals'
+class ImageTestImage(AbstractImage):
+    upload_dir='image_test_originals'
     filepath_length=100
     auto_delete_files=True
 
@@ -23,18 +23,16 @@ class NewsArticleImage(AbstractImage):
     class Meta:
         # This model is not managed by Django
         managed = False
-        db_table = 'image_newsarticleimage'
 
 
 
 
-class NewsArticleReform(AbstractReform):
-    image_model=NewsArticleImage
-    upload_dir='news_reforms'
+class ImageTestReform(AbstractReform):
+    image_model=ImageTestImage
+    upload_dir='image_test_reforms'
     filepath_length=100
 
 
     class Meta:
         # This model is not managed by Django
         managed = False
-        db_table = 'image_newsarticlereform'
