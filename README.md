@@ -18,10 +18,9 @@ All these facilities can be built in to the base code. But then the app wil not 
 The code API is a step back from the facilities mentioned above. It is small, concise, and fits good CSS/template-practice. 
 
 
-Also, so far, I have not considered and/or tested,
-- SVG images
-- pormissions
-- cloud storage
+Also, I have not,
+- considered SVG images
+- tested cloud storage
 
 
 ## Overview
@@ -211,7 +210,7 @@ The documenation is split into general areas.
 
 - [Attaching images to models]
 - [Creating new tables]
-- [Filters]
+- [Filters](#filters)
 - [Viewing images]
 - [Uploading]
 - [Settings]
