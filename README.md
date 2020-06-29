@@ -37,17 +37,17 @@ The app includes code to upload images. The Django admin for the base applicatio
 
 
 ## If you have done this before
-Decide if you want to use the core collection. If you want an app-based collection, [subclass the models for Image and Reform](#new-image-repositories).
+- Decide if you want to use the core collection. If you want an app-based collection, [subclass the models for Image and Reform](#new-image-repositories).
 
-[Add fields](#model-fields) to models that need them.
+- [Add fields](#model-fields) to models that need them.
 
-[Add auto deletion](#Autodeletion) if you want models carrying image fields to delete images automatically.
+- [Add auto deletion](#Autodeletion) if you want models carrying image fields to delete images automatically.
 
-Migrate new tables.
+- Migrate new tables.
 
-Create a file called 'image_filters.py' in the app. [Sublass a few filters](#filters),
+- Create a file called 'image_filters.py' in the app. [Sublass a few filters](#filters),
 
-Insert [template tags](#template-tags) into the relevant templates,
+- Insert [template tags](#template-tags) into the relevant templates,
 
     {% load img_tags %}
 
@@ -76,7 +76,7 @@ Pillow,
 
 
 #### Optional
-The code API can work with other image libraries such as Wand and OpenCV. Some Wand filters are built-in. On Debian-based distros,
+To use Wand filters, on Debian-based distros,
 
     sudo apt-get install libmagickwand-dev
 
@@ -84,7 +84,7 @@ Then,
 
     pip install wand
 
-The built-in Wand filters offer more image-processing options.
+
 
 
 
@@ -120,7 +120,7 @@ You can create, meaning upload and register, fifteen or twenty images in a few s
 
 
 ### View some images
-Ok, let's see an image, as you would on site. Two ways.
+Ok, let's see an image. Two ways.
 
 #### Use a view 
 Find a web view template. Nearly any template will do (maybe not a JSON REST interface, something visible).
@@ -131,9 +131,9 @@ Add this tag to the template,
     ...
     {% imagequery "pk=1" image.Thumb %}
 
-'image.Thumb' is a predefined filter. It makes a 64x64 pixel Thumbnail. The tag we use here searchs for an image by a very low method, "pk=1". This will do for now.  
+'image.Thumb' is a predefined filter. It makes a 64x64 pixel thumbnail. The tag we use here searchs for an image by a very low method, "pk=1". This will do for now.  
 
-Visit the page. The app will generate the filtered 'reform' image automatically, To change how the image is filtered, size and so on, see Filters.
+Visit the page. The app will generate the filtered 'reform' image automatically.
 
 
 #### Don't have a view?
@@ -141,17 +141,13 @@ Yeh, new or experimental site, I know. Image has a builtin view. Goto urls.py, a
 
     path('image/<int:pk>/', ImageDetailView.as_view(), name='image-detail'),
 
-Now visit (probably),
-
-    http://localhost:8000/image/1/
-
-To see some *real* web code.
+Now visit (probably) http://localhost:8000/image/1/ To see some *real* web code.
 
 
 ### (aside) Filters
 Perhaps your first request will be how to make a new filter.
 
-Make a new file called 'image filters'. Put it in the top level of any app, or in the site folder (alongside url.py and wsgi.py). Put something in it like this (adapt if you wish),
+Make a new file called 'image filters'. Put it in the top level of any app (not in the site directory). Put something in it like this (adapt if you wish),
 
     from image import Resize, registry
 
@@ -166,7 +162,7 @@ Now adapt the template tag (or the tag in image/templates/image/image_detail.htm
 
     {% imagequery "pk=1" someAppName.MediumImage %}
 
-Visit the page again. Image sees the new filter definition, finds it has no record of a reform for that image and filter, so generates a new one, then displays it.
+Visit the page again. Image sees the new filter definition, then generates a new reform, then displays it.
 
 Ok, you changed the image size, and maybe the format. If you want to continue, you probably have questions. Goto the main documentation.
 
@@ -179,6 +175,7 @@ Don't like what you see?
 - Migrate backwards,
 
     ./mangage.py migrate image zero
+
 - Remove from apps.py
 - Remove the two directories in /media,
 
@@ -192,7 +189,7 @@ That's it, gone.
 
 
 ## Full documentation
-The documenation is split into general areas. 
+Index, 
 
 - [Model Fields](#model-fields)
 - [New Image Repositories](#new-image-repositories)
@@ -644,7 +641,7 @@ FreeImageField. This skips path length verification on forms. Both this module, 
 ### Overview
 For most uses, the app only has one template tag. There is another, for testing and edge cases.
 
-## The 'image' tag
+### The 'image' tag
 You define a filter called ''Large'. Add this to template code,
 
     {% load img_tags %}
@@ -782,7 +779,7 @@ The template is at,
 Where you can edit the template tag to point at your own configurations. With visible results and basic image data, it is a lot easier to use than the shell.
 
 
-## Issues
+## Notes
 No SVG support 
 : requires shadow code, Pillow especially can't handle them
 
