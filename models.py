@@ -394,6 +394,7 @@ class AbstractImage(models.Model):
             *cls._check_filepath_length(**kwargs),
             *cls._check_available_filelength(**kwargs),
             *cls._check_max_upload_size(**kwargs),
+            *checks.check_type('reform_model', cls.reform_model, str, 'image_model.E004', **kwargs),
             ]
         return errors
         
@@ -428,17 +429,11 @@ class Image(AbstractImage):
 
 
 class AbstractReform(models.Model):
-    #?
-    #@classmethod
-    #def _get_filepath_length(cls):
-    #    return cls._meta.get_field('image').related_model.filepath_length
     image_model = Image
     
     # None is 'use settings default'
     upload_dir='reforms'
 
-    # 100 is Django default
-    filepath_length=100
     print('build reform')
     file_format = None
     jpeg_quality = 80
@@ -447,7 +442,7 @@ class AbstractReform(models.Model):
     src = models.FileField(
         unique=True,
         upload_to=get_reform_upload_to,
-        max_length=filepath_length,
+        max_length=image_model.filepath_length,
         )
     filter_id = models.CharField(max_length=255, db_index=True)
 
@@ -506,7 +501,7 @@ class AbstractReform(models.Model):
         if not cls._meta.swapped:
             errors += [
             #NB field checks check image_model is not abstract.
-            *checks.check_is_subclass(cls.image_model, AbstractImage, 'image_reform.E001', **kwargs),
+            *checks.check_is_subclass('image_model', cls.image_model, AbstractImage, 'image_reform.E001', **kwargs),
             *checks.check_image_format(cls.file_format, 'image_reform.E002', **kwargs),
             *checks.check_jpeg_quality(cls.jpeg_quality, 'image_reform.E003', **kwargs),
             *checks.check_jpeg_legible(cls.jpeg_quality, 'image_reform.W001', **kwargs),

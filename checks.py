@@ -1,6 +1,7 @@
 from django.core import checks
 from image.constants import IMAGE_FORMATS
 
+## This app speccific
 def check_filters(**kwargs):
     '''
     Check registered filters with Django static checks framework.
@@ -11,19 +12,7 @@ def check_filters(**kwargs):
         errors.extend(f.check())
     return errors
     
-def check_is_subclass(klass, base_klass, eid, **kwargs):
-    errors = []
-    if (not(issubclass(klass, base_klass))):
-        errors.append(
-            checks.Error(
-                "'class' value '%s' must be a subclass of {}.".format(
-                 klass.__name__,
-                 base_klass.__name__,
-                id=eid,
-            )
-        ))
-    return errors    
-        
+
 def check_image_format(image_format, eid, **kwargs):
     errors = []
     if (image_format and (not(image_format in IMAGE_FORMATS))):
@@ -62,6 +51,35 @@ def check_jpeg_legible(jpeg_quality, eid, **kwargs):
         ))   
     return errors 
 
+## General
+def check_is_subclass(setting_name, klass, base_klass, eid, **kwargs):
+    errors = []
+    if (not(issubclass(klass, base_klass))):
+        errors.append(
+            checks.Error(
+                "'{}' value '%s' must be a subclass of {}.".format(
+                setting_name,
+                klass.__name__,
+                base_klass.__name__,
+                id=eid,
+            )
+        ))
+    return errors    
+
+def check_type(setting_name, v, tpe, eid, **kwargs):
+    errors = []
+    if (v and (not(type(v)==tpe))):
+        errors.append(
+            checks.Error(
+            "'{}' value '{}' must be type {}.".format(
+            setting_name, 
+            v,
+            tpe
+            ),
+            id=eid,
+        ))
+    return errors 
+            
 def check_int(setting_name, v, eid, **kwargs):
     errors = []
     try:
@@ -116,6 +134,7 @@ def check_boolean(setting_name, v, eid, **kwargs):
             id=eid,
         ))
     return errors 
+
 
 # def check_file_exists(setting_name, v, eid, **kwargs):    
     # errors = []

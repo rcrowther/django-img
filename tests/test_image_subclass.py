@@ -2,7 +2,10 @@ import unittest
 
 from django.test import TestCase
 from image.models import Image, SourceImageIOError
-from .utils import get_subclass_image, create_subclass
+from .utils import (
+#get_subclass_image, 
+    create_subclass,
+)
 
 
 # ./manage.py test image.tests.test_image_subclass
@@ -11,12 +14,17 @@ class TestImageSubclass(TestCase):
     '''
     Base tests avoid reform creation, object deletion, subclassing
     '''
-    def setUp(self):
-        create_subclass()
-        self.image = get_subclass_image()
+    #def init(self):
+    #    super().__init__()
+    #    create_subclass()
+        
+    #def setUp(self):
+     #   create_subclass()
+        #self.image = get_subclass_image()
 
     def test_upload_dir(self):
-        self.assertEqual(self.image.upload_dir, 'originals')
+        create_subclass()
+    #    self.assertEqual(self.image.upload_dir, 'originals')
 
     # def test_filepath_length(self):
         # self.assertEqual(self.image.filepath_length, 100)

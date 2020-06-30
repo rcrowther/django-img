@@ -4,7 +4,7 @@ from django.core.files.images import ImageFile
 
 from image.models import Image
 from image.image_filters import Thumb
-from .image_subclass import NewsArticleImage, NewsArticleReform
+#from .image_subclass import NewsArticleImage, NewsArticleReform
 
         
 def get_test_image_file_png(filename='test.png', colour='white', size=(640, 480)):
@@ -56,7 +56,7 @@ from django.db import connection
 #from django.db import connection
 #from django.db.migrations.loader import MigrationLoader
 #        loader = MigrationLoader(connection)
-from django.core.management import call_command
+# from django.core.management import call_command
 
 def create_subclass():
     # needs to install the app
@@ -67,18 +67,20 @@ def create_subclass():
 #? but how?
 # https://stackoverflow.com/questions/7020966/how-to-create-table-during-django-tests-with-managed-false
 #
-    with connection.schema_editor() as schema_editor:
+    print('test create subclass')
+    #with connection.schema_editor() as schema_editor:
+    #    pass
         #schema_editor.create_model(NewsArticleImage)
-        schema_editor.create_model(NewsArticleReform)
+        #schema_editor.create_model(NewsArticleReform)
 
-        if NewsArticleImage._meta.db_table not in connection.introspection.table_names():
-            raise ValueError("Table `{table_name}` is missing in test database.".format(
-                table_name=NewsArticleImage._meta.db_table
-            ))    
+        # if NewsArticleImage._meta.db_table not in connection.introspection.table_names():
+            # raise ValueError("Table `{table_name}` is missing in test database.".format(
+                # table_name=NewsArticleImage._meta.db_table
+            # ))  
 
-def get_subclass_image():
-    im = NewsArticleImage.objects.create(
-            src=get_test_image_file_jpg(),
-        )
-        
-    return im
+
+#def get_subclass_image():
+#    im = NewsArticleImage.objects.create(
+#            src=get_test_image_file_jpg(),
+#        )
+#    return im
