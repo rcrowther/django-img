@@ -324,13 +324,14 @@ Not the last word in DRY coding, but you should be able to work out what the cod
 If you take some time looking at this, you'll see some unusual declarations. First, the 'image_model' and 'reform_model' are explicitly declared.  Second, the 'image_model' is declared as a string, but the 'reform_model' is declared as a class. If you are familar with Django, you may wonder, because Django has code to handle 'remote' and 'relative' constructions. But this solution is explicit, checkable, can configure in ways the Django solution can not, and does not have [the intricate workrounds of the stock provision](https://docs.djangoproject.com/en/3.0/topics/db/models/#abstract-related-name).
 
 Note the configuration variables, A few comments,
+
 <dl>
-<dt>'upload_dir'</dt> 
-    <dd>is different for Images and Reforms.</dd> 
-<dt>'filepath_length'</dt>  
-    <dd>for Reforms is inherited from Image. Note that if changed from the default, this value is serialized into migrations.</dd>
-<dt>'auto_delete_files'</dt> 
-    <dd>Auto-delete [must be enabled](#auto-delete). The value is regarded as optional and configurable for Images, but auto-deletion is standard for Reforms.</dd>
+    <dt>upload_dir</dt> 
+        <dd>is different for Images and Reforms.</dd> 
+    <dt>filepath_length</dt>  
+        <dd>for Reforms is inherited from Image. Note that if changed from the default, this value is serialized into migrations.</dd>
+    <dt>auto_delete_files</dt> 
+        <dd>Auto-delete [must be enabled](#auto-delete). The value is regarded as optional and configurable for Images, but auto-deletion is standard for Reforms.</dd>
 </dl>
 
 Migrate,
@@ -513,20 +514,35 @@ If you enable more than one effect, they will chain, though you have no control 
 
 I lost my way with the Wand effects. There is no 'blur', no 'rotate', no 'waves'. But there is,
 
-pop
-    Tightens leveling of black and white
-greyscale
-    A fast imitation
-night
-    Pretend the picture is from a movie
-warm
-    A small shift in hue to compensate for a common photography white-balance issue. 
-strong
-    Oversaturate image colors (like everyone does on the web). Unlike 'pop' this will not stress contrast so flatten blacks and whites. You may or may not prefer this. 
-no
-    Draw a red cross across the image
-watermark
-    Accepts a URL to a watermark image template.
+<dl>
+    <dt>pop/dt>
+    <dd>
+        Tightens leveling of black and white
+    </dd>
+    <dt>greyscale</dt>
+    <dd>
+        A fast imitation
+    </dd>
+    <dt>night</dt>
+    <dd>
+        Pretend the picture is from a movie
+    </dd>
+    <dt>warm</dt>
+    <dd>
+        A small shift in hue to compensate for a common photography white-balance issue. 
+    </dd>
+    <dt>strong</dt>
+    <dd>
+        Oversaturate image colors (like everyone does on the web). Unlike 'pop' this will not stress contrast so flatten blacks and whites. You may or may not prefer this. 
+    </dd>
+    <dt>no</dt>
+    <dd>
+        Draw a red cross across the image
+    </dd>
+    <dt>watermark</dt>
+    <dd>Accepts a URL to a watermark image template.
+    </dd>
+</dl>
 
 Watermark deserves some explanation. This does not draw on the image, as text metrics are tricky to handle. Provide a URL stub to an image, here's a builtin,
 
@@ -717,35 +733,51 @@ They do what they say. 'image_sync' is particularly useful, it will attempt to m
 Image accepts settings in several places. The app has moved away from using the site-wide settings.py towards other placements, with consistent override behaviour. Here is a summary, in order of last placement wins,
 
 ### Image
-upload_dir
-    default='originals', Image attribute
-    
-filepath_length
-    default=100, Image attribute, (if overridden) Image field 
-        
-auto_delete_files
-    (if enabled) Image/Reform attribute
-
-max_upload_size
-    default=2MB, Image attribute
-
+    <dl>
+    <dt>upload_dir</dt>
+    <dd>
+        default='originals', Image attribute
+    </dd>
+    <dt>  
+    filepath_length</dt>
+    <dd>
+        default=100, Image attribute, (if overridden) Image field 
+      </dd>
+    <dt>    
+    auto_delete_files</dt>
+    <dd>
+        (if enabled) Image/Reform attribute
+    </dd>
+    <dt>max_upload_size</dt>
+    <dd>
+        default=2MB, Image attribute
+    </dd>
+</dl>
 
 ### Reform
-upload_dir
-    default='reforms', Reform attribute
-
-filepath_length
-    default=100, Reform attribute, (if overridden) Reform field 
-            
-image_model
-    default='image.Image', Reform attribute
-
-file_format
-    default=original format, Reform attribute, filter attribute
-
-jpeg_quality
-    default=80, Reform attribute, filter attribute
-
+<dl>
+    <dt>upload_dir</dt>
+    <dd>
+        default='reforms', Reform attribute
+    </dd>
+    <dt>filepath_length</dt>
+    <dd>
+        default=100, Reform attribute, (if overridden) Reform field 
+    </dd>
+    <dt>            
+    image_model</dt>
+    <dd>
+        default='image.Image', Reform attribute
+    </dd>
+    <dt>file_format</dt>
+    <dd>
+        default=original format, Reform attribute, filter attribute
+    </dd>
+    <dt>jpeg_quality</dt>
+    <dd>
+        default=80, Reform attribute, filter attribute
+    </dd>
+</dl>
 
 
 ### Site-wide settings
@@ -760,12 +792,16 @@ Images accepts some site-wide settings. They look like the Django template setti
         },
     ]
 
-SEARCH_APP_DIRS
-Find 'image_filters.py' files in apps. If False, the app only uses filters defined in the core app and SEARCH_MODULES setting.
-
-SEARCH_MODULES
-Defines extra places to find 'image_filter.py' files. The above example suggests a site-wide filter collection in the site directory (most page-based Django sites have central collections of templates and CSS in the same directory). The setting takes module paths, not filepaths, because 'image_filter.py' files are live code.
-
+<dl>
+    <dt>SEARCH_APP_DIRS</dt>
+    <dd>
+    Find 'image_filters.py' files in apps. If False, the app only uses filters defined in the core app and SEARCH_MODULES setting.
+    </dd>
+    <dt>SEARCH_MODULES</dt>
+    <dd>
+    Defines extra places to find 'image_filter.py' files. The above example suggests a site-wide filter collection in the site directory (most page-based Django sites have central collections of templates and CSS in the same directory). The setting takes module paths, not filepaths, because 'image_filter.py' files are live code.
+    </dd>
+</dl>
 
 
 
