@@ -324,13 +324,15 @@ Not the last word in DRY coding, but you should be able to work out what the cod
 If you take some time looking at this, you'll see some unusual declarations. First, the 'image_model' and 'reform_model' are explicitly declared.  Second, the 'image_model' is declared as a string, but the 'reform_model' is declared as a class. If you are familar with Django, you may wonder, because Django has code to handle 'remote' and 'relative' constructions. But this solution is explicit, checkable, can configure in ways the Django solution can not, and does not have [the intricate workrounds of the stock provision](https://docs.djangoproject.com/en/3.0/topics/db/models/#abstract-related-name).
 
 Note the configuration variables, A few comments,
-'upload_dir' 
-    is different for Images and Reforms. 
-'filepath_length' 
-    for Reforms is inherited from Image. Note that if changed from the default, this value is serialized into migrations.
-'auto_delete_files'
-    Auto-delete [must be enabled](#auto-delete). The value is regarded as optional and configurable for Images, but auto-deletion is standard for Reforms.
- 
+<dl>
+<dt>'upload_dir'</dt> 
+    <dd>is different for Images and Reforms.</dd> 
+<dt>'filepath_length'</dt>  
+    <dd>for Reforms is inherited from Image. Note that if changed from the default, this value is serialized into migrations.</dd>
+<dt>'auto_delete_files'</dt> 
+    <dd>Auto-delete [must be enabled](#auto-delete). The value is regarded as optional and configurable for Images, but auto-deletion is standard for Reforms.</dd>
+</dl>
+
 Migrate,
 
     ./manage.py migrate NewsArticle
