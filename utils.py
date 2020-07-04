@@ -4,15 +4,18 @@ from django.templatetags.static import static
 from importlib import import_module
 from django.utils.module_loading import module_has_submodule
 print('create utils')
+import math
 
 
 def bytes2mb(v):
     # This is how Django does it, I think, binary MB
-    return v << 20
+    #NB must handle fractions so not shifts
+    return v / 1048576
 
 def mb2bytes(v):
     # This is how Django does it, I think, binary MB
-    return v >> 20
+    #NB must handle fractions so not shifts
+    return math.ceil(v * 1048576)
 
 def url_absolute_static_aware(path):
     """

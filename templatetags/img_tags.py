@@ -94,38 +94,38 @@ class ImgFromImageInstanceNode(template.Node):
             return ''
 
                     
-@register.tag(name="imagefromtitle")
-def image_by_title_tag(parser, token):
-    '''
-    Lookup an image by filter, and title.
-    If a view has already generated a context with models, this is not 
-    a prefered method, as it makes a database lookup.
-    img_title string 
-        reference to an image by title e.g. 'taunton_skyscraper'
-    filter_id 
-        string module path to a Filter e.g. "image.Format". If 
-        the Filter is only named, the app location of the calling view is 
-        added e.g. if "Large" is called from a view in 'page', the filter 
-        become "page.Large"
+# @register.tag(name="imagefromtitle")
+# def image_by_title_tag(parser, token):
+    # '''
+    # Lookup an image by filter, and title.
+    # If a view has already generated a context with models, this is not 
+    # a prefered method, as it makes a database lookup.
+    # img_title string 
+        # reference to an image by title e.g. 'taunton_skyscraper'
+    # filter_id 
+        # string module path to a Filter e.g. "image.Format". If 
+        # the Filter is only named, the app location of the calling view is 
+        # added e.g. if "Large" is called from a view in 'page', the filter 
+        # become "page.Large"
      
-    kwargs 
-        added as attributes to the final tag.
-    ''' 
-    lumps = token.split_contents()
+    # kwargs 
+        # added as attributes to the final tag.
+    # ''' 
+    # lumps = token.split_contents()
 
-    if(len(lumps) < 3):
-        raise template.TemplateSyntaxError(
-            "Image tag needs two arguments. tag:{}".format(
-                token.contents,
-            ))
+    # if(len(lumps) < 3):
+        # raise template.TemplateSyntaxError(
+            # "Image tag needs two arguments. tag:{}".format(
+                # token.contents,
+            # ))
             
-    tag_name = lumps[0]
-    filter_id = lumps[2]
-    kwargs = to_kwargs(token, lumps[3:])
-    image_title = arg_unquote(lumps[1], token, 'image title')
-    image_model = Image.objects.get(title=image_title)
+    # tag_name = lumps[0]
+    # filter_id = lumps[2]
+    # kwargs = to_kwargs(token, lumps[3:])
+    # image_title = arg_unquote(lumps[1], token, 'image title')
+    # image_model = Image.objects.get(title=image_title)
 
-    return ImgFromImageInstanceNode(image_model, filter_id, kwargs)
+    # return ImgFromImageInstanceNode(image_model, filter_id, kwargs)
 
 @register.tag(name="imagequery")
 def image_from_query_tag(parser, token):

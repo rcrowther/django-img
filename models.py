@@ -5,7 +5,7 @@ from collections import OrderedDict
 from functools import partial
 
 from django.db import models
-from django.core import checks
+from django.core.checks import Error, Warning
 #from django.urls import reverse
 from django.core.files.images import ImageFile
 #from django.db.models.signals import pre_delete, pre_save
@@ -17,9 +17,7 @@ from image import decisions
 from image.validators import validate_file_size, validate_image_file_extension
 from image import utils
 from image import checks
-
-
-print('create models')
+from image.model_fields import FreePathImageField, ReformFileField
  
  
  
@@ -51,7 +49,6 @@ def get_reform_upload_to(instance, filename):
     return instance.get_upload_to(filename)
 
 
-from image.model_fields import FreePathImageField
 class AbstractImage(models.Model):
     '''
     Data about stored images.
@@ -74,22 +71,42 @@ class AbstractImage(models.Model):
     Thus each file is unique, and each file field in the model is 
     unique.  
     '''
+    # def __new__(cls, *args, **kw):
+    # #def __new__(cls, name, bases, attrs, **kwargs):
+        # #r = super.__new__(name, bases, attrs, **kwargs)
+        # r = super().__new__(cls)
+        # print('Image model - bases')
+        # print(str(args))
+        # print(str(kw))
+        # #kwargs['filepath_length']
+        # return r
+        
     reform_model = 'Reform'
 
     # None is 'use settings default'
     upload_dir='originals'
     
+    print('create Image')
+    #print(str(dir(Image)))
+
     # 100 is Django default
     #! must be migrated
-    filepath_length=100
+    #@property
+    #@classmethod
+    # def filepath_length(cself):
+        # return 100
+    filepath_length=222
+    
+    # limit the unload filename length by checking on generateed forms.
+    # (if false, all filenames are accepted then truncated if necessary)
+    form_limit_filepath_length=False
     
     # If None, any size allowed. In MB. Fractions allowed.
     max_upload_size = 2
         
     # If the model is deleted, delete the file
     # Django stadard is False, but see documentation.
-    #! in subclasses, must be enabled with a post_save signal. 
-    #! (this core model is pre-coded)
+    #! Will not be effective on bulk SQL deletes
     auto_delete_files = True
     
     # Not autopoulated by storage, so funny name.
@@ -130,9 +147,9 @@ class AbstractImage(models.Model):
         upload_to=get_upload_to, 
         width_field='width', 
         height_field='height',
-        max_length=filepath_length,
+        #max_length=filepath_length,
         validators = [
-            partial(validate_file_size, utils.mb2bytes(max_upload_size)),
+            #partial(validate_file_size, utils.mb2bytes(max_upload_size)),
             validate_image_file_extension
         ],
     )
@@ -246,9 +263,8 @@ class AbstractImage(models.Model):
         """ Get the Reform models for this Image model """
         return apps.get_model(cls._meta.app_label, cls.reform_model)
 
-    @classmethod
-    def get_reforms(cls):
-        return cls.get_reform_model().objects
+    def get_reforms(self):
+        return self.get_reform_model().objects.filter(image_id=self.pk)
 
     def get_reform(self, filter_instance):
         ''' Generate a reform for this image.
@@ -286,7 +302,7 @@ class AbstractImage(models.Model):
             # We got everything Django likes. A model save should 
             # generate a Reform DB entry and the file itself.
             reform = Reform(
-                image = self,
+                image_id = self.pk,
                 filter_id = filter_instance.human_id(),
                 src = reform_file,
             )
@@ -317,8 +333,21 @@ class AbstractImage(models.Model):
 
     def is_landscape(self):
         return (self.height < self.width)
+
+    def delete(self, using=None, keep_parents=False):
+        # delete reform files
+        [rf.src.delete(False) for rf in self.get_reforms()]
+
+        # delete image model and CASCADE reform models
+        r = super().delete(using, keep_parents)
         
-    #? move checks out of class, use on reform
+        # Delete model file
+        # check the model delete suceeeded
+        if (r[1][self._meta.label] and self.auto_delete_files):
+            self.src.delete(False)
+        return r
+                
+    #? move checks out of class
     @classmethod
     def _check_filepath_length(cls, **kwargs):
         '''
@@ -332,7 +361,7 @@ class AbstractImage(models.Model):
                 raise ValueError()
         except (ValueError, TypeError):
             errors.append(
-                checks.Error(
+                Error(
                     "'filepath_length' value '%s' must be a number > 0 and < 65000." % cls.filepath_length,
                     id='image_model.E001',
                 )
@@ -345,11 +374,12 @@ class AbstractImage(models.Model):
         Does filepath_length allow for filenames?
         '''
         errors = []
+        print(str(cls.filepath_length))
         declared_len = int(cls.filepath_length)
         path_len =  len(cls.upload_dir)
         if (declared_len <= path_len):
             errors.append(
-                checks.Error(
+                Error(
                     "'filepath_length' must exceed base path length. 'filepath_length' len: {}, 'upload_dir' len: {}".format(
                      declared_len,
                      path_len,
@@ -359,7 +389,7 @@ class AbstractImage(models.Model):
             )
         elif (declared_len <= (path_len + 12)):
             errors.append(
-                checks.Warning(
+                Warning(
                     "Less than 12 chars avaiable for filenames. 'filepath_length' len: {}, 'upload_dir' len: {}".format(
                      declared_len,
                      path_len,
@@ -378,7 +408,7 @@ class AbstractImage(models.Model):
                 raise ValueError()    
         except (ValueError, TypeError):
             errors.append(
-                checks.Error(
+                Error(
                     "'max_upload_size' value '%s' must be None(unvalidated) or a positive number." % cls.max_upload_size,
                     id='image_model.E003',
                 )
@@ -391,9 +421,9 @@ class AbstractImage(models.Model):
         errors = super().check(**kwargs)
         if not cls._meta.swapped:
             errors += [
-            *cls._check_filepath_length(**kwargs),
-            *cls._check_available_filelength(**kwargs),
-            *cls._check_max_upload_size(**kwargs),
+            #*cls._check_filepath_length(**kwargs),
+            #*cls._check_available_filelength(**kwargs),
+            #*cls._check_max_upload_size(**kwargs),
             *checks.check_type('reform_model', cls.reform_model, str, 'image_model.E004', **kwargs),
             ]
         return errors
@@ -430,6 +460,7 @@ class Image(AbstractImage):
 
 class AbstractReform(models.Model):
     image_model = Image
+    #image_model = AbstractImage
     
     # None is 'use settings default'
     upload_dir='reforms'
@@ -439,29 +470,46 @@ class AbstractReform(models.Model):
     jpeg_quality = 80
             
     # For naming, see the note in AbstractImage
-    src = models.FileField(
+    # "image_id" integer NOT NULL REFERENCES"image_image" ("id") DEFERRABLE INITIALLY DEFERRED)
+    src = ReformFileField(
         unique=True,
         upload_to=get_reform_upload_to,
         max_length=image_model.filepath_length,
         )
     filter_id = models.CharField(max_length=255, db_index=True)
 
-    image = models.ForeignKey(
-        image_model, 
-        related_name='+', 
-        # If the original image model is removed, so are the reform 
-        # models.
-        on_delete=models.CASCADE
-    )
-                
+    # image = models.ForeignKey(
+        # image_model,
+        # related_name='+', 
+        # # If the original image model is removed, so are the reform 
+        # # models.
+        # on_delete=models.CASCADE
+    # )
+    image_id = models.IntegerField(
+        )
+        
     @property
     def url(self):
         return self.src.url
 
+    #@property
+    #def alt(self):
+    #    return self.image_model.objects.get(pk=self.image_id).alt
+
     @property
     def alt(self):
-        return self.image.alt
-
+        '''
+        String for an 'alt' field.
+        The base implementation is derived from the filepath of the 
+        uploaded file. 
+        Subclasses might override this attribute to use more refined 
+        data, such as a slug or title.
+        '''
+        #NB this could be lifted from the image, and is more consistent
+        # like thAT. bUT IT'S a DB hit
+        #? MAYBE MAKE A FIELD, but that needs to be updatable.
+        return Path(self.src.name).stem[:len(self.filter_id)] + ' image'
+        
     @property
     def attrs_dict(self):
         """
@@ -482,18 +530,11 @@ class AbstractReform(models.Model):
         #filename = decisions.image_save_path(self.src, self.upload_dir, filename)
         return decisions.reform_save_path(self, filename)
 
-    # @classmethod
-    # def _check_image_model(cls, **kwargs):
-        # #NB Django checks stop this being an abstract model.
-        # errors = []
-        # if (not(issubclass(cls.image_model, AbstractImage))):
-            # errors.append(
-                # checks.Error(
-                    # "'image_model' value '%s' must be a subclass of AbstractImage." % cls.reform_from_model.__name__,
-                    # id='image_reform.E001',
-                # )
-            # )
-        # return errors        
+    def delete(self, using=None, keep_parents=False):
+        r = super().delete(using, keep_parents)
+        print('reform delete')
+        self.src.delete(False)
+        return r
         
     @classmethod
     def check(cls, **kwargs):

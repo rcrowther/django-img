@@ -515,7 +515,7 @@ If you enable more than one effect, they will chain, though you have no control 
 I lost my way with the Wand effects. There is no 'blur', no 'rotate', no 'waves'. But there is,
 
 <dl>
-    <dt>pop/dt>
+    <dt>pop</dt>
     <dd>
         Tightens leveling of black and white
     </dd>
