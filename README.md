@@ -652,19 +652,33 @@ This is a small override that should not interfere with other admin code. It dis
 
 
 ## Forms
-There's nothing special about using the Image model in forms. Stock Django. Use the model via Django admin or Model forms. For your own forms, the Image model contains some extra validators, they are on the models so a call to is_valid() will run them.
+### Overview
+The model ImageField does routing, not validation, not even through FileField
 
-### Form parts
-Both the below are used in the base Image model. They are no use unless you you are building forms to control Image models directly (rare).
+The form FileField read checks files. It checks if a file exists, has a size, and that the filename is not too long.
 
-#### Model Fields
-FreeImageField. Loads a FreeImageField as default (see below).
+The form ImageField goes a little further. It checks Pillow can read the file, that Pillow.verify() does not think it is broken, that the MIME type is coherent, then validates the extension against Pillow data.
 
-#### Form Field
-FreeImageField. This skips path length verification on forms. Both this module, AND Django core, set and truncate lengths on upload. If you prefer that a user can upload files with any length of filename, but that the filename will be truncated, then use this.
+Interesting, ImageFile itself has a little checking, as it must rescue dimension data from Pillow.
+
+### For Image/Reform models
+There's nothing special about using the Image model in forms. Stock Django. Use the model or subclasses via Django admin or Model forms. 
+
+The field used by Image for ithe image storage is not a standard Django ImageFile, but an override.
+
+#### FreeImageField
+Does a few extra jobs beyond an ImageFile,
+
+<dl>
+<dt>Contains some extra config attributes,</dt>
+<dd>ost of which come from the class configuration (e.g. max_upload size). The class has deconstruct these.</dd>
+<dt>extra validators<ddt>
+<dd>Unlike the standard Django field, this field actively checks filesizes and extansions. Calls to is_valid() will run them.</dd>
+</dl>
+### For references to images
+When images are referenced from another model, this would usually use a Foreign Key on the referring model. 
 
 
- 
 ## Template Tags
 ### Overview
 For most uses, the app only has one template tag. There is another, for testing and edge cases.

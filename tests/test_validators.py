@@ -3,7 +3,7 @@ from django.test import TestCase
 from django.core.exceptions import ValidationError
 
 from image.validators import (
-    validate_image_file_extension,
+    validate_image_data_consistency,
     validate_file_size,
 )
 
@@ -17,22 +17,22 @@ class TestValidators(TestCase):
         self.file = get_test_image_file_jpg()
         
     def test_file_extension(self):
-        validate_image_file_extension(self.file)
+        validate_image_data_consistency(self.file)
 
     def test_unrecognisable_file_extension_raises_validationerror(self):
         self.file.name = 'test#ogg'
         with self.assertRaises(ValidationError):
-            validate_image_file_extension(self.file)
+            validate_image_data_consistency(self.file)
         
     def test_unrecognised_file_extension_raises_validationerror(self):
         self.file.name = 'test.ogg'
         with self.assertRaises(ValidationError):
-            validate_image_file_extension(self.file)
+            validate_image_data_consistency(self.file)
 
     def test_unmatched_file_extension_raises_validationerror(self):
         self.file.name = 'test.tiff'
         with self.assertRaises(ValidationError):
-            validate_image_file_extension(self.file)
+            validate_image_data_consistency(self.file)
 
     # next two tests are heavily mocked,
     # but will show up code bugs
