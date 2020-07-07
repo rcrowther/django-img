@@ -47,8 +47,10 @@ _FORMAT_FILE_EXTENSIONS_BASE = {
     'webp' : 'webp',
 }
 
+# new
 EXTENSION_TO_APP = _FORMAT_FILE_EXTENSIONS_BASE.copy()
 
+# new
 IIMAGE_FORMATS = set()
 for v in _FORMAT_FILE_EXTENSIONS_BASE.values():
      IIMAGE_FORMATS.add(v)

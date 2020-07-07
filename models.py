@@ -12,12 +12,10 @@ from django.core.files.images import ImageFile
 from django.utils.translation import gettext_lazy as _
 from django.utils.functional import cached_property
 from django.apps import apps
-#from django.utils.safestring import mark_safe
 from image import decisions
-#from image.validators import validate_file_size, validate_image_file_extension
 from image import utils
 from image import checks
-from image.model_fields import FreePathImageField, ReformFileField
+from image.model_fields import ImageFileField, ReformFileField
  
  
  
@@ -71,7 +69,8 @@ class AbstractImage(models.Model):
     Thus each file is unique, and each file field in the model is 
     unique.  
     '''
-    reform_model = 'Reform'
+    #reform_model = 'Reform'
+    reform_model = 'AbstractReform'
 
     # relative to MEDIA_ROOT
     upload_dir='originals'
@@ -82,6 +81,10 @@ class AbstractImage(models.Model):
     # limit the unload filename length by checking on generateed forms.
     # (if false, all filenames are accepted then truncated if necessary)
     form_limit_filepath_length=True
+    
+    # List of formats accepted. Should be lower-case, short form.
+    # If None, any format recognised as an image.
+    accept_formats = None
     
     # If None, any size allowed. In MB. Real allowed.
     max_upload_size = 2
@@ -124,15 +127,11 @@ class AbstractImage(models.Model):
     # naming this the same as the model is not a good idea, if only due 
     # to confusion in relations, let alone stray attribute manipulation 
     # in Python code. So, like HTML, it is 'src'     
-    src = FreePathImageField(_('image_file'), 
+    src = ImageFileField(_('image_file'), 
         unique=True,
         upload_to=get_image_upload_to, 
         width_field='width', 
         height_field='height',
-        #validators = [
-            #partial(validate_file_size, utils.mb2bytes(max_upload_size)),
-            #validate_image_file_extension
-        #],
     )
     
     # Django can use Pillow to provide width and height. So why?
@@ -336,9 +335,11 @@ class AbstractImage(models.Model):
             errors += [
             #NB By the time of check() models are built. So all 
             # attributes exist, at least as default.
-            *checks.check_type('reform_model', cls.reform_model, str, '{}.E004'.format(name), **kwargs),
-            *checks.check_numeric_range('filepath_length', cls.filepath_length, 1, 65535, '{}.E002'.format(name), **kwargs),
-            *checks.check_none_or_positive_float('max_upload_size', cls.max_upload_size, '{}.E003'.format(name), **kwargs),
+            *checks.check_type('reform_model', cls.reform_model, str, '{}.E001'.format(name), **kwargs),
+            #*checks.check_numeric_range('upload_dir', cls.upload_dir, 1, '{}.E002'.format(name), **kwargs),
+            *checks.check_numeric_range('filepath_length', cls.filepath_length, 1, 65535, '{}.E003'.format(name), **kwargs),
+            *checks.check_image_formats_or_none('accept_formats', cls.accept_formats,'{}.E004'.format(name), **kwargs),
+            *checks.check_positive_float_or_none('max_upload_size', cls.max_upload_size, '{}.E003'.format(name), **kwargs),
             ]
         return errors
         

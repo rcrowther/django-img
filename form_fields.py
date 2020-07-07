@@ -14,10 +14,15 @@ class FreePathImageField(FileField):
     # The other  and better reason for this existing is to get the 
     # validaors out into the forms fields, where Django feels they 
     # belong.
-    default_validators = [validators.validate_image_file_consistency]
+    #default_validators = [validators.validate_image_file_consistency]
 
-    def __init__(self, *, max_size=None, **kwargs):
+    def __init__(self, *,
+        max_size=None,
+        accept_formats=None,
+        **kwargs
+    ):
         self.max_size = max_size
+        self.accept_formats = accept_formats
         super().__init__(**kwargs)
         
     def to_python(self, data):
@@ -36,6 +41,7 @@ class FreePathImageField(FileField):
         super().validate(value)
         if (self.max_size):
             validators.validate_file_size(value, self.max_size)
+        validators.ImageFileDataConsistencyValidator(allowed_extensions=self.accept_formats)(value)
 
     def widget_attrs(self, widget):
         attrs = super().widget_attrs(widget)

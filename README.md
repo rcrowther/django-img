@@ -666,7 +666,7 @@ There's nothing special about using the Image model in forms. Stock Django. Use 
 
 The field used by Image for ithe image storage is not a standard Django ImageFile, but an override.
 
-#### FreeImageField
+#### ImageFileField
 Does a few extra jobs beyond an ImageFile,
 
 <dl>
@@ -675,6 +675,7 @@ Does a few extra jobs beyond an ImageFile,
 <dt>extra validators<ddt>
 <dd>Unlike the standard Django field, this field actively checks filesizes and extansions. Calls to is_valid() will run them.</dd>
 </dl>
+
 ### For references to images
 When images are referenced from another model, this would usually use a Foreign Key on the referring model. 
 
@@ -744,27 +745,37 @@ They do what they say. 'image_sync' is particularly useful, it will attempt to m
 
 ## Settings
 ### Overview
-Image accepts settings in several places. The app has moved away from using the site-wide settings.py towards other placements, with consistent override behaviour. Here is a summary, in order of last placement wins,
+Image accepts settings in several places. The app has moved away from using site-wide settings towards other placements. Here is a summary, in order of last placement wins,
 
 ### Image
     <dl>
+    <dt>reform_model</dt>
+    <dd>
+        default=AbstractReform
+    </dd>
     <dt>upload_dir</dt>
     <dd>
         default='originals', Image attribute
     </dd>
-    <dt>  
-    filepath_length</dt>
+    <dt>filepath_length</dt>
     <dd>
-        default=100, Image attribute, (if overridden) Image field 
+        default=100, Image attribute
       </dd>
-    <dt>    
-    auto_delete_files</dt>
+    <dt>form_limit_filepath_length</dt>
     <dd>
-        (if enabled) Image/Reform attribute
+        default=True, Image attribute
+    </dd>
+    <dt>accept_formats</dt>
+    <dd>
+        default=None, Image attribute
     </dd>
     <dt>max_upload_size</dt>
     <dd>
         default=2MB, Image attribute
+    </dd>
+    <dt>auto_delete_files</dt>
+    <dd>
+        (if enabled) Image/Reform attribute
     </dd>
 </dl>
 

@@ -5,8 +5,6 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.template.defaultfilters import filesizeformat
 from django.utils.deconstruct import deconstructible
-
-
 from image import settings
 from image.constants import (
     IMAGE_FORMATS,
@@ -16,8 +14,6 @@ from image.constants import (
     FORMAT_UCLIB_APP,
     UCLIB_TO_APP
 )
-
-
 
 def get_pillow_attribute(file, pil_attr):
     """
@@ -143,53 +139,6 @@ class ImageFileDataConsistencyValidator:
 
 def validate_image_file_consistency(value):
     return ImageFileDataConsistencyValidator()(value)
-
-# def validate_image_data_consistency(file):
-    # '''
-    # Check the extension of an image file.
-    # Checks the extension against the internally defined set of file 
-    # extensions. Then does a Pillow read, to see what Pillow thinks,
-    # and compares the two.  So a bit more than Django's
-    # FileExtensionValidator.
-
-    # file
-        # a Django file class. The file must be open.    
-    # '''
-    # code = 'image_file_inconsitent_data'
-
-    # fp = Path(file.name)
-    # raw_extension = fp.suffix
-    # if (len(raw_extension) < 2):
-        # raise ValidationError(
-            # "File extension not found. allowed extensions: {}.".format(
-                # ", ".join(FORMAT_EXTENSIONS_APP.keys())
-            # ))
-        
-    # extension = raw_extension[1:]
-    # if (not(extension in FORMAT_EXTENSIONS_APP)):
-        # raise ValidationError(
-            # "File extension {} not allowed. allowed extensions: {}.".format(
-                # raw_extension,
-                # ", ".join(IMAGE_FORMATS)
-            # ))
-    # declared_format = FORMAT_EXTENSIONS_APP[extension]
-    
-    # #x done by Pillow MIME check?
-    # pil_format = get_pillow_attribute(file.file, 'format')
-    # if (not(pil_format in FORMAT_UCLIB_APP)):
-        # raise ValidationError(
-            # "Not recognised as a {} image.".format(
-                # declared_format
-            # ))
-    # read_format = FORMAT_UCLIB_APP[pil_format]
-            
-    # # Check the pil_format matches the read_format
-    # if (read_format != declared_format):
-        # raise ValidationError(
-            # "Not a valid {} image.".format(
-                # declared_format
-            # ))
-        
 
 def validate_file_size(file, max_size):
     '''

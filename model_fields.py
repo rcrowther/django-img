@@ -10,10 +10,10 @@ from image import utils
 from image import form_fields
 
 
-class FreePathImageField(ImageField):
+class ImageFileField(ImageField):
     '''
     A (model) ImageField.
-    FreePathImageField allows any length of file path. It adds some
+    ImageFileField allows any length of file path. It adds some
     extra parameters and associated verification.
     maxd_size
         in bytes
@@ -26,12 +26,14 @@ class FreePathImageField(ImageField):
     def __init__(self, 
         verbose_name=None,
         name=None, 
-        max_size=None,
+        accept_formats=None,
         form_limit_filepath_length = True,
+        max_size=None,
         **kwargs
     ):
-        self.max_size = max_size
+        self.accept_formats = accept_formats
         self.form_limit_filepath_length = form_limit_filepath_length
+        self.max_size = max_size
         self.default_validators = []
         super().__init__(verbose_name, name, **kwargs)
 
@@ -64,7 +66,9 @@ class FreePathImageField(ImageField):
             self.form_limit_filepath_length = cls.form_limit_filepath_length
         if (hasattr(cls, 'max_upload_size')):
             self.max_size = utils.mb2bytes(cls.max_upload_size)
-
+        if (hasattr(cls, 'accept_formats')):
+            self.accept_formats = cls.accept_formats
+            
     def formfield(self, **kwargs):
         # if max_len is None, the formfield is unlimited length
         max_length = None
@@ -74,6 +78,7 @@ class FreePathImageField(ImageField):
             'form_class': form_fields.FreePathImageField,
             'max_length': max_length,
             'max_size': self.max_size,
+            'accept_formats' : self.accept_formats,
             **kwargs,
         })
 

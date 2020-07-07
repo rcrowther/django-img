@@ -1,5 +1,5 @@
 from django.core import checks
-from image.constants import IMAGE_FORMATS
+from image.constants import IMAGE_FORMATS, IIMAGE_FORMATS
 
 ## This app speccific
 def check_filters(**kwargs):
@@ -26,6 +26,54 @@ def check_image_format(image_format, eid, **kwargs):
         ))
     return errors  
 
+
+def image_format_error(setting_name, v, eid, accepted_formats):
+    '''
+    '''
+    return checks.Error(
+                "'{}' format '{}' unrecognised."
+                " Recognised image formats: {}".format(
+                setting_name,
+                v,
+                ", ".join(accepted_formats),
+            ),
+            id=eid,
+    )
+    
+def check_image_format_or_empty(
+        setting_name,
+        image_format,
+        eid, 
+        accepted_formats=IIMAGE_FORMATS,
+        **kwargs
+    ):
+    '''
+    Accepts a format
+    '''
+    errors = []
+    if (image_format and (not(image_format in accepted_formats))):
+        errors.append(image_format_error(setting_name, v, eid, accepted_formats))
+    return errors 
+    
+def check_image_formats_or_none(
+        setting_name, 
+        image_formats,
+        eid, 
+        accepted_formats=IIMAGE_FORMATS,
+        **kwargs
+    ):
+    '''
+    Accepts a list of formats
+    '''
+    errors = []
+    if (image_formats is None):
+        return errors
+    unrecognised_formats = [f for f in image_formats if not(f in accepted_formats)]
+    if (unrecognised_formats):
+        v = ", ".join(unrecognised_formats)
+        errors.append(image_format_error(setting_name, v, eid, accepted_formats))
+    return errors 
+    
 def check_jpeg_quality(jpeg_quality, eid, **kwargs):
     errors = []
     if (jpeg_quality and (jpeg_quality < 1 or jpeg_quality > 100)):
@@ -115,7 +163,7 @@ def check_positive(setting_name, v, eid, **kwargs):
     return errors 
 
 
-def check_none_or_positive_float(setting_name, v, eid, **kwargs):
+def check_positive_float_or_none(setting_name, v, eid, **kwargs):
     errors = []
     if (v is None):
         return errors

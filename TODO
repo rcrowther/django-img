@@ -11,6 +11,8 @@ move auto delete into model?
 == Model
 Check models for clashes?
 Move from signals to method delete
+Add accepted_extensions
+
 
 == Management
 Is bulk delete really bulk delete? No, it's 'mass delete', though
@@ -33,6 +35,9 @@ Register, want an instance? Admin want Model?
 
 == TemplateTags
 Test query
+
+== Constants
+Needs major reassessment
 
 == Utils
 
