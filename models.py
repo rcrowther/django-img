@@ -431,8 +431,8 @@ class AbstractReform(models.Model):
             #NB By the time of check() models are built. So all 
             # attributes exist, at least as default.
             *checks.check_is_subclass('image_model', cls.image_model, AbstractImage, '{}.E001'.format(name), **kwargs),
-            *checks.check_image_format(cls.file_format, '{}.E002'.format(name), **kwargs),
-            *checks.check_jpeg_quality(cls.jpeg_quality, '{}.E003'.format(name), **kwargs),
+            #*checks.check_numeric_range('upload_dir', cls.upload_dir, 1, '{}.E002'.format(name), **kwargs),
+            *checks.check_image_format_or_none('file_format', cls.file_format, '{}.E002'.format(name), **kwargs),
             *checks.check_jpeg_legible(cls.jpeg_quality, '{}.W001'.format(name), **kwargs),
             ]
         return errors

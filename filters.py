@@ -123,7 +123,7 @@ class FormatMixin():
     def check(cls, **kwargs):
         errors = super().check(**kwargs)
         errors += [
-            *checks.check_image_format(cls.format, 'image_filter.E001', **kwargs),
+            *checks.check_image_format_or_none(cls.format, 'image_filter.E001', **kwargs),
             *checks.check_jpeg_quality(cls.jpeg_quality, 'image_filter.E002', **kwargs),
             *checks.check_jpeg_legible(cls.jpeg_quality, 'image_reform.W001', **kwargs),
         ]

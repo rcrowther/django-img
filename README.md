@@ -664,16 +664,16 @@ Interesting, ImageFile itself has a little checking, as it must rescue dimension
 ### For Image/Reform models
 There's nothing special about using the Image model in forms. Stock Django. Use the model or subclasses via Django admin or Model forms. 
 
-The field used by Image for ithe image storage is not a standard Django ImageFile, but an override.
+The field used by Image for image storage is not a standard Django ImageFile, but an override.
 
 #### ImageFileField
 Does a few extra jobs beyond an ImageFile,
 
 <dl>
-<dt>Contains some extra config attributes,</dt>
-<dd>ost of which come from the class configuration (e.g. max_upload size). The class has deconstruct these.</dd>
-<dt>extra validators<ddt>
-<dd>Unlike the standard Django field, this field actively checks filesizes and extansions. Calls to is_valid() will run them.</dd>
+    <dt>Contains some extra config attributes,</dt>
+    <dd>Most of which are gathered from the class configuration (e.g. max_upload size). The class cas deconstruct these.</dd>
+    <dt>extra validators<ddt>
+    <dd>Beyond the standard Django field, this field and it's formfield actively check filesizes and extansions. Calls to is_valid() will run these validations.</dd>
 </dl>
 
 ### For references to images
@@ -699,7 +699,7 @@ The tag guess can guess the app from the context. So,
 
 Will assume the filter is in the app the context says the view comes from.
 
-The tag accpts keyword parameters which become HTML attributes,
+The tag accepts keyword parameters which become HTML attributes,
 
      {% image report.img Large class="report-image" %}
      <caption>{{ page.img.title }}</caption>
@@ -785,12 +785,7 @@ Image accepts settings in several places. The app has moved away from using site
     <dd>
         default='reforms', Reform attribute
     </dd>
-    <dt>filepath_length</dt>
-    <dd>
-        default=100, Reform attribute, (if overridden) Reform field 
-    </dd>
-    <dt>            
-    image_model</dt>
+    <dt>image_model</dt>
     <dd>
         default='image.Image', Reform attribute
     </dd>
@@ -854,7 +849,7 @@ Where you can edit the template tag to point at your own configurations. With vi
 
 ## Notes
 No SVG support 
-: requires shadow code, Pillow especially can't handle them
+: would require shadow code, Pillow especially can't handle them
 
 Widths, heights and bytesize of original images are recorded, in case the storage media is not local files but cloud provision.
 
@@ -862,7 +857,7 @@ The app uses the URL attribute of the FileFields to generate HTML 'src' (not the
 
 
 ## Credits
-The upload and storage code (particularly the replicable models) was ripped from the Wagtail CMS. Though I am responsibile for how I have treated it.
+The upload and storage code (particularly the replicable model idea) was ripped from the Wagtail CMS. Though I am responsibile for what has happened after that.
 
 [Wagtail documentation](https://docs.wagtail.io/en/v2.8.1/advanced_topics/images/index.html)
 

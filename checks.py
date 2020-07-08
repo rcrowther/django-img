@@ -12,22 +12,6 @@ def check_filters(**kwargs):
         errors.extend(f.check())
     return errors
 
-#x
-def check_image_format(image_format, eid, **kwargs):
-    errors = []
-    if (image_format and (not(image_format in IMAGE_FORMATS))):
-        errors.append(
-            checks.Error(
-                "'format' value '{}' is unrecognised."
-                " Recognised image formats: '{}'".format(
-                image_format,
-                "', '".join(IMAGE_FORMATS),
-            ),
-            id=eid,            
-        ))
-    return errors  
-
-
 def image_format_error(setting_name, v, eid, accepted_formats):
     '''
     '''
@@ -41,7 +25,7 @@ def image_format_error(setting_name, v, eid, accepted_formats):
             id=eid,
     )
     
-def check_image_format_or_empty(
+def check_image_format_or_none(
         setting_name,
         image_format,
         eid, 
@@ -52,7 +36,9 @@ def check_image_format_or_empty(
     Accepts a format
     '''
     errors = []
-    if (image_format and (not(image_format in accepted_formats))):
+    if (image_formats is None):
+        return errors
+    if (not(image_format in accepted_formats)):
         errors.append(image_format_error(setting_name, v, eid, accepted_formats))
     return errors 
     
@@ -116,7 +102,7 @@ def check_is_subclass(setting_name, v, base_klass, eid, **kwargs):
     
 def check_type(setting_name, v, tpe, eid, **kwargs):
     errors = []
-    if (v and (not(type(v)==tpe))):
+    if (not(type(v)==tpe)):
         errors.append(
             checks.Error(
                 "'{}' value '{}' must be type {}.".format(
@@ -128,31 +114,15 @@ def check_type(setting_name, v, tpe, eid, **kwargs):
         ))
     return errors 
 
-#? or_none
 def check_boolean(setting_name, v, eid, **kwargs):
     return check_type(setting_name, v, bool, eid, **kwargs)
-    
+
 def check_int(setting_name, v, eid, **kwargs):
-    '''
-    Does not allow None
-    '''
-    errors = []
-    try:
-        int(v)
-    except TypeError:
-        errors.append(
-            checks.Error(
-            "'{}' value '{}' must be a number.".format(
-            setting_name, 
-            v
-            ),
-            id=eid,
-        ))
-    return errors 
+    return check_type(setting_name, v, int, eid, **kwargs)
         
 def check_positive(setting_name, v, eid, **kwargs):
     errors = check_int(setting_name, v,  eid, **kwargs)
-    if (int(v) <= 0):
+    if ((not errors) and int(v) <= 0):
         errors.append(
             checks.Error(
             "'{}' value '{}' must be a positive number.".format(
@@ -162,7 +132,6 @@ def check_positive(setting_name, v, eid, **kwargs):
             id=eid,
         ))
     return errors 
-
 
 def check_positive_float_or_none(setting_name, v, eid, **kwargs):
     errors = []
