@@ -8,11 +8,8 @@ from django.utils.deconstruct import deconstructible
 from image import settings
 from image.constants import (
     IMAGE_FORMATS,
-    IIMAGE_FORMATS,
-    EXTENSION_TO_APP,
-    FORMAT_EXTENSIONS_APP,
-    FORMAT_UCLIB_APP,
-    UCLIB_TO_APP
+    EXTENSION_TO_APP_FORMAT,
+    FORMAT_UCLIB_TO_APP
 )
 
 def get_pillow_attribute(file, pil_attr):
@@ -94,8 +91,8 @@ class ImageFileDataConsistencyValidator:
         ),
     }
     allowed_extensions = IMAGE_FORMATS
-    ext2app = EXTENSION_TO_APP
-    pil2app = UCLIB_TO_APP
+    ext2app = EXTENSION_TO_APP_FORMAT
+    pil2app = FORMAT_UCLIB_TO_APP
     
     def __init__(self, allowed_extensions=None):
         if allowed_extensions is not None:

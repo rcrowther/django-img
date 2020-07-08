@@ -7,7 +7,7 @@ from image.filters import (
     ResizeCropSmartMixin,
 )
 from image import image_ops_pillow
-from image.constants import FORMAT_APP_UCLIB, FORMAT_UCLIB_APP
+from image.constants import FORMAT_APP_TO_UCLIB
 from image.decisions import reform_save_info
 
 print('create filters')
@@ -40,7 +40,7 @@ class PillowProcess:
 
         # mods on the save data
         # convert the returned format to PIL
-        write_attrs['format'] = FORMAT_APP_UCLIB[write_attrs['format']]
+        write_attrs['format'] = FORMAT_APP_TO_UCLIB[write_attrs['format']]
         
         # Add some general write attributes. Pillow ignores the unusable.        
         write_attrs['progressive'] = True  

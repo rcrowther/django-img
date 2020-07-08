@@ -1,5 +1,5 @@
 from django.core import checks
-from image.constants import IMAGE_FORMATS, IIMAGE_FORMATS
+from image.constants import IMAGE_FORMATS
 
 ## This app speccific
 def check_filters(**kwargs):
@@ -12,6 +12,7 @@ def check_filters(**kwargs):
         errors.extend(f.check())
     return errors
 
+#x
 def check_image_format(image_format, eid, **kwargs):
     errors = []
     if (image_format and (not(image_format in IMAGE_FORMATS))):
@@ -44,7 +45,7 @@ def check_image_format_or_empty(
         setting_name,
         image_format,
         eid, 
-        accepted_formats=IIMAGE_FORMATS,
+        accepted_formats=IMAGE_FORMATS,
         **kwargs
     ):
     '''
@@ -59,7 +60,7 @@ def check_image_formats_or_none(
         setting_name, 
         image_formats,
         eid, 
-        accepted_formats=IIMAGE_FORMATS,
+        accepted_formats=IMAGE_FORMATS,
         **kwargs
     ):
     '''

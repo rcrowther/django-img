@@ -8,7 +8,7 @@ from image.filters import (
     ResizeCropSmartMixin,
 )
 from image import image_ops_wand
-from image.constants import FORMAT_APP_UCLIB, FORMAT_UCLIB_APP
+from image.constants import FORMAT_APP_TO_UCLIB
 from image.decisions import reform_save_info
 
 
@@ -31,7 +31,7 @@ class WandProcess():
         wand_dst = self.modify(image) or image
         
         # set the format
-        wand_dst.format = FORMAT_APP_UCLIB[write_attrs['format']]
+        wand_dst.format = FORMAT_APP_TO_UCLIB[write_attrs['format']]
         
         # set JPEG and others quality
         wand_dst.compression_quality = write_attrs['jpeg_quality']
