@@ -138,7 +138,7 @@ Now visit (probably) http://localhost:8000/image/1/ To see some *real* web code.
 ### (aside) Filters
 Perhaps your first request will be how to make a new filter.
 
-Make a new file called 'image filters'. Put it in the top level of any app (not in the site directory, that can be done but must be configured in a (settings.py)[#settings]). Put something in like this (adapt if you wish),
+Make a new file called 'image filters'. Put it in the top level of any app (not in the site directory, that can be done but must be configured in a [settings.py](#settings). Put something in like this (adapt if you wish),
 
     from image import Resize, registry
 
@@ -715,7 +715,8 @@ e.g.
 
         {{ imagequery "pk=1" image.Large  }}
 
-or
+or,
+
         {{ imagequery "src="taunton-skyscraper"" image.Large  }}
 
 While this may be useful, especially for fixed logos or banners, it is unnecessary if you are passing a model through a context,
@@ -748,7 +749,7 @@ They do what they say. 'image_sync' is particularly useful, it will attempt to m
 
 ## Settings
 ### Overview
-Image accepts settings in several places. The app has moved away from using site-wide settings towards other placements. Here is a summary, in order of last placement wins,
+Image accepts settings in several places. The app has moved away from site-wide settings towards other placements. Here is a summary, in order of last placement wins,
 
 ### Image
 <dl>
@@ -794,11 +795,11 @@ Image accepts settings in several places. The app has moved away from using site
     </dd>
     <dt>file_format</dt>
     <dd>
-        Set thee default format of reforms. default=original format, Reform attribute, filter attribute
+        (set thee default format of reforms) default=original format, Reform attribute, filter attribute
     </dd>
     <dt>jpeg_quality</dt>
     <dd>
-        Set the quality of JPEG reforms. default=80, Reform attribute, filter attribute
+        (set the quality of JPEG reforms) default=80, Reform attribute, filter attribute
     </dd>
 </dl>
 
