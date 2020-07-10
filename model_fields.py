@@ -56,7 +56,7 @@ class ImageFileField(ImageField):
         # imitation of overriding. Which Python cannot otherwise do.  
         super().contribute_to_class(cls, name, private_only=False)
 
-        # Since this predates init, and steps drom base, we can simply
+        # Since this predates init, and steps from base, we can simply
         # overwrite values
         # Must use hasattr() defence because migration builds 
         # '__fake__' classes

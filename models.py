@@ -382,9 +382,17 @@ class AbstractReform(models.Model):
         upload_to=get_reform_upload_to,
         )
     filter_id = models.CharField(max_length=255, db_index=True)
-    image_id = models.IntegerField(
-        )
+    #image_id = models.IntegerField(
+    #    )
+    # image = models.ForeignKey(
+        # 'AbstractImage', 
+        # related_name='+', 
+        # # If the original image model is removed, so are the reform 
+        # # models.
+        # on_delete=models.CASCADE
+    # )
 
+    
     @property
     def url(self):
         return self.src.url
@@ -454,8 +462,11 @@ class AbstractReform(models.Model):
 
 
 class Reform(AbstractReform):
-         
-         
+    image_model = Image     
+
+    # exactly the same in every subclass
+    image = models.ForeignKey(image_model, related_name='+', on_delete=models.CASCADE)
+
     class Meta:
         verbose_name = _('reform')
         verbose_name_plural = _('reforms')

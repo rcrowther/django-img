@@ -7,7 +7,7 @@ from image.filters import (
     ResizeCropSmartMixin,
 )
 from image import image_ops_pillow
-from image.constants import FORMAT_APP_TO_UCLIB
+from image.constants import FORMAT_APP_TO_UCLIB, FORMAT_UCLIB_TO_APP
 from image.decisions import reform_save_info
 
 print('create filters')
@@ -16,14 +16,6 @@ print('create filters')
 
 
 class PillowProcess:
-
-    # def ensure_save(self, pillow):
-        # if pillow.mode in ('RGBA', 'LA'):
-            # background = Image.new(pillow.mode[:-1], pillow.size, self.fill_color)
-            # background.paste(pillow, pillow.split()[-1])
-            # image = background
-            # im.convert("RGB")
-
             
     def process(self, src_file, model_args):
         src_image = PILImage.open(src_file)
@@ -31,7 +23,7 @@ class PillowProcess:
         # write_attrs currently {format, jpeg_quality}
         write_attrs = reform_save_info(
                     self,
-                    FORMAT_UCLIB_APP[src_image.format],
+                    FORMAT_UCLIB_TO_APP[src_image.format],
                     model_args,
                     )
 

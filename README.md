@@ -274,31 +274,25 @@ The two core models in this app can be subclassed. If you create subclasses, the
 Two scenarios where you may want to do this,
 
 #### Associated data with images
-You may want to associate data with an image. Many people's first thought would be a title. That said, an image title is not often displayed, and/or a simple duplication of a filename, which should be avoided. Image does not provide titles by default.
+You may want to associate data with an image. Many people's first thought would be to add a title. That said, an image title is not often displayed, and/or a simple duplication of a filename, which should be avoided. Image does not provide titles by default.
 
 But other kinds of information can be attached such as captions, credits, dates, and/or data for semantic rendering. All of these can legitimately viewed as 'part of the image' or 'an aspect of the image'.
 
 #### Splitting needs
-Its fun to tweak with settings, but sometimes, maybe often, this is not the best approach.
+It's fun to tweak with settings, but sometimes, maybe often, this is not the best approach.
 
 Let's say you have a website which gathers photos that are joined to NewsArticle. Those photos are linked for sure to the Article, and can probably be created and deleted with the NewsArticle. But you may also have a need to upload images for the site in general. Perhaps for banner displays. This is an image pool. The deletion policy is different. There may be no need for credits.
  
 These are two seperate apps. Make two apps. Avoid complex configuration.
 
 ### Subclassing Image/Reform 
-In the models.py file in an app, do this,
+Here is a minimal subclass. In the models.py file in an app, do this,
 
     from image.models import AbstractImage, AbstractReform
 
     class NewsArticleImage(AbstractImage):
         reform_model = 'NewsArticleReform'
         upload_dir='news_originals'
-
-        #! Must be migrated
-        filepath_length=100
-
-        #! in subclasses, must be enabled with a post_save signal. 
-        auto_delete_files=True
 
         # AbstractImage has a file and upload_date
         caption = models.CharField(_('Caption'),
@@ -318,21 +312,13 @@ In the models.py file in an app, do this,
         image_model = NewsArticleImage
         upload_dir='news_reforms'
 
+        # exactly the same in every subclass
+        image = models.ForeignKey(image_model, related_name='+', on_delete=models.CASCADE)
+
 
 Not the last word in DRY coding, but you should be able to work out what the code is for. 
 
 If you take some time looking at this, you'll see some unusual declarations. First, the 'image_model' and 'reform_model' are explicitly declared.  Second, the 'image_model' is declared as a string, but the 'reform_model' is declared as a class. If you are familar with Django, you may wonder, because Django has code to handle 'remote' and 'relative' constructions. But this solution is explicit, checkable, can configure in ways the Django solution can not, and does not have [the intricate workrounds of the stock provision](https://docs.djangoproject.com/en/3.0/topics/db/models/#abstract-related-name).
-
-Note the configuration variables, A few comments,
-
-<dl>
-    <dt>upload_dir</dt> 
-        <dd>is different for Images and Reforms.</dd> 
-    <dt>filepath_length</dt>  
-        <dd>for Reforms is inherited from Image. Note that if changed from the default, this value is serialized into migrations.</dd>
-    <dt>auto_delete_files</dt> 
-        <dd>Auto-delete [must be enabled](#auto-delete). The value is regarded as optional and configurable for Images, but auto-deletion is standard for Reforms.</dd>
-</dl>
 
 Migrate,
 
@@ -348,7 +334,41 @@ You now have a new image upload app. It has it's own DB tables. Change it's conf
 
         etc.
 
-### Things to consider with subcalsses of models
+### Attributes
+The subcalsses aaccept some useful attributes. Here is an expanded version of the above,
+
+    from image.models import AbstractImage, AbstractReform
+
+    class NewsArticleImage(AbstractImage):
+        reform_model = 'NewsArticleReform'
+        upload_dir='news_originals'
+        accept_formats = ['png']
+        filepath_length=55
+        max_upload_size=2
+        form_limit_filepath_length=True
+        auto_delete_files=True
+
+        etc.
+
+
+
+    class NewsArticleReform(AbstractReform):
+        image_model = NewsArticleImage
+        upload_dir='news_reforms'
+        file_format='png'
+        jpeg_quality=28
+
+        # exactly the same in every subclass
+        image = models.ForeignKey(image_model, related_name='+', on_delete=models.CASCADE)
+
+Some of these attributes introduce checks ('max_upload_size'), some set defaults('file_format'), some can be overriden ('file_format', 'jpeg_quality' can be overriden by filter settings). See the section [Settings](#settings) for details.
+
+
+### Inheritance! Can I build repositories using OOP techniques?
+No! Python has been cautous about this kind of programming, and Django's solutions are a workround. Try stacking models of any kind and, unless you know the code line by line,  the classes will create unusable migrations. For stability and maintainability, create models directly from the abstract bases.
+
+
+### Things to consider when subcalssing models
 #### Auto-delete
 Let's say that when an image model is deleted, you want to auto-delete the file (Django used to do this, now it does not). The core implementation in this app auto-deletes,  but subclasses will not. If you want a subclass to auto-delete, set 'autto_delete_files = True' in the image subclass, then add this to app.py,
 
@@ -791,11 +811,11 @@ Image accepts settings in several places. The app has moved away from using site
     </dd>
     <dt>file_format</dt>
     <dd>
-        default=original format, Reform attribute, filter attribute
+        Set thee default format of reforms. default=original format, Reform attribute, filter attribute
     </dd>
     <dt>jpeg_quality</dt>
     <dd>
-        default=80, Reform attribute, filter attribute
+        Set the quality of JPEG reforms. default=80, Reform attribute, filter attribute
     </dd>
 </dl>
 

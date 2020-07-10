@@ -36,7 +36,7 @@ def check_image_format_or_none(
     Accepts a format
     '''
     errors = []
-    if (image_formats is None):
+    if (image_format is None):
         return errors
     if (not(image_format in accepted_formats)):
         errors.append(image_format_error(setting_name, v, eid, accepted_formats))

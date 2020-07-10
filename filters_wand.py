@@ -8,21 +8,20 @@ from image.filters import (
     ResizeCropSmartMixin,
 )
 from image import image_ops_wand
-from image.constants import FORMAT_APP_TO_UCLIB
+from image.constants import FORMAT_APP_TO_UCLIB, FORMAT_UCLIB_TO_APP
 from image.decisions import reform_save_info
 
 
 
 class WandProcess():
-    '''
-    '''
+
     def process(self, src_file, model_args):
         image = Image(file=src_file)
  
         # write_attrs currently {format, jpeg_quality}
         write_attrs = reform_save_info(
                     self,
-                    FORMAT_UCLIB_APP[image.format],
+                    FORMAT_UCLIB_TO_APP[image.format],
                     model_args,
                     )
  
