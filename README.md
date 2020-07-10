@@ -9,9 +9,7 @@ The front end, by which I mean 'programmer API' is designed for a particular pur
 ## Why you may not want this app
 This may not be the app for you.
 
-<div style="border:2px solid green; border-radius: 12px;">
 The app API does not let you write template tags with adjustable parameters, filters with runtime parameter processing, create filter chains, or categorise/tag images.
-</div>
 
 All these facilities can be built in to the base code. But then the app wil not be, for you, a plug and go solution.
  
@@ -177,6 +175,7 @@ Index,
 
 - [Model Fields](#model-fields)
 - [New Image Repositories](#new-image-repositories)
+- [Auto Delete](#auto-delete)
 - [Filters](#filters)
 - [Admin](#admin)
 - [Forms](#forms)
@@ -200,6 +199,11 @@ There are two, ImageManyToOneField and ImageOneToOneField,
         img = ImageManyToOneField(
             'page.Image'
             )
+
+
+##### Auto-delete images
+For ImageRelationFieldMixin fields, associated images (and their reforms and files) can be auto-deleted with the model. See [Auto Delete](#auto-delete) 
+
 
 #### Stock Django declaration,
 You can also use a stock Django foreign key declaration,
@@ -233,10 +237,6 @@ Foreign Field
 - Django stock
 - explicit
 - flexible configuration
-
-
-### Auto-delete
-See 
 
 
 ## New Image Repositories
@@ -339,12 +339,12 @@ Some of these attributes introduce checks ('max_upload_size'), some set defaults
 No! Python has been cautous about this kind of programming, and Django's solutions are a workround. Try stacking models of any kind and, unless you know the code line by line,  the classes will create unusable migrations. For stability and maintainability, create models directly from the abstract bases.
 
 
-### Things to consider when subcalssing models
-#### Auto delete
-See
+### Things to consider when subclassing models
+#### Auto delete of files
+May be a good idea to set up your deletion policy from the start. See [Auto Delete](#auto-delete)
  
 #### Add Meta information
-You may want to configure a Meta. If you added titles or slugs, for example, you may be interested in making them into unique constrained groups, or adding indexes,
+You may want to configure a Meta class. If you added titles or slugs, for example, you may be interested in making them into unique constrained groups, or adding indexes,
 
     class NewssArticleImage(AbstractImage):
         upload_dir='news_originals'
