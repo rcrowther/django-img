@@ -236,19 +236,7 @@ Foreign Field
 
 
 ### Auto-delete
-The solution only works if the model uses fields with the ImageRelationFieldMixin i.e. ImageManyToOneField and ImageOneToOneField.
-
-Add this to your app.ready(),
-
-    from image.actions import _image_delete
-
-    def ready()
-        post_delete.connect(_image_delete, sender=SomeModel, weak=False)
-
-
-The above settings will remove images when the model is deleted. If you prefer,
-
-
+See 
 
 
 ## New Image Repositories
@@ -352,20 +340,8 @@ No! Python has been cautous about this kind of programming, and Django's solutio
 
 
 ### Things to consider when subcalssing models
-#### Auto-delete
-Let's say that when an image model is deleted, you want to auto-delete the file (Django used to do this, now it does not). The core implementation in this app auto-deletes,  but subclasses will not. If you want a subclass to auto-delete, set 'autto_delete_files = True' in the image subclass, then add this to app.py,
-
-
-    from image.signals import register_file_delete_handlers
-
-    def ready()
-        super().ready()
-        from models import NewsArticleImage, NewsArticleReform          
-        register_file_delete_handlers(NewsArticleImage, NewsArticleReform)
-
-
-Note the position of the model import. It must be in the ready callback, not the main module.
-
+#### Auto delete
+See
  
 #### Add Meta information
 You may want to configure a Meta. If you added titles or slugs, for example, you may be interested in making them into unique constrained groups, or adding indexes,
@@ -387,6 +363,80 @@ You may want to configure a Meta. If you added titles or slugs, for example, you
                     fields=['title', 'author'], 
                     name='unique_newsarticle_reform_src'
                 )
+
+
+## Auto-delete
+### Overview
+I read somewhere that a long time ago, Django would auto-delete files. This probably happened in model fields. This is not true now. If objects and fields are deleted, files are left in the host system. However, it suits this application, and some of it's intended uses, to auto-delete files and models.
+
+If you would like this behaviour, the app provides some solutions.
+
+There are two aspects to this, automatic removal of referm objects when the original image object is deleted, and automatic deletion of files, Image or Reform, when an object is deleted.
+
+  
+### Automatic deletion of reform objects
+Reforms are treated as objects generated automatically, so automatic deletion is not controversial. Moreover, the main template tag acesses reforms through the Image model, so will not work if the original image is removed. 
+
+The core application removes reforms by default. So will custom repositories, as long as the 'image' foreign key is set to CASCADE.
+
+
+### Automatic deletion of files
+The application provides a signals solution. There is no way to 'inherit' the behaviour. It must be implemented for each image repository.
+
+#### Auto-delete Reform files
+Place this in the ready() method of the application,
+
+    from image.signals import register_file_delete_handlers
+b
+
+    class NewsConfig(AppConfig):
+        ...
+
+        def ready(self):
+            super().ready()
+            from news_article.models import NewsArticleReform
+            register_reform_delete_handler(NewsArticleReform)
+
+
+
+#### Auto-delete Image and Reform files
+Place this in the ready() method of the application,
+
+    from image.signals import register_file_delete_handlers
+
+
+    class NewsConfig(AppConfig):
+        ...
+
+        def ready(self):
+            super().ready()
+            from news_article.models import NewsArticleImage, NewsArticleReform
+            register_file_delete_handler(NewsArticleImage, NewsArticleReform)
+
+The Image class attribute must be 'auto_delete=True'. 
+
+
+#### Auto-delete images when a supporting object is deleted
+Place this in the ready() method of the application,
+
+    from image.signals import register_image_delete_handler
+
+
+    class NewsConfig(AppConfig):
+        ...
+
+        def ready(self):
+            super().ready()
+            from news_article.models import NewsArticle
+            register_image_delete_handler(NewsArticle)
+
+The image fields must be an ImageOneToOneField or ImageManyToOneField, and their attribute must be 'auto_delete=True'. 
+
+### Avoid auto-deletion for pooled images
+Only run auto-deletion on one-to-one file definitions. In an image pool, there is no simple way to track which models are using files. you run into this is a classic computing problem, and best avoided.
+ 
+### Default behavior
+By default, the core repository will auto-delete Reform models when the Image is deleted, and auto-delete the associated files. It will not auto-delete the original files associated with Images. This behaviour is not interited by custom repositories. 
 
 
 

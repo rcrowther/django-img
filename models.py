@@ -314,18 +314,18 @@ class AbstractImage(models.Model):
     def is_landscape(self):
         return (self.height < self.width)
 
-    def delete(self, using=None, keep_parents=False):
-        # delete reform files
-        [rf.src.delete(False) for rf in self.get_reforms()]
+    # def delete(self, using=None, keep_parents=False):
+        # # delete reform files
+        # [rf.src.delete(False) for rf in self.get_reforms()]
 
-        # delete image model and CASCADE reform models
-        r = super().delete(using, keep_parents)
+        # # delete image model and CASCADE reform models
+        # r = super().delete(using, keep_parents)
         
-        # Delete model file
-        # check the model delete suceeeded
-        if (r[1][self._meta.label] and self.auto_delete_files):
-            self.src.delete(False)
-        return r
+        # # Delete model file
+        # # check the model delete suceeeded
+        # if (r[1][self._meta.label] and self.auto_delete_files):
+            # self.src.delete(False)
+        # return r
 
     @classmethod
     def check(cls, **kwargs):
