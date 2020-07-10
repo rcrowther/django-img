@@ -139,8 +139,8 @@ def image_from_query_tag(parser, token):
     If you need to lookup by filepath, it is difficult, you need the
     media-relative filepath, not only the filename.
     
-    img_filename string 
-        reference to an image by filename e.g. 'taunton_skyscraper'
+    query
+        e.g."pk=3"
     filter_id 
         string module path to a Filter e.g. "image.Format". If 
         the Filter is only named, the app location of the calling view is 

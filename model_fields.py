@@ -18,6 +18,18 @@ class ImageFileField(ImageField):
     maxd_size
         in bytes
     '''
+    #NB In stock Django,
+    # - The model ImageField does routing, not validation, not even 
+    # through FileField
+    # - The form FileField read-checks files. It checks if a file exists, 
+    # has a size, and that the filename is not too long.
+    # - The form ImageField goes a little further. It checks Pillow can 
+    # read the file, that Pillow.verify() does not think it is broken, 
+    # that the MIME type is coherent, then validates the extension 
+    # against Pillow data.
+    # - Interesting, ImageFile itself has a little checking, as it must 
+    # rescue dimension data from Pillow.
+
     # Class mainly exists for contibute_to options, faking real abstract
     # classes. But adds some init vals and it's formfield belongs to 
     # this app

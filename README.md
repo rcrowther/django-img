@@ -45,18 +45,9 @@ The app includes code to upload images. The Django admin for the base applicatio
 
 - Migrate new tables.
 
-- Create a file called 'image_filters.py' in the app. [Sublass a few filters](#filters),
+- Create 'image_filters.py' files in the apps, then [Sublass a few filters](#filters),
 
-- Insert [template tags](#template-tags) into the relevant templates,
-
-    {% load img_tags %}
-
-    ...
-
-    {% image a_model.a_field my_app.FilterName %}
-
-
-
+- Insert [template tags](#template-tags) into the relevant templates.
 
 
 
@@ -147,7 +138,7 @@ Now visit (probably) http://localhost:8000/image/1/ To see some *real* web code.
 ### (aside) Filters
 Perhaps your first request will be how to make a new filter.
 
-Make a new file called 'image filters'. Put it in the top level of any app (not in the site directory). Put something in it like this (adapt if you wish),
+Make a new file called 'image filters'. Put it in the top level of any app (not in the site directory, that can be done but must be configured in a (settings.py)[#settings]). Put something in like this (adapt if you wish),
 
     from image import Resize, registry
 
@@ -162,7 +153,7 @@ Now adapt the template tag (or the tag in image/templates/image/image_detail.htm
 
     {% imagequery "pk=1" someAppName.MediumImage %}
 
-Visit the page again. Image sees the new filter definition, then generates a new reform, then displays it.
+Visit the page again. Image sees the new filter definition, then generates a new reform (filters the image), then displays it.
 
 Ok, you changed the image size, and maybe the format. If you want to continue, you probably have questions. Goto the main documentation.
 
@@ -172,16 +163,9 @@ Ok, you changed the image size, and maybe the format. If you want to continue, y
 Don't like what you see?
 
 - Remove any temporary code.
-- Migrate backwards,
-
-    ./mangage.py migrate image zero
-
+- Migrate backwards ('./manage.py migrate image zero')
 - Remove from apps.py
-- Remove the two directories in /media,
-
-    originals/
-    reforms/
-
+- Remove the two directories '/media/originals/', '/media/reforms/'
 - Remove the app folder.
 
 That's it, gone.
@@ -235,9 +219,9 @@ You can also use a stock Django foreign key declaration,
 
          etc.
 
-null=True and blank=True means you can delay adding an image until later. And related_name='*' means that Images will not track the models you are creating. See Django documentation of model fields for more details.
+null=True and blank=True means users can delay adding an image until later. And related_name='*' means that Images will not track the models you are creating. See Django documentation of model fields for more details.
 
-Only use models.CASCADE if you are sure this is what you want. It means, if an image is deleted, your model that carries the image is deleted too. This is usually not what you want.
+Only use models.CASCADE if you are sure this is what you want. It means, if an image is deleted, the model that carries the image is deleted too. This is not usually what you want.
 
 
 #### Choosing between the two
@@ -269,19 +253,19 @@ The above settings will remove images when the model is deleted. If you prefer,
 
 ## New Image Repositories
 ### Overview
-The two core models in this app can be subclassed. If you create subclasses, the subclass models have new DB tables, and can operate with new configurations such as storing files in different directories.
+The core models in this app can be subclassed. If you create subclasses, the subclass models have new DB tables, and can operate with new configurations such as storing files in different directories.
 
 Two scenarios where you may want to do this,
 
 #### Associated data with images
-You may want to associate data with an image. Many people's first thought would be to add a title. That said, an image title is not often displayed, and/or a simple duplication of a filename, which should be avoided. Image does not provide titles by default.
+You may want to associate data with an image. Many people's first thought would be to add a title. That said, an image title is not often displayed, and/or a simple duplication of a filename, which should be avoided. This app does not provide titles by default.
 
-But other kinds of information can be attached such as captions, credits, dates, and/or data for semantic rendering. All of these can legitimately viewed as 'part of the image' or 'an aspect of the image'.
+But other kinds of information can be attached such as captions, credits, dates, and/or data for semantic rendering. All of these may be viewed as 'an aspect of the image'.
 
 #### Splitting needs
 It's fun to tweak with settings, but sometimes, maybe often, this is not the best approach.
 
-Let's say you have a website which gathers photos that are joined to NewsArticle. Those photos are linked for sure to the Article, and can probably be created and deleted with the NewsArticle. But you may also have a need to upload images for the site in general. Perhaps for banner displays. This is an image pool. The deletion policy is different. There may be no need for credits.
+Let's say you have a website which gathers photos that are joined to NewsArticle. Those photos are linked for sure to the Article, and can probably be created and deleted with the NewsArticle. But you may also have a need to upload images for the site in general, perhaps for banner displays. This is an image pool. The deletion policy is different. There may be no need for credits.
  
 These are two seperate apps. Make two apps. Avoid complex configuration.
 
@@ -316,15 +300,14 @@ Here is a minimal subclass. In the models.py file in an app, do this,
         image = models.ForeignKey(image_model, related_name='+', on_delete=models.CASCADE)
 
 
-Not the last word in DRY coding, but you should be able to work out what the code is for. 
-
-If you take some time looking at this, you'll see some unusual declarations. First, the 'image_model' and 'reform_model' are explicitly declared.  Second, the 'image_model' is declared as a string, but the 'reform_model' is declared as a class. If you are familar with Django, you may wonder, because Django has code to handle 'remote' and 'relative' constructions. But this solution is explicit, checkable, can configure in ways the Django solution can not, and does not have [the intricate workrounds of the stock provision](https://docs.djangoproject.com/en/3.0/topics/db/models/#abstract-related-name).
+Not the last word in DRY coding, but you should be able to work out what the code is for. Note that 'image_model' and 'reform_model' are explicitly declared, and that the 'reform_model' is declared as a string, but the 'image_model' is declared as a class.
 
 Migrate,
 
+    ./manage.py makemigrations NewsArticle
     ./manage.py migrate NewsArticle
 
-You now have a new image upload app. It has it's own DB tables. Change it's configuration. Refer to it in other models,
+You now have a new image upload app. It has it's own DB tables. Change it's configuration (see next section). Refer to it in other models,
 
     class NewsArticle(models.Model):
 
@@ -335,7 +318,7 @@ You now have a new image upload app. It has it's own DB tables. Change it's conf
         etc.
 
 ### Attributes
-The subcalsses aaccept some useful attributes. Here is an expanded version of the above,
+Subclasses accept some attributes. Here is an expanded version of the above,
 
     from image.models import AbstractImage, AbstractReform
 
@@ -361,7 +344,7 @@ The subcalsses aaccept some useful attributes. Here is an expanded version of th
         # exactly the same in every subclass
         image = models.ForeignKey(image_model, related_name='+', on_delete=models.CASCADE)
 
-Some of these attributes introduce checks ('max_upload_size'), some set defaults('file_format'), some can be overriden ('file_format', 'jpeg_quality' can be overriden by filter settings). See the section [Settings](#settings) for details.
+Some of these attributes introduce checks ('max_upload_size'), some set defaults('file_format'), some can be overriden ('file_format', 'jpeg_quality' can be overriden by filter settings). See [Settings](#settings) for details.
 
 
 ### Inheritance! Can I build repositories using OOP techniques?
@@ -385,7 +368,7 @@ Note the position of the model import. It must be in the ready callback, not the
 
  
 #### Add Meta information
-You may want to configure a Meta. If you have titles or slugs, for example, you may be interested in making them into unique constrained groups or adding indexes,
+You may want to configure a Meta. If you added titles or slugs, for example, you may be interested in making them into unique constrained groups, or adding indexes,
 
     class NewssArticleImage(AbstractImage):
         upload_dir='news_originals'
@@ -413,10 +396,12 @@ Filters are used to describe how an original uploaded image should be modified f
  
 A few filters are predefined. A couple of utility filters,
 
-Format
-    Change the format of an uploaded image
-Thumb
-    A 64x64 pixel square
+<dl>
+<dt>Format</dt>
+    <dd>Change the format of an uploaded image
+<dt>Thumb</dt>
+    <dd>A 64x64 pixel square</dd>
+</dl>
 
 And some base filters, which you can configure. These are all centre-anchored, 
 
@@ -425,7 +410,7 @@ And some base filters, which you can configure. These are all centre-anchored,
 - SmartCrop
 - SmartResize
 
-If you only need different image sizes, then you only need to configure these. But if you want to pass some time with image-processing code, you can add extra filters to generate ''PuddingColour' and other filters.
+If you only need different image sizes, then you only need to configure these. But if you want to pass some time with image-processing code, you can add filters to generate ''PuddingColour' and other effects.
 
 
 ### Filter placement and registration
@@ -433,13 +418,15 @@ Files of filter definitions can be placed in any app. Start a file called 'image
 
 If you would prefer to gether all filters together in one place, define the settings to include,
 
-    Image : {
-            'MODULES': [
+    IMAGES = [
+        {
+            'SEARCH_MODULES': [
                         "siteName",
             ],
-    }
+        },
+    ]
 
-Then put a file image_filters.py in the 'sitename' directory. If you do this, you should namespace the filters,
+Then put a file image_filters.py in the 'sitename' directory. If you use a central file, you should namespace the filters,
 
     BlogPostLarge:
         width : 256
@@ -453,9 +440,9 @@ All builtin filter bases accept these attributes,
 - height
 - format
 
-Most filter code demands width and height, but format is optional. Without a stated format, the image stays as it was (unless another setting is in place). Formats accepted are,
+Most filter code demands 'width' and 'height', but 'format' is optional. Without a stated format, the image format stays as it was (unless another setting is in place). Formats accepted are conservative,
 
-    gif, png, jpg, bmp, tiff, webp 
+    bmp, gif, ico, jpg, png, rgb, tiff, webp 
 
 which should be written as above (lowercase, and 'jpg', not 'jpeg'). So,
 
@@ -471,7 +458,7 @@ which should be written as above (lowercase, and 'jpg', not 'jpeg'). So,
 
 Crop and Resize can/often result in images narrower in one dimension. 
 
-The Smart variations do a background fill in a chosen colour, so return the requaeted size,
+The Smart filters do a background fill in a chosen colour, so return the requaeted size,
 
     from image import ResizeSmart, registry
 
@@ -489,7 +476,7 @@ Fill color is defined however the image library handles it. Both Pillow and Wand
 ### Registering filters
 Filters need to be registered. Registration style is like ModelAdmin, templates etc. Registration is to the image.registry (this is how templatetags finds them).
 
-You can use the declaration used in the examples above,
+You can use an explicit declaration,
 
     from image import ResizeSmart, registry
 
@@ -497,7 +484,7 @@ You can use the declaration used in the examples above,
 
     registry.register(single_or_list_of_filters)
 
-Like ModelAdmin, there is also a decorator available,
+OR use the decorator,
 
     from image import register, ResizeSmart
 
@@ -510,7 +497,7 @@ Like ModelAdmin, there is also a decorator available,
 
 
 ### Wand filters
-The base filters in the Wand filter set have more attributes available. The 'wand' code needs Wand to be installed on the host computer, and a imported into the image_filters file. Assuming that, you gain these effects on every Wand filter,
+The base filters in the Wand filter set have more attributes available. The 'wand' code needs Wand to be installed on the host computer. Assuming that, you gain these effects,
 
     from image import registry
     from image.wand_filters import ResizeSmart
@@ -564,13 +551,13 @@ I lost my way with the Wand effects. There is no 'blur', no 'rotate', no 'waves'
     </dd>
 </dl>
 
-Watermark deserves some explanation. This does not draw on the image, as text metrics are tricky to handle. Provide a URL stub to an image, here's a builtin,
+Watermark deserves some explanation. This does not draw on the image, as text metrics are tricky to handle. You configure a URL stub to an image, here's a builtin,
 
     watermark = 'image/watermark.png'
 
 The URL is Django static-aware, but will pass untouched if you give it a web URL (like the URLs in Django Media).
  
-The template is scaled to the image-to-be-watermarked, then composited over the main image by 'disolve'. So the watermark is customisable, can be used on most sizes of image, and is usually readable since aspect ratio is preserved.
+The template is scaled to the image-to-be-watermarked, then composited over the main image by 'dissolve'. So the watermark is customisable, can be used on most sizes of image, and is usually readable since aspect ratio is preserved.
 
 It is probably worth saying again that you can not change the parameters, so the strengths of these effects, without creating a new filter.
 
@@ -589,10 +576,10 @@ If you want the filter to work with the Pillow or Wand liraries, you can inherit
 See the code for details.
 
 
-### Why can filters not be chained?
-Filters can not be chained dynamically. There is no way to present chaining to a user. You need to create a fixed filter. Filters must be written in code, and do not accept parameters. You want a filter with new parameters, you write it and it is set.
+### Why can filters not be chained or given parameters?
+This app only enables creation of fixed filters intended for a broad range of images. You write a filter with parameters, the processing order is fixed, and it is set.
 
-This is a deliberate decision. It makes life easy. If you want to produce a front-end that can lever the filters and chain them, that is another step. This is not that app.
+This is a deliberate decision. It makes life easy. If you want to produce a front-end that can adjust the filters, or chain them, that is another step. This is not that app.
 
 
 
@@ -603,32 +590,26 @@ This is a deliberate decision. It makes life easy. If you want to produce a fron
 ### Overview
 Image ships with stock Django admin. However, this is not always suited to the app, it's intended or possible uses. So there are some additions.
 
-The admin provided has an attitude about how to use the app.
+The admin provided has an attitude about how to use the app. It assumes that each model instance is locked to one file. If a model exists, then the file exists. If the admin is given the same file, it duplicates the file and model.
 
-<div style="border:2px solid green; border-radius: 12px;">
-The custom admin assumes that each model instance is locked to one file. If a model exists, then the file exists. If the admin is given the same file, it duplicates file and model.
-</div>
-
-In this system, models that use the Image models are still free to be null and blank, to represent 'image not yet uploaded'. And it is possible to build systems that reuse images---it is the Image_instance->file connection that is locked.
+In this system, models that refer to Image models can be null and blank, which represents 'image not yet uploaded'. And it is possible to build systems that reuse images. It is the Image_instance->file connection that is locked.
 
 
 ### Package solutions
 #### ImageCoreAdmin
 For administration and maintenance of the image collections. This is a rather specialised use, which would only be visible to end users if they are trusted.
 
-If you go to the admin.py file in the app, you will find an alternative Admin file builtin. This is for handling the images and image DB itself (not images attached to models in other apps),
+This is built into the image app, and can be used on custom repositories too.
 
-    # Custom admin interface disalows deletion of files from models.
-    #class ImageAdmin(ImageCoreAdmin):
-        
-    # Stock admin interface.
-    class ImageAdmin(admin.ModelAdmin):
-        pass
-            
-            
-    admin.site.register(Image, ImageAdmin)
+Significant changes,
 
-If you'd like to try the core admin, change the comments,
+- changelist is tidier and includes 'view' and 'delete' links
+- changelist has searchable filenames
+- change form has 'readonly' file data
+
+
+##### Remove ImageCoreAdmin from central repository
+Want Django stock admin (or a custom)? Change the comments in 'image/admin.py' from,
 
     # Custom admin interface disalows deletion of files from models.
     class ImageAdmin(ImageCoreAdmin):
@@ -636,22 +617,28 @@ If you'd like to try the core admin, change the comments,
     # Stock admin interface.
     #class ImageAdmin(admin.ModelAdmin):
         pass
+            
+            
+    admin.site.register(Image, ImageAdmin)
+
+to,
+
+    # Custom admin interface disalows deletion of files from models.
+    #class ImageAdmin(ImageCoreAdmin):
+        
+    # Stock admin interface.
+    class ImageAdmin(admin.ModelAdmin):
+        pass
         
         
     admin.site.register(Image, ImageAdmin)
 
-The modified app makes several changes to the builtin Admin. A short list of significant changes,
-
-- changelist is tidier and includes view links
-- changelist has searchable titles
-- upload form prepopulates the new title with the filename 
-- change form disables Image choice
 
 
 ##### Notes and alternatives for the core admin
 You may provide no core admin at all. You can use the ./manage.py commands to do maintenence. The stock admin is provided to get you started.
 
-IF you prefer your own core admin, have a look at the code for ImageCoreAdmin in '/image/admins.py'. It provides some useful clues about how to do formfield overrides, and other customisations.
+If you prefer your own core admin, have a look at the code for ImageCoreAdmin in '/image/admins.py'. It provides some useful clues about how to do formfield overrides and other customisations.
 
 If using subclassed Image/Reform models, you may find it more maintainable to duplicate and modify the admin code, rather than import and override.
 
@@ -673,31 +660,22 @@ This is a small override that should not interfere with other admin code. It dis
 
 ## Forms
 ### Overview
-The model ImageField does routing, not validation, not even through FileField
+There's nothing special about using images trom this app in forms. Even the custom fields are mostly renames to tidy code and namespace custom admin configurations.
 
-The form FileField read checks files. It checks if a file exists, has a size, and that the filename is not too long.
+That said, the fields used by Image for image storage are not standard Django. 
 
-The form ImageField goes a little further. It checks Pillow can read the file, that Pillow.verify() does not think it is broken, that the MIME type is coherent, then validates the extension against Pillow data.
-
-Interesting, ImageFile itself has a little checking, as it must rescue dimension data from Pillow.
-
-### For Image/Reform models
-There's nothing special about using the Image model in forms. Stock Django. Use the model or subclasses via Django admin or Model forms. 
-
-The field used by Image for image storage is not a standard Django ImageFile, but an override.
-
-#### ImageFileField
-Does a few extra jobs beyond an ImageFile,
+### ImageFileField
+If you are interested in the internals, this does a few extra jobs beyond an ImageFile,
 
 <dl>
-    <dt>Contains some extra config attributes,</dt>
-    <dd>Most of which are gathered from the class configuration (e.g. max_upload size). The class cas deconstruct these.</dd>
+    <dt>Contains extra config attributes,</dt>
+    <dd>Most of which are gathered from the class configuration (e.g. max_upload size). The class cas deconstruct these for migrations.</dd>
     <dt>extra validators<ddt>
     <dd>Beyond the standard Django field, this field and it's formfield actively check filesizes and extansions. Calls to is_valid() will run these validations.</dd>
 </dl>
 
 ### For references to images
-When images are referenced from another model, this would usually use a Foreign Key on the referring model. 
+When images are referenced from another model, this would usually [use a Foreign Key on the referring model](#model-fields). 
 
 
 ## Template Tags
@@ -705,7 +683,7 @@ When images are referenced from another model, this would usually use a Foreign 
 For most uses, the app only has one template tag. There is another, for testing and edge cases.
 
 ### The 'image' tag
-You define a filter called ''Large'. Add this to template code,
+Let's say there is a filter named ''Large'. Add this to template code,
 
     {% load img_tags %}
 
@@ -713,7 +691,7 @@ You define a filter called ''Large'. Add this to template code,
  
 then visit the page. The app will generate a ''Large' reform of 'report.image', to the spec given in the filter.
 
-The tag guess can guess the app from the context. So,
+The tag can guess the app from the context. So,
 
      {% image report.img Large %}
 
@@ -722,18 +700,23 @@ Will assume the filter is in the app the context says the view comes from.
 The tag accepts keyword parameters which become HTML attributes,
 
      {% image report.img Large class="report-image" %}
-     <caption>{{ page.img.title }}</caption>
 
-Assuming a title "End Of Year Table", this renders similar to,
+This renders similar to,
 
-    <img src="/media/reforms/eoy-report_large.png" alt="end of year table image" class="report-image">
-    <caption>End Of Year Table</caption>
+    <img src="/media/reforms/eoy-report_large.png" alt="eoy-report image" class="report-image">
 
 
 ### The 'query' tag
-There is a tag to find images by a database query. Sometimes this will be useful, for fixed or temporary decoration/banners etc. 
+There is a tag to find images by a database query. Currently, the tag only works on the central repository. Sometimes this will be useful, for fixed or temporary decoration/banners etc. 
 
-        {{ imagequery "query" image.Large  }}
+        {{ imagequery "some_query" image.Large  }}
+
+e.g.
+
+        {{ imagequery "pk=1" image.Large  }}
+
+or
+        {{ imagequery "src="taunton-skyscraper"" image.Large  }}
 
 While this may be useful, especially for fixed logos or banners, it is unnecessary if you are passing a model through a context,
 
@@ -768,7 +751,7 @@ They do what they say. 'image_sync' is particularly useful, it will attempt to m
 Image accepts settings in several places. The app has moved away from using site-wide settings towards other placements. Here is a summary, in order of last placement wins,
 
 ### Image
-    <dl>
+<dl>
     <dt>reform_model</dt>
     <dd>
         default=AbstractReform
@@ -821,7 +804,7 @@ Image accepts settings in several places. The app has moved away from using site
 
 
 ### Site-wide settings
-Images accepts some site-wide settings. They look like the Django template settings,
+Images accepts some site-wide settings,
 
     IMAGES = [
         {
@@ -850,7 +833,7 @@ Images accepts some site-wide settings. They look like the Django template setti
         
 ## Utilities
 ### The View
-Image has a builtin view. It's main purpose is to test filter code. The view template reforms from images in the core folder. As a test and trial device, it is not enabled by default.
+Image has a builtin view. It's main purpose is to test filter code. The view template reforms from images in the core repository. As a test and trial device, it is not enabled by default.
 
 Goto urls.py, add this,
 
@@ -873,11 +856,11 @@ No SVG support
 
 Widths, heights and bytesize of original images are recorded, in case the storage media is not local files but cloud provision.
 
-The app uses the URL attribute of the FileFields to generate HTML 'src' (not the filepath). So it should keep working if you swap storage backends or, at least, keep responding an a Django-like way.
+The app generally uses URLs, not the filepaths. This can be confusing, but it means it is 'static' aware, and it should keep working if you swap storage backends.
 
 
 ## Credits
-The upload and storage code (particularly the replicable model idea) was ripped from the Wagtail CMS. Though I am responsibile for what has happened after that.
+The upload and storage code (particularly the replicable models) are ripped from the Wagtail CMS. Though I am responsibile for what has happened after that.
 
 [Wagtail documentation](https://docs.wagtail.io/en/v2.8.1/advanced_topics/images/index.html)
 
