@@ -1,6 +1,7 @@
 from django.db.models.signals import post_delete
 from django.db import transaction
-
+from django.core.exceptions import ValidationError
+from image.model_fields import ImageOneToOneField
 
 def _image_delete(instance, **kwargs):
     '''
@@ -11,11 +12,10 @@ def _image_delete(instance, **kwargs):
     ImageRelationFieldMixin mixedins i,e, imag.model_fields.
     '''
     # find image fields
-    #! maybe gather relevant fields on the meta. This is ugly.
-    #! run  a check so drop the class test?
+    #? ugly, but...?
     b = []
     for f in instance._meta.fields:
-        if (issubclass(f, ImageRelationFieldMixin) and f.auto_delete):
+        if (issubclass(f, ImageOneToOneField) and f.auto_delete):
             f.delete(False)
 
 def register_image_delete_handler(model):

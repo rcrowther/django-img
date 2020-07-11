@@ -111,8 +111,7 @@ class ReformFileField(FileField):
 
 
 class ImageRelationFieldMixin():
-    auto_delete = False
-    
+        
     def _check_relation_model_is_image_model(self):
         # These checks are run in 'show migrations' and 'runmigrations'.
         # By this check, the related model must exist.
@@ -152,16 +151,10 @@ class ImageManyToOneField(ImageRelationFieldMixin, ForeignKey):
     - Deletion of the image sets the field to null
     - Deletion of the model will not delete the image 
     - The image can not refer back to the model
-    
-    auto_delete
-        delete image model on deletion of a model with this field.
-        Needs to be enabled in signals. Default False.
     '''
     def __init__(self, to, related_query_name=None,
                  limit_choices_to=None, parent_link=False,
                  db_constraint=True, **kwargs):
-        if ('auto_delete' in kwargs):
-            self.auto_delete = kwargs['auto_delete']
 
         # not kwrd, set a default
         on_delete = kwargs.get('on_delete', SET_NULL)

@@ -367,12 +367,32 @@ You may want to configure a Meta class. If you added titles or slugs, for exampl
 
 ## Auto-delete
 ### Overview
-I read somewhere that a long time ago, Django would auto-delete files. This probably happened in model fields. This is not true now. If objects and fields are deleted, files are left in the host system. However, it suits this application, and some of it's intended uses, to auto-delete files and models.
+I read somewhere that a long time ago, Django would auto-delete files. This probably happened in model fields. This is not true now. If objects and fields are deleted, files are left in the host system. However, it suits this application, and some of it's intended uses, to auto-delete models and files. If you would like this behaviour, the app provides some solutions.
 
-If you would like this behaviour, the app provides some solutions.
+There are aspects to this. First, automatic removal of images when a supporting model is deleted. Then, automatic removal of reform objects when the original image object is deleted. Finally, automatic deletion of files, Image or Reform, when an object is deleted.
 
-There are two aspects to this, automatic removal of referm objects when the original image object is deleted, and automatic deletion of files, Image or Reform, when an object is deleted.
 
+### Automatic deletion of images when a supporting object is deleted
+Place this in the ready() method of the application,
+
+    from image.signals import register_image_delete_handler
+
+
+    class NewsConfig(AppConfig):
+        ...
+
+        def ready(self):
+            super().ready()
+            from news_article.models import NewsArticle
+            register_image_delete_handler(NewsArticle)
+
+The image fields must be ImageOneToOneFields, and the field attribute must be 'auto_delete=True'.
+
+#### Why must the code run on the custom field and not on a ImageOneToManyField?
+The custom field means lightweight field identification.
+ 
+An ImageOneToManyField implies an image pool. Many connections to one image. This is a  classic computing problem of reference counting. Best avoided.
+ 
   
 ### Automatic deletion of reform objects
 Reforms are treated as objects generated automatically, so automatic deletion is not controversial. Moreover, the main template tag acesses reforms through the Image model, so will not work if the original image is removed. 
@@ -416,25 +436,6 @@ Place this in the ready() method of the application,
 The Image class attribute must be 'auto_delete=True'. 
 
 
-#### Auto-delete images when a supporting object is deleted
-Place this in the ready() method of the application,
-
-    from image.signals import register_image_delete_handler
-
-
-    class NewsConfig(AppConfig):
-        ...
-
-        def ready(self):
-            super().ready()
-            from news_article.models import NewsArticle
-            register_image_delete_handler(NewsArticle)
-
-The image fields must be an ImageOneToOneField or ImageManyToOneField, and their attribute must be 'auto_delete=True'. 
-
-### Avoid auto-deletion for pooled images
-Only run auto-deletion on one-to-one file definitions. In an image pool, there is no simple way to track which models are using files. you run into this is a classic computing problem, and best avoided.
- 
 ### Default behavior
 By default, the core repository will auto-delete Reform models when the Image is deleted, and auto-delete the associated files. It will not auto-delete the original files associated with Images. This behaviour is not interited by custom repositories. 
 
@@ -757,19 +758,19 @@ This renders similar to,
 
 
 ### The 'query' tag
-There is a tag to find images by a database query. Currently, the tag only works on the central repository. Sometimes this will be useful, for fixed or temporary decoration/banners etc. 
+There is a tag to find images by a database query. Sometimes this will be useful, for fixed or temporary decoration/banners etc. It must be given the app/model path in full,
 
-        {{ imagequery "some_query" image.Large  }}
+        {{ imagequery some_app_name.some_image_model_name "some_query" image.Large  }}
 
 e.g.
 
-        {{ imagequery "pk=1" image.Large  }}
+        {{ imagequery image.Image "pk=1" image.Large  }}
 
 or,
 
         {{ imagequery "src="taunton-skyscraper"" image.Large  }}
 
-While this may be useful, especially for fixed logos or banners, it is unnecessary if you are passing a model through a context,
+While this may be useful, especially for fixed logos or banners, it is unnecessary if you are passing a model through a context. 
 
 
 ### Filters from other apps

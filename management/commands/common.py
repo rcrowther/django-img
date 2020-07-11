@@ -23,6 +23,12 @@ def model_id_parse(model_path):
     return Model
         
 def get_model(options, allow_reform=False):
+    '''
+    Get an Image from a string path.
+    
+    allow_reform
+        will get a Reform too
+    '''
     Model = Image
     model_path = options['model']        
     if (model_path):

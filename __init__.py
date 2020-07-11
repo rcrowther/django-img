@@ -5,7 +5,7 @@ from image.filters_pillow import (
 )
 from image.settings import settings
 from image.registry import registry
-from image.utils import autodiscover_modules
+from image.module_loading import autodiscover_modules
 #from image.model_fields import ImageOneToOneField
 #from image.models import Image, Reform
 

@@ -5,17 +5,17 @@ from django.core.exceptions import ImproperlyConfigured
 from django.template.base import kwarg_re
 
 #from django.utils.functional import cached_property
-from image.models import Image
+#from image.models import Image
 from image.shortcuts import get_reform_or_not_found
 from image.registry import registry
-
+from image import module_utils
 
 register = template.Library()
 
 def arg_unquote(a, token, arg_name):
     if not (a[0] == a[-1] and a[0] in ('"', "'")):
        raise template.TemplateSyntaxError(
-            "image tag {} argument should be in quotes. token:{} value:{}".format(
+            "image tag {} argument must be in quotes. tag:{{% {} %}} value:{}".format(
             arg_name,
             token.contents,
             a
@@ -35,20 +35,32 @@ def to_kwargs(token, kwlumps):
     for kw in kwlumps:
         match = kwarg_re.match(kw)
         if not match:
-            raise template.TemplateSyntaxError("Malformed arguments to image tag. tag:{} kw:{}".format(
+            raise template.TemplateSyntaxError("Malformed arguments to image tag. tag:{{% {} %}} kw:{}".format(
                token.contents,
                kw
            ))
         k, v = match.groups()
         if not (v[0] == v[-1] and v[0] in ('"', "'")):
            raise template.TemplateSyntaxError(
-               "image tag keyword arguments should be in quotes. token:{} kw:{}".format(
+               "image tag keyword arguments must be in quotes. tag:{{% {} %}} kw:{}".format(
                token.contents,
                kw
            ))
         kwargs[k] = v[1:-1]
 
     return kwargs
+
+def get_app_name(context):
+    view = context.get('view')
+
+    # 'view' is present on any Django template view, so reasonably
+    # safe to look for. In case there is some sly tampering, or edge 
+    # usecase, though the message is unhelpful...
+    if (not(view)):
+        raise ImproperlyConfigured(
+            "The template context has no view information to supply an app name"
+        )
+    return view.__module__.split('.', 1)[0]    
 
 def filter_id_resolve(context, filter_id):
     '''
@@ -64,11 +76,12 @@ def filter_id_resolve(context, filter_id):
         # must be derived from the context.
         view = context.get('view')
 
-        # 'view' is present on any Django template view, so resonably safe
-        # to look for. In case there is some sly tampering, or edge 
+        # 'view' is present on any Django template view, so reasonably
+        # safe to look for. In case there is some sly tampering, or edge 
         # usecase, though the message is unhelpful...
         if (not(view)):
-            raise ImproperlyConfigured("A short filter reference has been provided, but the template context has no view information to supply a full path. filter_id:{}".format(
+            raise ImproperlyConfigured(
+                "A short filter reference has been provided, but the template context has no view information to supply a full path. filter_id:{}".format(
                 filter_id,
             ))
         app_name = view.__module__.split('.', 1)[0]
@@ -82,7 +95,7 @@ class ImgFromImageInstanceNode(template.Node):
         self.instance = instance
         self.filter_id = filter_id      
         self.kwargs = kwargs
-        
+
     def render(self, context):
         try:
             ifilter = registry(filter_id_resolve(context, self.filter_id))      
@@ -93,39 +106,6 @@ class ImgFromImageInstanceNode(template.Node):
         except template.VariableDoesNotExist:
             return ''
 
-                    
-# @register.tag(name="imagefromtitle")
-# def image_by_title_tag(parser, token):
-    # '''
-    # Lookup an image by filter, and title.
-    # If a view has already generated a context with models, this is not 
-    # a prefered method, as it makes a database lookup.
-    # img_title string 
-        # reference to an image by title e.g. 'taunton_skyscraper'
-    # filter_id 
-        # string module path to a Filter e.g. "image.Format". If 
-        # the Filter is only named, the app location of the calling view is 
-        # added e.g. if "Large" is called from a view in 'page', the filter 
-        # become "page.Large"
-     
-    # kwargs 
-        # added as attributes to the final tag.
-    # ''' 
-    # lumps = token.split_contents()
-
-    # if(len(lumps) < 3):
-        # raise template.TemplateSyntaxError(
-            # "Image tag needs two arguments. tag:{}".format(
-                # token.contents,
-            # ))
-            
-    # tag_name = lumps[0]
-    # filter_id = lumps[2]
-    # kwargs = to_kwargs(token, lumps[3:])
-    # image_title = arg_unquote(lumps[1], token, 'image title')
-    # image_model = Image.objects.get(title=image_title)
-
-    # return ImgFromImageInstanceNode(image_model, filter_id, kwargs)
 
 @register.tag(name="imagequery")
 def image_from_query_tag(parser, token):
@@ -138,8 +118,12 @@ def image_from_query_tag(parser, token):
     
     If you need to lookup by filepath, it is difficult, you need the
     media-relative filepath, not only the filename.
-    
+
+    image_model 
+        reference to an image model in dotted notation. Must be present 
+        and full path e.g. page.Image.
     query
+        in quotes
         e.g."pk=3"
     filter_id 
         string module path to a Filter e.g. "image.Format". If 
@@ -152,27 +136,32 @@ def image_from_query_tag(parser, token):
     ''' 
     lumps = token.split_contents()
 
-    if(len(lumps) < 3):
+    if(len(lumps) < 4):
         raise template.TemplateSyntaxError(
-            "Imagefromquery tag needs two arguments. tag:{}".format(
+            "Imagefromquery tag needs three arguments. tag:{{% {} %}}".format(
                 token.contents,
             ))
             
     tag_name = lumps[0]
-    query = arg_unquote(lumps[1], token, 'query')
-    filter_id = lumps[2]
-    kwargs = to_kwargs(token, lumps[3:])
+    model_path = lumps[1]
+    query = arg_unquote(lumps[2], token, 'query')
+    filter_id = lumps[3]
+    kwargs = to_kwargs(token, lumps[4:])
+    
+    # Too much trouble to get the app, name, needs to do in context, so
+    # request full path
+    image_model = module_utils.get_image_model(model_path)
     
     # what a faff
-    #? self.model.DoesNotExist. Or are we ok with broken image?
+    # fail is self.model.DoesNotExist. Which is ok.
     e = query.split('=',1)  
-    image_model = Image.objects.get(**{e[0]: e[1]})
-    return ImgFromImageInstanceNode(image_model, filter_id, kwargs)
+    image_object = image_model.objects.get(**{e[0]: e[1]})
+    return ImgFromImageInstanceNode(image_object, filter_id, kwargs)
     
 
 class ImageNode(template.Node):
-    def __init__(self, image_model, filter_id, kwargs):
-        self.image = template.Variable(image_model)
+    def __init__(self, image_obj, filter_id, kwargs):
+        self.image = template.Variable(image_obj)
         self.filter_id = filter_id      
         self.kwargs = kwargs
         
@@ -197,7 +186,7 @@ def image_tag(parser, token):
     prefered method. The tag will also work for subclasses of the app
     models.
     
-    image_model 
+    image_obj 
         reference to an image in the template context (NB: 
         the parameter can handle dotted notation e.g. page.image)
     
@@ -214,14 +203,14 @@ def image_tag(parser, token):
 
     if(len(lumps) < 3):
         raise template.TemplateSyntaxError(
-            "Image tag needs two arguments. tag:{}".format(
+            "Image tag needs two arguments. tag:{{% {} %}}".format(
                 token.contents,
             ))
             
     tag_name = lumps[0]
-    image_model = lumps[1]
+    image_obj = lumps[1]
     filter_id = lumps[2]
     kwargs = to_kwargs(token, lumps[3:])
 
-    return ImageNode(image_model, filter_id, kwargs)
+    return ImageNode(image_obj, filter_id, kwargs)
 
