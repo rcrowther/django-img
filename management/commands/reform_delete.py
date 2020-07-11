@@ -17,7 +17,7 @@ class Command(BaseCommand):
         )
         
     def handle(self, *args, **options):
-        Model = common.get_reform(options)
+        Model = common.get_reform_model(options)
         qs = Model.objects.all()
         qs = common.filter_query_contains(options, qs)
         

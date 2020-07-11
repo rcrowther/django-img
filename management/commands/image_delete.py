@@ -17,7 +17,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        Model = common.get_model(options, allow_reform=False)
+        Model = common.get_image_model(options)
         qs = Model.objects.all()
         qs = common.filter_query_contains(options, qs)
         

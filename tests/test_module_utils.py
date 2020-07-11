@@ -1,6 +1,4 @@
 from django.test import TestCase
-from image.image_filters import Thumb
-from image.models import Image
 from image import module_utils
 from django.core.exceptions import ImproperlyConfigured
 

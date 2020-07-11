@@ -1,6 +1,6 @@
 from django.apps import apps
 from django.core.exceptions import ImproperlyConfigured
-from image.models import AbstractImage, Image
+from image.models import AbstractImage, AbstractReform, Image, Reform
 
 
 ## These utils can only be loaded when Django/the app is ready
@@ -54,6 +54,28 @@ def get_image_model(model_path, app_name=''):
         Model = get_model(model_path, app_name)
         if (not issubclass(Model, AbstractImage)):
             raise ImproperlyConfigured("Given class not a subclass of AbstractImage: '{}'".format(
+                model_path
+            ))
+    return Model
+
+def get_reform_model(model_path, app_name=''):
+    '''
+    Get an model from a string path.
+
+    model_path
+         a string path in form 'app_name.model_name'
+    app_name
+        an app name. If the model_path will only parse to a model, this 
+        is used to provide the app name.
+    return
+        if path empty, Reform, if path, a Reform model, if path fails, 
+        ImproperlyConfigured
+    '''
+    Model = Reform
+    if (model_path):
+        Model = get_model(model_path, app_name)
+        if (not issubclass(Model, AbstractReform)):
+            raise ImproperlyConfigured("Given class not a subclass of AbstractReform: '{}'".format(
                 model_path
             ))
     return Model

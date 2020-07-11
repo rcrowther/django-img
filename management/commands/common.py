@@ -1,7 +1,6 @@
-from image.models import Image, Reform
+from django.core.exceptions import ImproperlyConfigured
 from django.core.management.base import CommandError
-from django.apps import apps
-
+from image import module_utils
 
 
 def add_model_argument(parser):
@@ -11,49 +10,27 @@ def add_model_argument(parser):
             type=str,
             help='Target a model derived from Image, form:is <app.model>.',
         )
-
-def model_id_parse(model_path):
-    model_path_elements = model_path.split('.', 1)
-    if (len(model_path_elements) != 2):
-        raise CommandError("Unable to parse given app path: '{}'".format(model_path))
-    try:
-        Model = apps.get_model(model_path_elements[0], model_path_elements[1])
-    except Exception as e:
-        raise CommandError("Unable to locate given app path: '{}'".format(model_path))
-    return Model
         
-def get_model(options, allow_reform=False):
-    '''
-    Get an Image from a string path.
-    
-    allow_reform
-        will get a Reform too
-    '''
-    Model = Image
+def get_image_model(options):
     model_path = options['model']        
-    if (model_path):
-        model_path_elements = model_path.split('.', 1)
-        if (len(model_path_elements) != 2):
-            raise CommandError("Unable to parse given app path: '{}'".format(model_path))
-        try:
-            Model = apps.get_model(model_path_elements[0], model_path_elements[1])
-        except Exception as e:
-            raise CommandError("Unable to locate given app path: '{}'".format(model_path))
-        model_failed = (not issubclass(Model, Image))
-        if (not allow_reform and model_failed):
-            raise CommandError("Given class not a subclass of Image: '{}'".format(model_path))
-        if (not issubclass(Model, Reform) and model_failed):
-            raise CommandError("Given class not a subclass of Image or Reform: '{}'".format(model_path))
-    return Model    
-        
-def get_reform(options, allow_reform=False):
-    Model = Reform
+    try:
+        Image = module_utils.get_image_model(model_path)
+    except ImproperlyConfigured as e:
+
+        # Stock exception system not working for this
+        raise  CommandError(e.args[0])
+    return Image
+
+def get_reform_model(options):
     model_path = options['model']
-    if (model_path):
-        Model = model_id_parse(model_path)
-        if (not issubclass(Model, Reform)):
-            raise CommandError("Given class not a subclass of Reform: '{}'".format(model_path))
-    return Model
+    try:
+        Reform = module_utils.get_reform_model(model_path)
+    except ImproperlyConfigured as e:
+
+        # Stock exception system not working for this
+        raise  CommandError(e.args[0])
+    return Reform
+
             
 def add_contains_argument(parser):
     parser.add_argument(

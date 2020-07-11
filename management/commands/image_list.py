@@ -20,7 +20,7 @@ class Command(BaseCommand):
         )
                 
     def handle(self, *args, **options):
-        Model = common.get_model(options, allow_reform=True)
+        Model = common.get_image_model(options)
         qs = Model.objects
         qs = common.filter_query_contains(options, qs)
         if (options["weeks_back"]):
@@ -32,4 +32,4 @@ class Command(BaseCommand):
             qs = qs.filter(upload_date__week__gte=week_num_back)
 
         for e in qs.all():
-            print("{} {}".format(e.pk, e.filename))
+            print("{} {}".format(e.pk, e.src))

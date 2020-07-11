@@ -18,7 +18,7 @@ class Command(BaseCommand):
 
                          
     def handle(self, *args, **options):
-        Model = common.get_model(options, allow_reform=False)
+        Model = common.get_image_model(options)
             
         # get the path of src dir
         src_path = options['src_path']

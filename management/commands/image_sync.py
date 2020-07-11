@@ -55,7 +55,7 @@ class Command(BaseCommand):
         return Model.objects.count()
         
     def handle(self, *args, **options):        
-        Model = common.get_model(options, allow_reform=False)
+        Model = common.get_image_model(options)
         
         # get the model dir path
         # Mad Django
