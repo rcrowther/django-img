@@ -132,7 +132,15 @@ Yeh, new or experimental site, I know. Image has a builtin view. Goto urls.py, a
 
 Now visit (probably) http://localhost:8000/image/1/ To see some *real* web code.
 
+### (optional) See a broken image
+USe the management command to remove reforms,
 
+    .manage.py reform_delete
+
+Goto '/media/originals' and delete the file (the file you are currently viewing as a reform).
+
+Now refresh the view. The app will try to find the reform. When it fails, it will attempt to make a new one. But because the original file is missing, it will fail to do that too, so display a generic 'broken' image.
+ 
 ### (aside) Filters
 Perhaps your first request will be how to make a new filter.
 
@@ -901,6 +909,8 @@ The template is at,
 
 Where you can edit the template tag to point at your own configurations. With visible results and basic image data, it is a lot easier to use than the shell.
 
+## Broken Images
+The app throws a special error if images are broken i.e. files are missing or unreadable. In this case a stock image is returned, Using the standard tags there is no need to configure or change in any way for this. The image can be [redefined]{#settings}.
 
 ## Notes
 No SVG support 

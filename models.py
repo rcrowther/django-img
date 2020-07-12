@@ -70,7 +70,8 @@ class AbstractImage(models.Model):
     unique.  
     '''
     #reform_model = 'Reform'
-    reform_model = 'AbstractReform'
+    reform_model = None
+    #reform_model = 'AbstractReform'
 
     # relative to MEDIA_ROOT
     upload_dir='originals'
@@ -264,6 +265,7 @@ class AbstractImage(models.Model):
                 'file_format': Reform.file_format, 
                 'jpeg_quality': Reform.jpeg_quality
             }
+            print('open source')
             with self.open_src() as fsrc:
                 (reform_buff, iformat) = filter_instance.process(
                 fsrc,
@@ -345,6 +347,7 @@ class AbstractImage(models.Model):
         
         
 class Image(AbstractImage):
+    reform_model = 'Reform'
 
     class Meta:
         verbose_name = _('image')
@@ -369,17 +372,7 @@ class AbstractReform(models.Model):
         upload_to=get_reform_upload_to,
         )
     filter_id = models.CharField(max_length=255, db_index=True)
-    #image_id = models.IntegerField(
-    #    )
-    # image = models.ForeignKey(
-        # 'AbstractImage', 
-        # related_name='+', 
-        # # If the original image model is removed, so are the reform 
-        # # models.
-        # on_delete=models.CASCADE
-    # )
 
-    
     @property
     def url(self):
         return self.src.url

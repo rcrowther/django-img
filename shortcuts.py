@@ -4,13 +4,14 @@ from django.templatetags.static import static
 from django.core.files.images import ImageFile
 from django.core.files.storage import FileSystemStorage
 from image.utils import url_absolute_static_aware
+from image import settings
 
 #? cache
 def image_broken_url():
     '''
     Deliver a static-aware 'broken url' path.
     '''
-    return  url_absolute_static_aware('image/unfound2.png')
+    return  url_absolute_static_aware(settings.broken_image_path)
      
 def get_reform_or_not_found(image, ifilter):
     """

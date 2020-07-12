@@ -24,6 +24,7 @@ class Settings():
         self.media_root = None
         self.modules = []
         self.app_dirs = True
+        self.broken_image_path = 'image/unfound.png'
         if (populate):
             self.populate()
                  
@@ -34,6 +35,8 @@ class Settings():
             
         if (hasattr(dsettings, 'IMAGES')):
             s = dsettings.IMAGES[0]
+            if ('BROKEN' in s):
+                self.broken_image_path = s['BROKEN']
             if ('SEARCH_APP_DIRS' in s):
                 self.app_dirs = s['SEARCH_APP_DIRS']
             if ('SEARCH_MODULES' in s):
