@@ -876,6 +876,10 @@ Images accepts some site-wide settings,
     ]
 
 <dl>
+    <dt>BROKEN</dt>
+    <dd>
+    URL of a static file displayed in place of ureadable files. Takes a static-aware URL to a file. URLs with a web-based scheme pass untouched, relative URLs are assumed in the app's static folder. Default is 'image/unfound.png'.
+    </dd>
     <dt>SEARCH_APP_DIRS</dt>
     <dd>
     Find 'image_filters.py' files in apps. If False, the app only uses filters defined in the core app and SEARCH_MODULES setting.
@@ -887,6 +891,9 @@ Images accepts some site-wide settings,
 </dl>
 
 
+
+## Broken Images
+The app throws a special error if images are broken i.e. files are missing or unreadable. In this case a stock 'broken' image is returned, Using the standard tags there is no need to configure or change in any way for this. The image can be [redefined]{#settings}.
 
 
     
@@ -909,8 +916,7 @@ The template is at,
 
 Where you can edit the template tag to point at your own configurations. With visible results and basic image data, it is a lot easier to use than the shell.
 
-## Broken Images
-The app throws a special error if images are broken i.e. files are missing or unreadable. In this case a stock image is returned, Using the standard tags there is no need to configure or change in any way for this. The image can be [redefined]{#settings}.
+
 
 ## Notes
 No SVG support 
