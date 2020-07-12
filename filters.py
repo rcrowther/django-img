@@ -1,8 +1,6 @@
 from image import checks
 
 
-print('create filters')
-
 
 class PlacementError(Exception):
     """
@@ -110,7 +108,6 @@ class Filter():
         
 # Classes here on are mixins. They estabish attributes and checks, 
 # skeletons to hang image-processing code on.
-
 class FormatMixin():
     '''Establish the format for an image. 
     Set format=None means the image is unchanged.

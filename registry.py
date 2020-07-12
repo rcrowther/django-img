@@ -75,8 +75,7 @@ class ClassRegistry:
         return len(self._registry)    
         
         
-print('create registry')
-
+        
 import image.filters
 
 class FilterRegistry(ClassRegistry):

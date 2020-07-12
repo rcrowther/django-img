@@ -1,17 +1,15 @@
 = README
-Markdown sanitation stripping tags
+
 
 = Structure
 How does cloud storage generate reforms?
 Does auto delete work? (Check again)
 auto_delete tests
-move auto delete into model?
 
 
 == Model
 Check models for clashes?
-Move from signals to method delete
-Add accepted_extensions
+
 
 
 == Management
@@ -37,7 +35,6 @@ Register, want an instance? Admin want Model?
 Test query
 
 == Constants
-Needs major reassessment
 
 == Utils
 
@@ -55,6 +52,7 @@ Needs major reassessment
 
 = Tests
 Subclass [sigh]
+Static [sigh]
 
 == Documentation
 Test quickstart

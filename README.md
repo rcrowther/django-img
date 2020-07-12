@@ -453,11 +453,9 @@ By default, the core repository will auto-delete Reform models when the Image is
 ### Overview
 Filters are used to describe how an original uploaded image should be modified for display. In the background, the app will automatically adjust the image to the given spacification (or use a cached version).
  
-A few filters are predefined. A couple of utility filters,
+A few filters are predefined. One utility/test filter,
 
 <dl>
-<dt>Format</dt>
-    <dd>Change the format of an uploaded image
 <dt>Thumb</dt>
     <dd>A 64x64 pixel square</dd>
 </dl>
@@ -543,7 +541,7 @@ You can use an explicit declaration,
 
     registry.register(single_or_list_of_filters)
 
-OR use the decorator,
+Or use the decorator,
 
     from image import register, ResizeSmart
 
@@ -558,10 +556,10 @@ OR use the decorator,
 ### Wand filters
 The base filters in the Wand filter set have more attributes available. The 'wand' code needs Wand to be installed on the host computer. Assuming that, you gain these effects,
 
-    from image import registry
-    from image.wand_filters import ResizeSmart
+    from image import filters_wand, register
 
-    class MediumImage(ResizeSmart):
+    @register()
+    class Medium(filters_wand.ResizeSmart):
         width=260
         height=350
         format='jpg'
@@ -571,9 +569,8 @@ The base filters in the Wand filter set have more attributes available. The 'wan
         warm=False
         strong=False
         no=False
-        watermark=None # e.g.'/srv/images/watermark.png'
+        watermark='image/watermark.png'
 
-    registry.register(Medium)
 
 
 If you enable more than one effect, they will chain, though you have no control over order.
@@ -614,7 +611,7 @@ Watermark deserves some explanation. This does not draw on the image, as text me
 
     watermark = 'image/watermark.png'
 
-The URL is Django static-aware, but will pass untouched if you give it a web URL (like the URLs in Django Media).
+The URL is Django static-aware, but will pass untouched if you give it a web-scheme URL (like the URLs in Django Media).
  
 The template is scaled to the image-to-be-watermarked, then composited over the main image by 'dissolve'. So the watermark is customisable, can be used on most sizes of image, and is usually readable since aspect ratio is preserved.
 
@@ -893,7 +890,7 @@ Images accepts some site-wide settings,
 
 
 ## Broken Images
-The app throws a special error if images are broken i.e. files are missing or unreadable. In this case a stock 'broken' image is returned, Using the standard tags there is no need to configure or change in any way for this. The image can be [redefined]{#settings}.
+The app throws a special error if images are broken i.e. files are missing or unreadable. In this case a stock 'broken' image is returned, Using the standard tags there is no need to configure or change in any way for this. The image can be [redefined](#settings).
 
 
     

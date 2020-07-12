@@ -1,11 +1,11 @@
 def register():
     """
-    Register the given classes and wrapped ModelAdmin class with
-    admin site:
+    Register the given filter classes with the image app:
 
     @register()
-    class AuthorAdmin(admin.ModelAdmin):
-        pass
+    class Thumb(filters_pillow.ResizeSmart):
+        width=64
+        height=64
     """
     from image import Filter, registry
 

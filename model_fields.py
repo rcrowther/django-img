@@ -30,7 +30,7 @@ class ImageFileField(ImageField):
     # - Interesting, ImageFile itself has a little checking, as it must 
     # rescue dimension data from Pillow.
 
-    # Class mainly exists for contibute_to options, faking real abstract
+    # Class mainly exists for contribute_to options, faking abstract
     # classes. But adds some init vals and it's formfield belongs to 
     # this app
     default_validators = []

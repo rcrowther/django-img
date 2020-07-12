@@ -32,6 +32,5 @@ def register_reform_delete_handler(reform_class):
     post_delete.connect(_reform_src_delete, sender=reform_class, weak=False )
 
 def register_file_delete_handler(image_class, reform_class):
-    print('singals registered')
     post_delete.connect(_image_src_delete, sender=image_class, weak=False)
     post_delete.connect(_reform_src_delete, sender=reform_class, weak=False )

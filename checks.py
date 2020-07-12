@@ -12,9 +12,7 @@ def check_filters(**kwargs):
         errors.extend(f.check())
     return errors
 
-def image_format_error(setting_name, v, eid, accepted_formats):
-    '''
-    '''
+def _image_format_error(setting_name, v, eid, accepted_formats):
     return checks.Error(
                 "'{}' format '{}' unrecognised."
                 " Recognised image formats: {}".format(
@@ -39,7 +37,7 @@ def check_image_format_or_none(
     if (image_format is None):
         return errors
     if (not(image_format in accepted_formats)):
-        errors.append(image_format_error(setting_name, v, eid, accepted_formats))
+        errors.append(_image_format_error(setting_name, v, eid, accepted_formats))
     return errors 
     
 def check_image_formats_or_none(
@@ -58,7 +56,7 @@ def check_image_formats_or_none(
     unrecognised_formats = [f for f in image_formats if not(f in accepted_formats)]
     if (unrecognised_formats):
         v = ", ".join(unrecognised_formats)
-        errors.append(image_format_error(setting_name, v, eid, accepted_formats))
+        errors.append(_image_format_error(setting_name, v, eid, accepted_formats))
     return errors 
     
 def check_jpeg_quality(jpeg_quality, eid, **kwargs):
@@ -168,20 +166,6 @@ def check_numeric_range(setting_name, v, imin, imax, eid):
                 id=eid,
         ))
     return errors
-        
-# def check_boolean(setting_name, v, eid, **kwargs):
-    # errors = []
-    # if (v and (not(type(v)==bool))):
-        # errors.append(
-            # checks.Error(
-            # "'{}' value '{}' must be a boolean.".format(
-            # setting_name, 
-            # v
-            # ),
-            # id=eid,
-        # ))
-    # return errors 
-
 
 # def check_file_exists(setting_name, v, eid, **kwargs):    
     # errors = []

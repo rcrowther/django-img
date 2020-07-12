@@ -3,7 +3,6 @@ import os.path
 from pathlib import Path
 from collections import OrderedDict
 from functools import partial
-
 from django.db import models
 from django.core.checks import Error, Warning
 #from django.urls import reverse
@@ -325,7 +324,7 @@ class AbstractImage(models.Model):
             #NB By the time of check() models are built. So all 
             # attributes exist, at least as default.
             *checks.check_type('reform_model', cls.reform_model, str, '{}.E001'.format(name), **kwargs),
-            #*checks.check_numeric_range('upload_dir', cls.upload_dir, 1, '{}.E002'.format(name), **kwargs),
+            #*checks.check_str('upload_dir', cls.upload_dir, 1, '{}.E002'.format(name), **kwargs),
             *checks.check_numeric_range('filepath_length', cls.filepath_length, 1, 65535, '{}.E003'.format(name), **kwargs),
             *checks.check_image_formats_or_none('accept_formats', cls.accept_formats,'{}.E004'.format(name), **kwargs),
             *checks.check_positive_float_or_none('max_upload_size', cls.max_upload_size, '{}.E003'.format(name), **kwargs),
@@ -419,7 +418,7 @@ class AbstractReform(models.Model):
             #NB By the time of check() models are built. So all 
             # attributes exist, at least as default.
             *checks.check_is_subclass('image_model', cls.image_model, AbstractImage, '{}.E001'.format(name), **kwargs),
-            #*checks.check_numeric_range('upload_dir', cls.upload_dir, 1, '{}.E002'.format(name), **kwargs),
+            #*checks.check_str('upload_dir', cls.upload_dir, 1, '{}.E002'.format(name), **kwargs),
             *checks.check_image_format_or_none('file_format', cls.file_format, '{}.E002'.format(name), **kwargs),
             *checks.check_jpeg_legible(cls.jpeg_quality, '{}.W001'.format(name), **kwargs),
             ]

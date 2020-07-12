@@ -39,7 +39,7 @@ def get_test_image_file_webp(filename='test.webp', colour='white', size=(640, 48
     image.save(f, 'WEBP')
     return ImageFile(f, name=filename)
 
-    
+
 def get_test_image():
     im = Image.objects.create(
             src=get_test_image_file_jpg(),

@@ -10,9 +10,6 @@ from image import image_ops_pillow
 from image.constants import FORMAT_APP_TO_UCLIB, FORMAT_UCLIB_TO_APP
 from image.decisions import reform_save_info
 
-print('create filters')
-
-
 
 
 class PillowProcess:
@@ -80,15 +77,15 @@ class PillowProcess:
         # simple return. PIL uses returns
         return lib_image
         
+    
         
-
 class Format(FormatMixin, PillowProcess, Filter):
     '''Establish the format for an image. 
     Set iformat=None means the image is unchanged.
     '''
     
     
-                        
+    
 class Resize(ResizeCropMixin, Format):
     '''Resize n image.
     Shrinks inside the box defined by the given args. So the result will

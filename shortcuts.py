@@ -29,7 +29,7 @@ def get_reform_or_not_found(image, ifilter):
         # it's file. Instead of throwing a page error, make a mock
         # reform to hold a generic broken image.
         # A textlike src.name triggers no attempt to 'upload'.
-        #! is this expensive?
+        #? is this expensive?
         Reform = image.get_reform_model()
         fp = image_broken_url()
         reform = Reform(

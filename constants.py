@@ -6,8 +6,8 @@ Map of allowed file extensions -> format key
 Lower case entries, and variations in spelling 
 e.g. 'jpg'/'jpeg'
 '''    
-# This needs to be a union of of the filehandling of the possible 
-# libraries, Pillow Wand, OpenCV
+# This needs to be a union of the filehandling of the possible 
+# libraries, largely Pillow Wand, OpenCV
 # Pillow
 #   django.core.validators.get_available_image_extensions
 # Imagemagic
@@ -45,24 +45,25 @@ be used for new file extensions. However, for verification and other
 code, other collections in this module are preferred. The main use in 
 code is for displaying nice messages for the user. 
 '''
-## To get extensions from internal format, just use them!
+## To get extensions from internal format, use the internal format 
+# string!
 IMAGE_FORMATS = set()
 for v in EXTENSION_TO_APP_FORMAT.values():
      IMAGE_FORMATS.add(v)
 
-def extensions_maxlen():
-    '''
-    max length of listed extensions, including the period.
-    eg '.tiff' returns 5
-    '''
-    m = 0
-    for f in IMAGE_FORMATS:
-        l = len(f)
-        if (l > m):
-            m = l
-    # for the period i.e '.png' is 4
-    m += 1
-    return m
+# def extensions_maxlen():
+    # '''
+    # max length of listed extensions, including the period.
+    # eg '.tiff' returns 5
+    # '''
+    # m = 0
+    # for f in IMAGE_FORMATS:
+        # l = len(f)
+        # if (l > m):
+            # m = l
+    # # for the period i.e '.png' is 4
+    # m += 1
+    # return m
 
 
 '''

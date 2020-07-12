@@ -35,9 +35,7 @@ class WandProcess():
         # set JPEG and others quality
         wand_dst.compression_quality = write_attrs['jpeg_quality']
         
-        #! No transparency
-        #pil_dst = pil_dst.convert("RGB")
-        #write_attrs['quality'] = 85
+        # Defend against rendering jpeg transparency
         if ((wand_dst.alpha_channel) and (write_attrs['format'] == 'jpg')): 
             # Here's where Wand plays for us. Alpha channel or not, it 
             # sets a background_color. And the default is 'white', like 

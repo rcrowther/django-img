@@ -2,9 +2,6 @@ import math
 from django.utils.functional import cached_property
 from django.templatetags.static import static
 
-print('create utils')
-
-
 def bytes2mb(v):
     # This is how Django does it, I think, binary MB
     #NB must handle fractions so not shifts
@@ -15,7 +12,6 @@ def mb2bytes(v):
     #NB must handle fractions so not shifts
     return math.ceil(v * 1048576)
 
-    
 def url_absolute_static_aware(path):
     """
     Given a relative or absolute path to a static asset, return an 
@@ -37,15 +33,6 @@ def url_absolute_static_aware(path):
 # from django.utils.encoding import iri_to_uri
 # from urllib.parse import quote, urljoin
 # from django.conf import settings
-
-
-# def url_absolute_media(path):
-    # # a far conversion from django.templatetags.static
-    # prefix = ''
-    # url = getattr(settings, 'MEDIA_URL', '')
-    # if (url):
-        # prefix = iri_to_uri(url)
-    # return urljoin(prefix, quote(path))
 
 
 #! should match names with pathlib.Path

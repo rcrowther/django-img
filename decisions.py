@@ -1,10 +1,7 @@
 from pathlib import Path
+import os
 from unidecode import unidecode
-import os.path
 from django.utils.functional import cached_property
-from image.constants import extensions_maxlen
-
-print('decisions')
 
 # methods that negociate with calling opinions and settings to decide
 # or gain info for actions.
@@ -63,7 +60,6 @@ def filename_reforms_maxlen(field_file, media_path):
     return truncate_len - len(str(full_path)) - 1
     
 
-from os import path
 def image_save_path(obj, filename):
     '''
     Get the save path from a source filepath.
@@ -78,12 +74,8 @@ def image_save_path(obj, filename):
     '''
     # Info from field: length limit, mangling and path-build utilities
     field_file = obj.src
-        
-    # Which media path?
-    #media_path = media_path_originals(obj.upload_dir)
     media_path = obj.upload_dir
             
-    #! do these two replicate functionality?
     # Quote:
     # Return the given string converted to a string that can be used for a clean
     # filename. Remove leading and trailing spaces; convert other spaces to
@@ -105,7 +97,7 @@ def image_save_path(obj, filename):
     stem = decoded_stem[:stem_limit]
 
     # return the /media relative path.
-    return path.join(media_path, stem + tag)
+    return os.path.join(media_path, stem + tag)
     
 def reform_save_path(obj, filename):
     '''
@@ -121,15 +113,11 @@ def reform_save_path(obj, filename):
     '''
     # Info from field: length limit, mangling and path-build utilities
     field_file = obj.src
-
-    # Which media path?
-    #media_path = media_path_reforms(obj.upload_dir)
     media_path = obj.upload_dir
     
     # Reform is internal, so we have an internal representation of
     # filename already
-    p = Path(filename)
-        
+    p = Path(filename)        
     src_stem = p.stem
     
     # filterid is a dotted path
@@ -145,10 +133,8 @@ def reform_save_path(obj, filename):
 
     # Find maxlen for the filename, then truncate
     # accounting for declared paths and filename extensions
-    # https://code.djangoproject.com/ticket/9893
     stem_limit = filename_reforms_maxlen(field_file, media_path) - len(tag)
     stem = src_stem[:stem_limit]        
 
     # return the /media relative path.
-    return path.join(media_path, stem + tag)
-
+    return os.path.join(media_path, stem + tag)

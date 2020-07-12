@@ -101,15 +101,11 @@ def crop(wand, width, height):
     # Only crop if the image is too big
     if ((width_reduce > 0) or (height_reduce > 0)):
         x = 0
-        #x1 = current_width
         y = 0
-        #y1 = current_height
         if (width_reduce > 0):
             x = width_reduce >> 1
-            #x1 = x + width
         if (height_reduce > 0):
             y = height_reduce >> 1
-            #y1 = y + height
         # Crop!
         wand.crop(left=x, top=y, width=width, height=height)
     return wand
@@ -128,6 +124,7 @@ def fill(wand, width, height, fill_color="white"):
         wand.background_color = bg
         x = (width - current_width) >> 1
         y = (height - current_height) >> 1
+
         # the negative is deliberate. Wand I think is anchored to *bottom* left.
         wand.extent(width=width, height=height, x=x, y=-y)
 
