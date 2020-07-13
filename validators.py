@@ -113,12 +113,13 @@ class ImageFileDataConsistencyValidator:
                     code='extension_not_allowed',
                     params={'extension': extension, 'extensions': self.allowed_extensions_message},
                 )
-        raw_read_format = get_pillow_attribute(v.file, 'format')
-        if (not(raw_read_format)):
+        try:
+            raw_read_format = get_pillow_attribute(v.file, 'format')
+        except Exception as e:
             raise ValidationError(
                     self.messages['format_not_readable'],
                     code='format_not_readable',
-                )
+                ) from e
         read_format = self.pil2app[raw_read_format]
         declared_format = self.ext2app[extension]
         if (read_format != declared_format):

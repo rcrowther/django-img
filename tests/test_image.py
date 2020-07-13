@@ -2,13 +2,13 @@ import unittest
 
 from django.test import TestCase
 from image.models import Image, SourceImageIOError
-from .utils import get_test_image
+from . import utils
 
 
 # A fundamental issue throughout the tests is that image uploading 
 # is transactional. But TestCase will not complete over transactions
 # So fails to trigger file deletion. 
-#Ratther than using TestTransaction, which is less clean, these tests 
+# Ratther than using TestTransaction, which is less clean, these tests 
 # are littered with rearDown() methods to clean up orphaned files 
 # (poor orphans, unwanted...). 
 # ./manage.py test image.tests.test_image
@@ -17,7 +17,7 @@ class TestImage(TestCase):
     Base tests avoid reform creation, object deletion, subclassing
     '''
     def setUp(self):
-        self.image = get_test_image()
+        self.image = utils.get_test_image()
 
     def test_upload_dir(self):
         self.assertEqual(self.image.upload_dir, 'originals')
@@ -28,7 +28,7 @@ class TestImage(TestCase):
     def test_path_checks(self):
         self.image.__class__.filepath_length = -300
         errors = self.image.check()
-        self.assertEqual(errors[0].id, 'image_model.E001')
+        self.assertEqual(errors[0].id, 'image.E003')
         
     def test_upload_time(self):
         self.assertNotEqual(self.image.upload_time, None)
@@ -48,9 +48,10 @@ class TestImage(TestCase):
         self.assertGreater(size, 0)
         
     def test_bytesize_on_missing_file_raises_sourceimageioerror(self):
-        self.image.src.delete(save=False)
+        image = utils.get_test_image()
+        utils.image_delete(image)
         with self.assertRaises(SourceImageIOError):
-            self.image.bytesize
+            image.bytesize
 
     def test_is_local(self):
         self.assertTrue(self.image.is_local())
@@ -68,4 +69,4 @@ class TestImage(TestCase):
         self.assertTrue(self.image.is_landscape())
         
     def tearDown(self):
-        self.image.src.delete(False) 
+        utils.image_delete(self.image)

@@ -108,7 +108,7 @@ class ImgFromImageInstanceNode(template.Node):
 
 
 @register.tag(name="imagequery")
-def image_from_query_tag(parser, token):
+def query_tag(parser, token):
     '''
     Lookup an image by query (and filter).
     This is not a prefered method, It only works on the base image 
@@ -117,8 +117,10 @@ def image_from_query_tag(parser, token):
     and debugging.
     
     If you need to lookup by filepath, it is difficult, you need the
-    media-relative filepath, not only the filename.
+    media-relative filepath, not only the filename e.g.
 
+        {% imagequery image.Image "pk=2" image.Thumb class="test-image" %}
+        
     image_model 
         reference to an image model in dotted notation. Must be present 
         and full path e.g. page.Image.
@@ -184,7 +186,9 @@ def image_tag(parser, token):
     Search is by image details, passed in a context, and filter id.
     If a view has already generated a context with models, this is the
     prefered method. The tag will also work for subclasses of the app
-    models.
+    models e.g.
+
+        {% image page.img image.Thumb class="test-image" %}
     
     image_obj 
         reference to an image in the template context (NB: 

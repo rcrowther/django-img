@@ -3,7 +3,7 @@ import unittest
 from django.test import TestCase
 from image.models import Image, Reform, SourceImageIOError
 from image.image_filters import Thumb
-from .utils import get_test_reform
+from . import utils
 
 
 
@@ -14,13 +14,13 @@ class TestReforms(TestCase):
     Base tests avoid object deletion and subclassing
     '''
     def setUp(self):
-        self.reform = get_test_reform()
+        self.reform = utils.get_test_reform()
 
     def test_upload_dir(self):
         self.assertEqual(self.reform.upload_dir, 'reforms')
 
-    def test_filepath_length(self):
-        self.assertEqual(self.reform.filepath_length, 100)
+    # def test_filepath_length(self):
+        # self.assertEqual(self.reform.filepath_length, 100)
 
     # def test_path_checks(self):
         # self.reform.__class__.filepath_length = -300
@@ -47,5 +47,4 @@ class TestReforms(TestCase):
         self.assertEqual(self.reform.alt, "test image")
 
     def tearDown(self):
-        self.reform.image.src.delete(False)
-        self.reform.src.delete(False)
+        utils.reform_delete(self.reform)

@@ -205,8 +205,6 @@ class AbstractImage(models.Model):
         # to storage base
         # image_save_path(field_file, upload_dir, filename)
         filename = decisions.image_save_path(self, filename)
-        print('model fielname:')
-        print(str(filename))
         return filename
         
     @contextmanager
@@ -264,7 +262,6 @@ class AbstractImage(models.Model):
                 'file_format': Reform.file_format, 
                 'jpeg_quality': Reform.jpeg_quality
             }
-            print('open source')
             with self.open_src() as fsrc:
                 (reform_buff, iformat) = filter_instance.process(
                 fsrc,
@@ -387,7 +384,7 @@ class AbstractReform(models.Model):
         '''
         #NB this could be lifted from the image, and is more consistent
         # like that. but it's a DB hit
-        return Path(self.src.name).stem[:len(self.filter_id)] + ' image'
+        return Path(self.src.name).stem[:-(len(self.filter_id) + 1)] + ' image'
         
     @property
     def attrs_dict(self):

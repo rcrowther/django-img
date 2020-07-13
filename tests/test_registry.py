@@ -12,13 +12,15 @@ from image.image_filters import Thumb
 class NonFilter():
     pass
     
+# ./manage.py test image.tests.test_registry
 class TestFilterRegistry(TestCase):
-    #! ignore non-image_config keys?
     def setUp(self):
+        
         # Create a Registy for running tests on
+        # not use stock
         self.registry = FilterRegistry('test')
 
-        # mock class to enter. NB, classes not instances
+        # mock filter classes to enter. NB, classes not instances
         self.filter = Thumb
         self.non_filter = NonFilter
         

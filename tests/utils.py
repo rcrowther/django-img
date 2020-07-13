@@ -1,3 +1,4 @@
+import os
 from io import BytesIO
 import PIL.Image
 from django.core.files.images import ImageFile
@@ -41,16 +42,43 @@ def get_test_image_file_webp(filename='test.webp', colour='white', size=(640, 48
 
 
 def get_test_image():
+    '''
+    Generate an image in the db.
+    '''
     im = Image.objects.create(
             src=get_test_image_file_jpg(),
         )
     return im
+
+def image_delete(image):
+    '''
+    Remove an image
+    Due to basic settings and test transaction handling, a test will not
+    remove an image without leaving files.
+    '''
+    os.remove(image.src.path)
+    image.delete(False)
         
 def get_test_reform():
+    '''
+    Generate an image and reform in the db.
+    '''
     im = get_test_image()
     return im.get_reform(Thumb())
 
-# seems to work but not on foreign keys
+def reform_delete(reform):
+    '''
+    Remove a reform
+    Due to basic settings and test transaction handling, a test will not
+    remove an image without leaving files.
+    '''
+    os.remove(reform.src.path)
+    image_delete(reform.image)
+    
+# Seems to work but not on foreign keys
+# So Django documentation wants to lecture me about testing. How about 
+# some gear for subclassing? Because so far I've found nothing that 
+# works. R.C.
 from django.db import connection
     
 #from django.db import connection

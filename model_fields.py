@@ -15,7 +15,7 @@ class ImageFileField(ImageField):
     A (model) ImageField.
     ImageFileField allows any length of file path. It adds some
     extra parameters and associated verification.
-    maxd_size
+    max_size
         in bytes
     '''
     #NB In stock Django,

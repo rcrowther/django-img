@@ -14,8 +14,11 @@ class TestSettings(TestCase):
     #def test_no_media_root_raises_error(self):
     #    with self.assertRaises(ImproperlyConfigured):
     #        self.settings.media_root
-            
-    def test__modules(self):
+
+    def test_broken(self):
+        self.assertTrue(hasattr(self.settings, 'broken_image_path'))
+                    
+    def test_modules(self):
         self.assertTrue(type(self.settings.modules) == list)
 
     def test_app_dirs(self):

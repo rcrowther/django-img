@@ -2,7 +2,7 @@ import unittest
 
 from django.test import TestCase, TransactionTestCase
 from image.models import Image, Reform, SourceImageIOError
-from .utils import get_test_image_file_jpg, get_test_image
+from . import utils
 from pathlib import Path
 from image.image_filters import Thumb
 
@@ -12,23 +12,29 @@ from image.image_filters import Thumb
 #! how to override policy? Create new model?
 class TestModelDeletionPolicy(TransactionTestCase):
     def setUp(self):
-        self.image = get_test_image()
+        self.image = utils.get_test_image()
         
     #def test_delete_image_delete_src(self):
     #    self.image.delete()
-    #    self.assertEqual(self.image.src, None)
+    #    self.assertEqual(self.image.src.path, None)
 
     def test_file_exists(self):
-        self.image.delete()
-        p = Path(self.image.src.path)
+        im = utils.get_test_image()
+        im.delete()
+        p = Path(im.src.path)
         self.assertTrue(p.exists())
         p.unlink() 
+        
     # def test_reform(self):
-        # reform = self.image.get_reform(self.filter)
-        # p = Path(reform.src.path)
-        # self.image.delete()
+        # rm = utils.get_reform(self.filter)
+        #utils.image_delete()
+        # p = Path(rm.src.path)
+        # self.i.delete()
         # self.assertFalse(p.exists())
 
+        
+    def tearDown(self):
+        utils.image_delete(self.image)
 
 
 

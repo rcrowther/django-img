@@ -136,7 +136,6 @@ class ResizeSmart(ResizeCropSmartMixin, Format):
             fill_color="dark-green"
     '''
     def modify(self, lib_image):
-        print('riesize smart modify.....')
         i = image_ops_pillow.resize_aspect(
             lib_image, 
             self.width, 
