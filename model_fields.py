@@ -16,6 +16,7 @@ class ImageFileField(ImageField):
     A (model) ImageField.
     ImageFileField allows any length of file path. It adds some
     extra parameters and associated verification.
+    
     max_size
         in bytes
     '''
@@ -32,8 +33,8 @@ class ImageFileField(ImageField):
     # rescue dimension data from Pillow.
 
     # Class mainly exists for contribute_to options, faking abstract
-    # classes. But adds some init vals and it's formfield belongs to 
-    # this app
+    # classes. But adds some init vals, bytesize handling, and it's 
+    # formfield belongs to this app
     default_validators = []
     
     def __init__(self, 
@@ -56,7 +57,7 @@ class ImageFileField(ImageField):
         name, path, args, kwargs = super().deconstruct()
         # upload_to and max_length handled by super()
         if self.bytesize_field:
-            kwargs['bytesize_field'] = self.bytesize_field
+            kwargs['bytesize_field'] = self.bytesize_field           
         kwargs['max_size'] = self.max_size
         kwargs['form_limit_filepath_length'] = self.form_limit_filepath_length
         return name, path, args, kwargs
@@ -91,7 +92,7 @@ class ImageFileField(ImageField):
             signals.post_init.connect(self.update_bytesize_field, sender=cls)
 
     def update_bytesize_field(self, instance, force=False, *args, **kwargs):
-        # Nothing to update if the field doesn't have the field or if
+        # Nothing to update if the field doesn't have the attribute or if
         # the field is deferred.
         if not self.bytesize_field or self.attname not in instance.__dict__:
             return
@@ -101,22 +102,17 @@ class ImageFileField(ImageField):
         # (ImageFieldFile in this case).
         file = getattr(instance, self.attname)
         
-
         # Nothing to update if we have no file and not being forced to update.
         if not file and not force:
             return
-
-       # dimension_fields_filled = not(
-       #     (self.bytesize_field and not getattr(instance, self.bytesize_field))
-        #)
         update_field = self.bytesize_field and not(getattr(instance, self.bytesize_field))
         
         # When the field has a value, we are most likely loading
         # data from the database or updating an image field that already had
         # an image stored.  In the first case, we don't want to update the
-        # dimension fields because we are already getting their values from the
-        # database.  In the second case, we do want to update the dimensions
-        # fields and will skip this return because force will be True since we
+        # field because we are already getting the value from the
+        # database.  In the second case, we do want to update the
+        # field and will skip this return because force will be True since we
         # were called from ImageFileDescriptor.__set__.
         if not(update_field) and not force:
             return
@@ -129,7 +125,7 @@ class ImageFileField(ImageField):
         # ok, update
         if self.bytesize_field:
             setattr(instance, self.bytesize_field, bytesize)
-            
+
     def formfield(self, **kwargs):
         # if max_len is None, the formfield is unlimited length
         max_length = None

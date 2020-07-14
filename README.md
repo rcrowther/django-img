@@ -145,7 +145,7 @@ Use the management command to remove reforms,
 
     ./manage.py reform_delete
 
-Goto '/media/originals' and delete a file (maybe the file you are currently viewing as a reform).
+No better way to make a truly broken file... Goto '/media/originals' and delete a file (maybe the file you are currently viewing as a reform). 
 
 Now refresh the view. The app will try to find the reform. When it fails, it will attempt to make a new reform. But the original file is missing, so it will fail to do that too. It will then display a generic 'broken' image.
  

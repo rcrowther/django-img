@@ -90,32 +90,10 @@ class AbstractImage(models.Model):
     
     # Not autopoulated by storage, so funny name.
     # See the property
-    _upload_time = models.DateTimeField(_("Datetime of upload"),
-        null=True, editable=False
+    upload_time = models.DateTimeField(_("Datetime of upload"),
+        auto_now_add=True, editable=False
     )
 
-    @property
-    def upload_time(self):
-        '''
-        upload time of the associated image.
-        Cached in a database field.
-        '''
-        # Although Django Imagefield will autopopulate 
-        # width and height, there is no support for upload_time.
-        if self._upload_time is None:
-            try:
-                # Storage should handle file opening or web hits.
-                self._upload_time = self.src.storage.get_created_time(self.src.name)
-            except Exception as e:
-                # File not found
-                #
-                # Have to catch everything, because the exception
-                # depends on the storage being used.
-                raise SourceImageIOError(str(e))
-
-            self.save(update_fields=['_upload_time'])
-        return self._upload_time
-    
     # A note about the name. Even if possible, using the word 'file'
     # triggers my, and probably other, IDEs. Again, even if possible,
     # naming this the same as the model is not a good idea, if only due 
@@ -126,7 +104,7 @@ class AbstractImage(models.Model):
         upload_to=get_image_upload_to, 
         width_field='width', 
         height_field='height',
-        bytesize_field="bytesize"
+        bytesize_field="bytesize",
     )
     
     # Django can use Pillow to provide width and height. So why?
@@ -140,28 +118,6 @@ class AbstractImage(models.Model):
     # Not autopoulated by storage, so funny name.
     # See the property
     bytesize = models.PositiveIntegerField(null=True, editable=False)
-
-    # @property
-    # def bytesize(self):
-        # '''
-        # vysize of the associated image.
-        # Cached in a database field.
-        # '''
-        # # Although Django Imagefield will autopopulate 
-        # # width and height, there is no support for bytesize.
-        # if self._bytesize is None:
-            # try:
-                # # Storage should handle file opening or web hits.
-                # self._bytesize = self.src.size
-            # except Exception as e:
-                # # File not found
-                # #
-                # # Have to catch everything, because the exception
-                # # depends on the storage being used.
-                # raise SourceImageIOError(str(e))
-
-            # self.save(update_fields=['_bytesize'])
-        # return self._bytesize
 
     @classmethod
     def get_reform_model(cls):
@@ -344,7 +300,7 @@ class Image(AbstractImage):
         verbose_name = _('image')
         verbose_name_plural = _('images')
         indexes = [
-            models.Index(fields=['_upload_time']),
+            models.Index(fields=['upload_time']),
         ]
 
 
