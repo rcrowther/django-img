@@ -132,8 +132,10 @@ Visit the page. The app will generate the filtered 'reform' image automatically.
 
 
 #### Don't have a view?
-Yeh, new or experimental site, I know. Image has a builtin view. Goto urls.py, add this,
+Yeh, new or experimental site, I know. Image has a builtin view. Goto 'urls.py', add this,
 
+    from image.views import ImageDetailView
+    ...
     path('image/<int:pk>/', ImageDetailView.as_view(), name='image-detail'),
 
 Now visit (probably) http://localhost:8000/image/1/ To see some *real* web code.
@@ -141,9 +143,9 @@ Now visit (probably) http://localhost:8000/image/1/ To see some *real* web code.
 ### (optional) See a broken image
 Use the management command to remove reforms,
 
-    .manage.py reform_delete
+    ./manage.py reform_delete
 
-Goto '/media/originals' and delete the file (the file you are currently viewing as a reform).
+Goto '/media/originals' and delete a file (maybe the file you are currently viewing as a reform).
 
 Now refresh the view. The app will try to find the reform. When it fails, it will attempt to make a new reform. But the original file is missing, so it will fail to do that too. It will then display a generic 'broken' image.
  
@@ -895,7 +897,7 @@ Images accepts some site-wide settings,
 
 
 ## Broken Images
-The app throws a special error if images are broken i.e. files are missing or unreadable. In this case a stock 'broken' image is returned. Using the standard tags there is no need to configure or change in any way for this. The image can be [redefined](#settings).
+The app throws a special error if images are broken i.e. files are missing or unreadable. In this case a stock 'broken' image is returned. Using the standard tags there is no need to configure or change in any way for this. The image can be [redefined](#site-wide-settings).
 
 
     
@@ -916,7 +918,7 @@ The template is at,
 
     image/templates/image/image_detail.html
 
-In the template you can edit the tag to point at your own configurations. With visible results and basic image data, it is a lot easier to use than the shell.
+In the template you can edit the tag to point at your own configurations. With visible results and basic image data, it is often easier to use than the shell.
 
 
 

@@ -1,0 +1,25 @@
+= all tests
+./manage.py test image.tests
+
+= coverage
+coverage run --source='.' manage.py test image.tests
+coverage html
+coverage reports
+coverage erase
+
+= silk
+INSTALLED_APPS
+    'silk',
+MIDDLEWARE
+    'silk.middleware.SilkyMiddleware',
+    urlpatterns += [url(r'^silk/', include('silk.urls', namespace='silk'))]
+
+http://localhost:8000/silk/
+
+from silk.profiling.profiler import silk_profile
+
+@silk_profile(name='View Blog Post')
+
+and,
+
+python manage.py silk_clear_request_log

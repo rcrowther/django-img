@@ -123,7 +123,6 @@ class ImageFileDataConsistencyValidator:
         read_format = self.pil2app[raw_read_format]
         declared_format = self.ext2app[extension]
         if (read_format != declared_format):
-            print('error!!!!')
             raise ValidationError(
                     self.messages['format_extension_mismatch'],
                     code='format_extension_mismatch',

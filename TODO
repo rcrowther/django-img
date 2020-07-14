@@ -14,6 +14,7 @@ Check models for clashes?
 
 == Management
 Is bulk delete really bulk delete? No, it's 'mass delete', though
+Bluk upload ignoring validations?
 tests
 
 == Checks
