@@ -41,7 +41,7 @@ The app includes code to upload images. The Django admin for the base applicatio
 
 
 ## If you have done this before
-- Decide if you want to use the core repository. If you want an app-based repository, [subclass the models for Image and Reform](#new-image-repositories).
+- Decide if you want to use the core repository. If you want an app-based repository, [subclass the models for Image and Reform](#custom-image-repositories).
 
 - [Add fields](#model-fields) to models that need them
 
@@ -188,7 +188,7 @@ That's it, gone.
 Index, 
 
 - [Model Fields](#model-fields)
-- [New Image Repositories](#new-image-repositories)
+- [New Image Repositories](#custom-image-repositories)
 - [Auto Delete](#auto-delete)
 - [Filters](#filters)
 - [Admin](#admin)
@@ -253,14 +253,14 @@ Foreign Field
 - flexible configuration
 
 
-## New Image Repositories
+## Custom Image Repositories
 ### Overview
-The core models in this app can be subclassed. If you create subclasses, the subclass models have new DB tables, and can operate with new configurations such as storing files in different directories.
+The core models in this app can be subclassed. If you create subclasses, the new repositories have new DB tables, and can operate with new configurations such as storing files in different directories.
 
 Two scenarios where you may want to do this,
 
 #### Associated data with images
-You may want to associate data with an image. Many people's first thought would be to add a title. This app does not provide titles by default. But other kinds of information can be attached such as captions, credits, dates, and/or data for semantic rendering.
+You may want to associate data with an image. Many people's first thought would be to add a title, as the app does not provide titles by default. But other kinds of information can be attached such as captions, credits, dates, and/or data for semantic rendering.
 
 #### Splitting needs
 It's fun to tweak with settings, but sometimes, maybe often, this is not the best approach.
