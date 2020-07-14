@@ -7,7 +7,6 @@ from django.db import models
 from django.core.checks import Error, Warning
 #from django.urls import reverse
 from django.core.files.images import ImageFile
-#from django.db.models.signals import pre_delete, pre_save
 from django.utils.translation import gettext_lazy as _
 from django.utils.functional import cached_property
 from django.apps import apps
