@@ -444,8 +444,6 @@ Place this in the ready() method of the application,
             from news_article.models import NewsArticleImage, NewsArticleReform
             register_file_delete_handler(NewsArticleImage, NewsArticleReform)
 
-The Image class attribute must be 'auto_delete=True'. 
-
 
 ### Default behaviour
 By default, the core repository will not auto-delete the files associated with Images. It will auto-delete Reform models, and the reform files. This behaviour is not inherited by custom repositories.

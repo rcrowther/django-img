@@ -20,4 +20,4 @@ class ImageConfig(AppConfig):
         self.module.autodiscover()        
         checks.register(check_filters, 'image_filters')
         from image.models import Image, Reform
-        register_file_delete_handler(Image, Reform)
+        register_reform_delete_handler(Image, Reform)
