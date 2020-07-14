@@ -836,10 +836,6 @@ Image accepts settings in several places. The app has moved away from site-wide 
     <dd>
         default=2MB, Image attribute
     </dd>
-    <dt>auto_delete_files</dt>
-    <dd>
-        (if enabled) Image/Reform attribute
-    </dd>
 </dl>
 
 ### Reform

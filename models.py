@@ -87,11 +87,6 @@ class AbstractImage(models.Model):
     
     # If None, any size allowed. In MB. Real allowed.
     max_upload_size = 2
-        
-    # If the model is deleted, delete the file
-    # Django stadard is False, but see documentation.
-    #! Will not be effective on bulk SQL actions
-    auto_delete_files = False
     
     # Not autopoulated by storage, so funny name.
     # See the property

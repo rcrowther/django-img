@@ -22,8 +22,7 @@ def register_image_delete_handler(model):
     post_delete.connect(_image_delete, sender=model, weak=False)
 
 def _image_src_delete(instance, **kwargs):
-    if (instance._meta.model.auto_delete_files):
-        transaction.on_commit(lambda: instance.src.delete(False))
+    transaction.on_commit(lambda: instance.src.delete(False))
 
 def _reform_src_delete(instance, **kwargs):
     transaction.on_commit(lambda: instance.src.delete(False))
