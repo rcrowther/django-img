@@ -21,13 +21,13 @@
     <line style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke-dasharray: 10; stroke: #b3b3b3" x1="0" y1="260" x2="920" y2="260"/>
     <line style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke-dasharray: 10; stroke: #b3b3b3" x1="0" y1="140" x2="920" y2="140"/>
     <line style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke-dasharray: 10; stroke: #b3b3b3" x1="0" y1="60" x2="920" y2="60"/>
-    <text font-size="10.5437" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="40" y="280">
+    <text font-size="10.5438" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="40" y="280">
       <tspan x="40" y="280">/media </tspan>
     </text>
-    <text font-size="10.7243" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="40" y="80">
+    <text font-size="10.7244" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="40" y="80">
       <tspan x="40" y="80">Django</tspan>
     </text>
-    <text font-size="10.5437" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="40" y="160">
+    <text font-size="10.5438" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="40" y="160">
       <tspan x="40" y="160">Database</tspan>
     </text>
     <g>
@@ -35,7 +35,7 @@
       <path style="fill: none; stroke-opacity: 1; stroke-width: 0.2; stroke: #000000" d="M 305 308 C 305,300 305,300 310,300 C 315,300 315,300 320,300 C 325,300 325,300 325,308 C 325,308 340,308 340,308 C 340,308 340,340 340,340 C 340,340 305,340 305,340 C 305,340 305,316 305,308"/>
       <polygon style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" fill-rule="evenodd" points="305,340 300,312 335,312 340,340 "/>
       <polygon style="fill: none; stroke-opacity: 1; stroke-width: 0.2; stroke: #000000" points="305,340 300,312 335,312 340,340 "/>
-      <text font-size="12.7998" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="320" y="326">
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="320" y="326">
         <tspan x="320" y="326"></tspan>
       </text>
     </g>
@@ -44,11 +44,11 @@
       <path style="fill: none; stroke-opacity: 1; stroke-width: 0.2; stroke: #000000" d="M 545 308 C 545,300 545,300 550,300 C 555,300 555,300 560,300 C 565,300 565,300 565,308 C 565,308 580,308 580,308 C 580,308 580,340 580,340 C 580,340 545,340 545,340 C 545,340 545,316 545,308"/>
       <polygon style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" fill-rule="evenodd" points="545,340 540,312 575,312 580,340 "/>
       <polygon style="fill: none; stroke-opacity: 1; stroke-width: 0.2; stroke: #000000" points="545,340 540,312 575,312 580,340 "/>
-      <text font-size="12.7998" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="560" y="326">
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="560" y="326">
         <tspan x="560" y="326"></tspan>
       </text>
     </g>
-    <text font-size="12.7998" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="320" y="-20">
+    <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="320" y="-20">
       <tspan x="320" y="-20">e.g {% image page,img imge.Thumb %}</tspan>
     </text>
     <g>
@@ -69,14 +69,14 @@
     <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:700" x="540" y="160">
       <tspan x="540" y="160">Reforms</tspan>
     </text>
-    <text font-size="12.7998" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="300" y="180">
+    <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="300" y="180">
       <tspan x="300" y="180">upload date</tspan>
       <tspan x="300" y="196">src</tspan>
       <tspan x="300" y="212">width</tspan>
       <tspan x="300" y="228">height</tspan>
       <tspan x="300" y="244">bytesize</tspan>
     </text>
-    <text font-size="12.7998" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="540" y="180">
+    <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="540" y="180">
       <tspan x="540" y="180">src</tspan>
     </text>
     <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:700" x="440" y="80">
@@ -115,5 +115,11 @@
       <polygon style="fill: #90ecff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" fill-rule="evenodd" points="660,415 681,415 688,408 688,380 660,380 "/>
       <polyline style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke: #000000" points="681,415 681,408 688,408 688,408 "/>
     </g>
+    <text font-size="10.5438" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="360" y="320">
+      <tspan x="360" y="320">/media /originals</tspan>
+    </text>
+    <text font-size="10.5438" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="600" y="320">
+      <tspan x="600" y="320">/medi/storagea </tspan>
+    </text>
   </g>
 </svg>

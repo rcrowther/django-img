@@ -41,13 +41,13 @@ The app includes code to upload images. The Django admin for the base applicatio
 
 
 ## If you have done this before
-- Decide if you want to use the core collection. If you want an app-based collection, [subclass the models for Image and Reform](#new-image-repositories).
+- Decide if you want to use the core repository. If you want an app-based repository, [subclass the models for Image and Reform](#new-image-repositories).
 
 - [Add fields](#model-fields) to models that need them
 
 - Migrate new tables
 
-- [Add auto deletion](#Autodeletion) if you want models carrying image fields to delete images automatically
+- [Add auto deletion](#Autodeletion) if you want models carrying image fields to delete images and/or files  automatically
 
 - Create 'image_filters.py' files in the apps, then [subclass a few filters](#filters)
 
@@ -202,8 +202,8 @@ Index,
 ## Model Fields
 Two ways,
 
-#### The ImageRelationFieldMixin model fields
-There are two, ImageManyToOneField and ImageOneToOneField,
+#### Custom ImageRelationFieldMixin fields
+There are two, ImageOneToOneField and ImageManyToOneField (for image pools),
 
     from image.model_fields import ImageManyToOneField
 
@@ -219,8 +219,8 @@ There are two, ImageManyToOneField and ImageOneToOneField,
 An ImageOneToOneField field can auto-delete associated images (and their reforms and files) with the model. See [Auto Delete](#auto-delete) 
 
 
-#### Stock Django declaration,
-You can also use a stock Django foreign key declaration,
+#### Stock Django
+You can also use a Django foreign key declaration,
 
     from image.models import Image
 
@@ -260,14 +260,12 @@ The core models in this app can be subclassed. If you create subclasses, the sub
 Two scenarios where you may want to do this,
 
 #### Associated data with images
-You may want to associate data with an image. Many people's first thought would be to add a title. That said, an image title is not often displayed, and is a simple duplication of a filename, which should be avoided. This app does not provide titles by default.
-
-But other kinds of information can be attached such as captions, credits, dates, and/or data for semantic rendering. All of these may be viewed as 'an aspect of the image'.
+You may want to associate data with an image. Many people's first thought would be to add a title. This app does not provide titles by default. But other kinds of information can be attached such as captions, credits, dates, and/or data for semantic rendering.
 
 #### Splitting needs
 It's fun to tweak with settings, but sometimes, maybe often, this is not the best approach.
 
-Let's say you have a website which gathers photos that are joined to NewsArticle. Those photos are linked for sure to the NewsArticle, and can probably be created and deleted with the model. But you may also have a need to upload images for the site in general, perhaps for banner displays. This is an image pool. The deletion policy is different. There may be no need for credits.
+Let's say you have a website which gathers photos joined to NewsArticle. Those photos are linked for sure to the NewsArticle, and can probably be created and deleted with the model. But you may also need an image pool, perhaps for banner displays. The deletion policy is different, and pool images may not need credits.
  
 These are two separate apps. Avoid complex configuration. Make two apps.
 
@@ -465,7 +463,7 @@ A few filters are predefined. One utility/test filter,
     <dd>A 64x64 pixel square</dd>
 </dl>
 
-And some base filters, which you can configure. These are all centre-anchored, 
+And some base filters, which you can configure. These are centre-anchored, 
 
 - Crop
 - Resize
@@ -670,9 +668,9 @@ Significant changes,
 
 
 ##### Remove ImageCoreAdmin from central repository
-Want Django stock admin (or a custom admin)? Change the comments in 'image/admin.py' from,
+Want Django stock admin? Change the comments in 'image/admin.py' from,
 
-    # Custom admin interface disalows deletion of files from models.
+    # Custom admin interface disallows deletion of files from models.
     class ImageAdmin(ImageCoreAdmin):
         
     # Stock admin interface.
@@ -864,6 +862,14 @@ Image accepts settings in several places. The app has moved away from site-wide 
     </dd>
 </dl>
 
+### ImageOneToOneField
+<dl>
+    <dt>auto_delete</dt>
+    <dd>
+        if True, and signals are enabled, will delete image models and maybe files. referred to
+    </dd>
+</dl>
+(the field naturally has many other settings, this one is the only one related to this app)
 
 ### Site-wide settings
 Images accepts some site-wide settings,
