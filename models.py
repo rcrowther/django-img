@@ -16,7 +16,7 @@ from image import checks
 from image.model_fields import ImageFileField, ReformFileField
  
  
- 
+
 class SourceImageIOError(IOError):
     """
     Custom exception to distinguish IOErrors that were thrown while opening the source image
@@ -45,6 +45,7 @@ def get_reform_upload_to(instance, filename):
     return instance.get_upload_to(filename)
 
 
+
 class AbstractImage(models.Model):
     '''
     Data about stored images.
@@ -67,9 +68,11 @@ class AbstractImage(models.Model):
     Thus each file is unique, and each file field in the model is 
     unique.  
     '''
-    #reform_model = 'Reform'
+    
+    # Provides is a link for searching without Django's
+    # relate machinery. It's safe as None.
+    # Subclasses need to use a string name (Django 'Defered')
     reform_model = None
-    #reform_model = 'AbstractReform'
 
     # relative to MEDIA_ROOT
     upload_dir='originals'
@@ -88,6 +91,18 @@ class AbstractImage(models.Model):
     # If None, any size allowed. In MB. Real allowed.
     max_upload_size = 2
     
+    auto_delete_files=False
+
+    @classmethod
+    def delete_file(cls, instance, **kwargs):
+        transaction.on_commit(lambda: instance.src.delete(False))
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__()
+        if (cls.auto_delete_files):
+            signals.post_delete.connect(cls.delete_file, sender=cls)
+          
+              
     # Not autopoulated by storage, so funny name.
     # See the property
     upload_time = models.DateTimeField(_("Datetime of upload"),
@@ -280,7 +295,8 @@ class AbstractImage(models.Model):
         return errors
         
     def __repr__(self):
-        return "Image(upload_time: {}, src:'{}')".format(
+        return "{}(upload_time: {}, src:'{}')".format(
+            self.__class__.__name__,
             self.upload_time,
             self.src,
         )                
@@ -304,10 +320,24 @@ class Image(AbstractImage):
         ]
 
 
+from django.db import transaction
+from django.db.models import signals
+
+
 
 class AbstractReform(models.Model):
+        
+    @classmethod
+    def delete_file(cls, instance, **kwargs):
+        transaction.on_commit(lambda: instance.src.delete(False))
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__()
+        signals.post_delete.connect(cls.delete_file, sender=cls)
+              
+        
     image_model = AbstractImage
- 
+    
     # relative to MEDIA_ROOT
     upload_dir='reforms'
     file_format = None
@@ -328,10 +358,8 @@ class AbstractReform(models.Model):
     def alt(self):
         '''
         String for an 'alt' field.
-        The base implementation is derived from the filepath of the 
-        uploaded file. 
-        Subclasses might override this attribute to use more refined 
-        data, such as a slug or title.
+        The base implementation is derived from the filepath. 
+        Subclasses might override this attribute.
         '''
         #NB this could be lifted from the image, and is more consistent
         # like that. but it's a DB hit
@@ -373,7 +401,8 @@ class AbstractReform(models.Model):
         return errors
 
     def __repr__(self):
-        return "Reform(image:'{}', src:'{}', filter_id:'{}')".format(
+        return "{}(image:'{}', src:'{}', filter_id:'{}')".format(
+            self.__class__.__name__,
             self.image,
             self.src,
             self.filter_id,
@@ -397,3 +426,4 @@ class Reform(AbstractReform):
     class Meta:
         verbose_name = _('reform')
         verbose_name_plural = _('reforms')
+

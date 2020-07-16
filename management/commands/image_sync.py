@@ -89,7 +89,7 @@ class Command(BaseCommand):
                     path.unlink()
                     count += 1
                 except Exception:
-                    fail.append(p)
+                    fail.append(path.stem)
             if (options['verbosity'] > 0):
                 print("{} image(s) deleted".format(count)) 
                 if (len(fail) > 0):
@@ -129,7 +129,7 @@ class Command(BaseCommand):
                     i.save()
                     count += 1
                 except Exception:
-                    fail.append(p)
+                    fail.append(path.stem)
         
             if (options['verbosity'] > 0):
                 print("{} image(s) created".format(count)) 

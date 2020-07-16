@@ -2,7 +2,6 @@ from django.apps import AppConfig
 from django.utils.translation import gettext_lazy as _
 from django.core import checks
 from image.checks import check_filters
-from image.signals import register_reform_delete_handler
 
 
 
@@ -18,5 +17,3 @@ class ImageConfig(AppConfig):
         super().ready()
         self.module.autodiscover()        
         checks.register(check_filters, 'image_filters')
-        from image.models import Image, Reform
-        register_reform_delete_handler(Reform)

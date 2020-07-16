@@ -1,6 +1,4 @@
 from django.db.models.signals import post_delete
-from django.db import transaction
-from django.core.exceptions import ValidationError
 from image.model_fields import ImageOneToOneField
 
 def _image_delete(instance, **kwargs):
@@ -21,15 +19,3 @@ def _image_delete(instance, **kwargs):
 def register_image_delete_handler(model):
     post_delete.connect(_image_delete, sender=model, weak=False)
 
-def _image_src_delete(instance, **kwargs):
-    transaction.on_commit(lambda: instance.src.delete(False))
-
-def _reform_src_delete(instance, **kwargs):
-    transaction.on_commit(lambda: instance.src.delete(False))
-
-def register_reform_delete_handler(reform_class):   
-    post_delete.connect(_reform_src_delete, sender=reform_class, weak=False )
-
-def register_file_delete_handler(image_class, reform_class):
-    post_delete.connect(_image_src_delete, sender=image_class, weak=False)
-    post_delete.connect(_reform_src_delete, sender=reform_class, weak=False )

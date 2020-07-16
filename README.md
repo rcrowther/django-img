@@ -355,7 +355,7 @@ No! Python has been cautious about this kind of programming, and Django's soluti
 
 ### Things to consider when subclassing models
 #### Auto delete of files
-May be a good idea to set up your deletion policy from the start. See [Auto Delete](#auto-delete)
+May be good to set up your deletion policy from the start. See [Auto Delete](#auto-delete)
  
 #### Add Meta information
 You may want to configure a Meta class. If you added titles or slugs, for example, you may be interested in making them into unique constrained groups, or adding indexes,
@@ -402,7 +402,7 @@ Place this in the ready() method of the application,
 
 The image fields must be ImageOneToOneFields, and the field attribute must be 'auto_delete=True'.
 
-#### Why must the code run on the custom field, and not on a ImageOneToManyField?
+#### Why must the code run on the custom field, and why not on a ImageOneToManyField?
 The custom field means lightweight field identification.
  
 An ImageOneToManyField implies an image pool. Many connections to one image. This is a  classic computing problem of reference counting. Best avoided.
@@ -411,44 +411,22 @@ An ImageOneToManyField implies an image pool. Many connections to one image. Thi
 ### Automatic deletion of reform objects
 Reforms are treated as objects generated automatically, so automatic deletion is not controversial. Moreover, the template tag accesses reforms through the Image model. If the original image model is removed, the reforms will not display. 
 
-The core application removes reforms by default. So will custom repositories, as long as the 'image' foreign key is set to CASCADE.
+The core application removes reform models by default. So will custom repositories, as long as the 'image' foreign key is set to CASCADE.
 
 
 ### Automatic deletion of files
-The application provides a signals solution. There is no way to 'inherit' this behaviour. It must be implemented for each image repository.
+The application provides a signals solution.
 
 #### Auto-delete Reform files
-Place this in the ready() method of the application,
-
-    from image.signals import register_file_delete_handlers
-
-    class NewsConfig(AppConfig):
-        ...
-
-        def ready(self):
-            super().ready()
-            from news_article.models import NewsArticleReform
-            register_reform_delete_handler(NewsArticleReform)
+Reform files are deleted with the reform. There is nothing else to do.
 
 
-
-#### Auto-delete Image and Reform files
-Place this in the ready() method of the application,
-
-    from image.signals import register_file_delete_handlers
-
-
-    class NewsConfig(AppConfig):
-        ...
-
-        def ready(self):
-            super().ready()
-            from news_article.models import NewsArticleImage, NewsArticleReform
-            register_file_delete_handler(NewsArticleImage, NewsArticleReform)
+#### Auto-delete Image files
+Image file deletion is optional. Set the Image attribute 'auto_delete_files=True' to auto delete.
 
 
 ### Default behaviour
-By default, the core repository will not auto-delete the files associated with Images. It will auto-delete Reform models, and the reform files. This behaviour is not inherited by custom repositories.
+By default, the core repository will not auto-delete the files associated with Images. It will auto-delete Reform models, and the reform files.
 
 
 
@@ -818,23 +796,27 @@ Image accepts settings in several places. The app has moved away from site-wide 
     </dd>
     <dt>upload_dir</dt>
     <dd>
-        default='originals', Image attribute
+        default='originals'
     </dd>
     <dt>filepath_length</dt>
     <dd>
-        default=100, Image attribute
-      </dd>
+        default=100
+    </dd>
     <dt>form_limit_filepath_length</dt>
     <dd>
-        default=True, Image attribute
+        default=True
     </dd>
     <dt>accept_formats</dt>
     <dd>
-        default=None, Image attribute
+        default=None
     </dd>
     <dt>max_upload_size</dt>
     <dd>
-        default=2MB, Image attribute
+        default=2MB
+    </dd>
+    <dt>auto_delete_files</dt>
+    <dd>
+        default=False, if the Image is deleted, the file is deleted too.  
     </dd>
 </dl>
 
@@ -862,10 +844,10 @@ Image accepts settings in several places. The app has moved away from site-wide 
 <dl>
     <dt>auto_delete</dt>
     <dd>
-        if True, and signals are enabled, will delete image models and maybe files. referred to
+        if True, and signals are enabled, deletion of this model will delete image models.
     </dd>
 </dl>
-(the field naturally has many other settings, this one is the only one related to this app)
+(the field naturally has many other settings, this setting is the only one related to this app)
 
 ### Site-wide settings
 Images accepts some site-wide settings,
