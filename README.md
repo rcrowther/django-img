@@ -124,7 +124,7 @@ Add this tag to the template,
 
     {% load img_tags %}
     ...
-    {% imagequery "pk=1" image.Thumb %}
+    {% imagequery image.Image "pk=1" image.Thumb %}
 
 'image.Thumb' is a predefined filter. It makes a 64x64 pixel thumbnail. The tag we use here searches for an image by a very low method, "pk=1". This will do for now. 
 
@@ -165,7 +165,7 @@ Make a new file called 'image filters'. Put it in the top level of any app (not 
  
 Now adapt the template tag (or the tag in image/templates/image/image_detail.html) to point at the new filter,
 
-    {% imagequery "pk=1" someAppName.MediumImage %}
+    {% imagequery image.Image "pk=1" someAppName.MediumImage %}
 
 Visit the page again. Image sees the new filter definition, so generates a new reform (filters the image) then displays it.
 
@@ -272,7 +272,7 @@ Let's say you have a website which gathers photos joined to NewsArticle. Those p
 These are two separate apps. Avoid complex configuration. Make two apps.
 
 ### Subclassing Image/Reform 
-Here is a minimal subclass. In the models.py file in an app, do this,
+Here is a minimal subclass. In the 'models.py' file in an app, do this,
 
     from image.models import AbstractImage, AbstractReform
 
@@ -348,12 +348,18 @@ Subclasses accept some attributes. An expanded version of the above,
 
 Some of these attributes introduce checks ('max_upload_size'), some set defaults('file_format'), some can be overridden ('file_format', 'jpeg_quality' can be overridden by filter settings). See [Settings](#settings) for details.
 
+Now migrate, and you are up and running.
 
 ### Inheritance! Can I build repositories using OOP techniques?
 No! Python has been cautious about this kind of programming, and Django's solutions are a workround. Try stacking models of any kind and, unless you know the code line by line, the classes will create unusable migrations. For stability and maintainability, create models directly from the abstract bases.
 
 
 ### Things to consider when subclassing models
+#### Do I need to migrate the 'image' app for a custom repository?
+No. Migrate the app containing the repository code.
+
+If you got here later, and already have the core app migrated, but don't need the data, you can [zero migrate and remove the file folders](#quickStop).
+
 #### Auto delete of files
 May be good to set up your deletion policy from the start. See [Auto Delete](#auto-delete)
  
