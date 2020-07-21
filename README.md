@@ -1,9 +1,9 @@
 # Django-images
 A drop and go app (as much as a Django app can be) to handle upload and display of images.
 
-The base code is concise and levers Django recommendations and facilities where possible. It may form a good base for others wishing to build their own app.
+When I say plug-and-go, I mean there is a default repository built into the app. IT works in a Django way, and needs only a migration to start uploading and managing images. To show images, you need only to define a few filter classes and place the main template tag. That's all.
 
-The front end, by which I mean 'programmer API' is designed for a particular purpose (most image apps are). It is for websites where images are associated with other models. Use cases might include websites of local interest, such as small-scale publishing and shops. These examples would associate images with other models, for example, SalesItem or Article.
+The base code is concise and levers Django recommendations and facilities where possible. It may provide a base for others wishing to build their own app.
 
 
 ## Why you may not want this app
@@ -18,7 +18,6 @@ The app API does not let you,
 All these facilities could be built into the base code. But then the app will not be, for you, a plug and go solution.
  
 The code API is a step back from the facilities mentioned above. It is small, concise, and fits good CSS/template-practice. 
-
 
 Also, I have not,
 - considered SVG images
@@ -36,22 +35,20 @@ Image delivery is by template tag. The presence of a tag with a reference to an 
 
 File-based storage is in 'media/' with paths adjustable through attribute settings.
 
-The app includes code to upload images. The Django admin for the base application has some (optional) customisation.
+The app includes code to upload images. Some custom Django admin is provided, which is optional and easy to modify/replace.
 
 
 
 ## If you have done this before
-- Decide if you want to use the core repository. If you want an app-based repository, [subclass the models for Image and Reform](#custom-image-repositories).
+- Decide if you want to use the core repository. If you want a custom repository, [subclass the models for Image and Reform](#custom-image-repositories).
 
 - [Add fields](#model-fields) to models that need them
 
-- Migrate new tables
-
-- [Add auto deletion](#Autodeletion) if you want models carrying image fields to delete images and/or files  automatically
+- Migrate custom repository tables and models carrying image fields
 
 - Create 'image_filters.py' files in the apps, then [subclass a few filters](#filters)
 
-- Insert [template tags](#template-tags) into the relevant templates
+- Insert [template tags](#template-tags) into relevant templates
 
 
 
@@ -140,6 +137,8 @@ Yeh, new or experimental site, I know. Image has a builtin view. Goto 'urls.py',
 
 Now visit (probably) http://localhost:8000/image/1/ To see some *real* web code.
 
+
+
 ### (optional) See a broken image
 Use the management command to remove reforms,
 
@@ -163,11 +162,11 @@ Make a new file called 'image filters'. Put it in the top level of any app (not 
 
     registry.register(MediumImage)
  
-Now adapt the template tag (or the tag in image/templates/image/image_detail.html) to point at the new filter,
+Now adapt the template tag (or the tag in 'image/templates/image/image_detail.html') to point at the new filter,
 
     {% imagequery image.Image "pk=1" someAppName.MediumImage %}
 
-Visit the page again. Image sees the new filter definition, so generates a new reform (filters the image) then displays it.
+Visit the page again. Image uses the new filter definition to generate a new reform (filters the image) then displays it.
 
 Ok, you changed the image size, and maybe the format. If you want to continue, you probably have questions. Goto the main documentation.
 
@@ -257,21 +256,23 @@ Foreign Field
 
 ## Custom Image Repositories
 ### Overview
-The core models in this app can be subclassed. If you create subclasses, the new repositories have new DB tables, and can operate with new configurations such as storing files in different directories.
+New repositories can be made by subclassing the the core models.
 
-Two scenarios where you may want to do this,
+Reasons you may want to do this,
 
-#### Associated data with images
-You may want to associate data with an image. Many people's first thought would be to add a title, as the app does not provide titles by default. But other kinds of information can be attached such as captions, credits, dates, and/or data for semantic rendering.
+#### Custom repository behaviour
+Custom repositories have new DB tables, and can operate with new configurations such as storing files in different directories, auto-deleting original files, not limiting filename sizes and more.
 
-#### Splitting needs
-It's fun to tweak with settings, but sometimes, maybe often, this is not the best approach.
+#### Associate data with images
+You may want to associate data with an image. Many people's first thought would be to add a title, as the app does not provide titles by default. But other kinds of information can be attached to an image such as captions, credits, dates, and/or data for semantic/SEO rendering.
 
-Let's say you have a website which gathers photos joined to NewsArticle. Those photos are linked for sure to the NewsArticle, and can probably be created and deleted with the model. But you may also need an image pool, perhaps for banner displays. The deletion policy is different, and pool images may not need credits.
+#### Split needs
+For example, you may want a repository attached to a main Article model, and also an image pool for general site use such as banners or icons. 
  
-These are two separate apps. Avoid complex configuration. Make two apps.
 
 ### Subclassing Image/Reform 
+Custom Image repository code is placed in 'models.py' files and migrated. You decide how you want your namespacing to work. The code can be placed in an app handling one kind of model or, for general use, in a separate app.
+
 Here is a minimal subclass. In the 'models.py' file in an app, do this,
 
     from image.models import AbstractImage, AbstractReform
@@ -302,7 +303,7 @@ Here is a minimal subclass. In the 'models.py' file in an app, do this,
         image = models.ForeignKey(image_model, related_name='+', on_delete=models.CASCADE)
 
 
-Not the last word in DRY coding, but you should be able to work out what the code is for. Note that 'image_model' and 'reform_model' are explicitly declared, and that 'reform_model' is declared as a string, but 'image_model' is declared as a class.
+Not the last word in DRY coding, but you should be able to work out what the code is for. Note that 'image_model' and 'reform_model' are explicitly declared. Note also that 'reform_model' is declared as a string, but 'image_model' is declared as a class.
 
 Migrate,
 
@@ -320,7 +321,9 @@ You now have a new image upload app. It has it's own DB tables. Change it's conf
         etc.
 
 ### Attributes
-Subclasses accept some attributes. An expanded version of the above,
+Subclasses accept some attributes. Note that some of these settings are radical alterations to a model class. To be sure a model setting will take effect, it is best to migrate the class.
+
+An expanded version of the above,
 
     from image.models import AbstractImage, AbstractReform
 
@@ -350,15 +353,20 @@ Some of these attributes introduce checks ('max_upload_size'), some set defaults
 
 Now migrate, and you are up and running.
 
-### Inheritance! Can I build repositories using OOP techniques?
-No! Python has been cautious about this kind of programming, and Django's solutions are a workround. Try stacking models of any kind and, unless you know the code line by line, the classes will create unusable migrations. For stability and maintainability, create models directly from the abstract bases.
 
+### Inheritance! Can I build repositories using OOP techniques?
+No! Python has been cautious about this kind of programming, and Django's solutions are a workround. Try stacking models of any kind and, unless you know the code line by line, the classes will create unusable migrations. In the current situation, for stability and maintainability, create models directly from the two abstract bases.
+
+### Can I create different repositories, then point them at the same storage paths?
+The app tracks through the database tables, and the [management commands](#management-commands) work from them, so yes, you can.
+
+That said, when code offers opportunities for namespacing/ecapsulaytion, you need a good reason to ignore it.
 
 ### Things to consider when subclassing models
-#### Do I need to migrate the 'image' app for a custom repository?
+#### Do I need to migrate the defualt 'image' for a custom repository?
 No. Migrate the app containing the repository code.
 
-If you got here later, and already have the core app migrated, but don't need the data, you can [zero migrate and remove the file folders](#quickStop).
+If you got here later, and already have the core repository migrated, but don't need the data, you can [zero migrate and remove the file folders](#quickStop).
 
 #### Auto delete of files
 May be good to set up your deletion policy from the start. See [Auto Delete](#auto-delete)
@@ -387,7 +395,7 @@ You may want to configure a Meta class. If you added titles or slugs, for exampl
 
 ## Auto-delete
 ### Overview
-I read somewhere that a long time ago, Django would auto-delete files. This probably happened in model fields. It is not true now. If objects and fields are deleted, files are left in the host system. However, it suits this application, and some of it's intended uses, to auto-delete models and files. If you would like this behaviour, the app provides some solutions.
+I read somewhere that a long time ago, Django would auto-delete files. This probably happened in model fields. This behaviour is not true now. If objects and fields are deleted, files are left in the host system. However, it suits this application, and some of it's intended uses, to auto-delete models and files. If you would like this behaviour, the app provides some solutions.
 
 There are aspects to this. First, deletion of image models when a supporting model is deleted. Then, deletion of reform models when the image model is deleted. Finally, deletion of files, Image or Reform, when an model is deleted.
 
@@ -412,27 +420,29 @@ The image fields must be ImageOneToOneFields, and the field attribute must be 'a
 The custom field means lightweight field identification.
  
 An ImageOneToManyField implies an image pool. Many connections to one image. This is a  classic computing problem of reference counting. Best avoided.
- 
+
   
 ### Automatic deletion of reform objects
-Reforms are treated as objects generated automatically, so automatic deletion is not controversial. Moreover, the template tag accesses reforms through the Image model. If the original image model is removed, the reforms will not display. 
+Reforms are treated as objects generated automatically, so automatic deletion is not controversial. Moreover, the template tag accesses reforms through the Image model. If the model for original image is deleted, the reforms will not display. 
 
 The core application removes reform models by default. So will custom repositories, as long as the 'image' foreign key is set to CASCADE.
+
+Reform files are auto-deleted with reform models.
 
 
 ### Automatic deletion of files
 The application provides a signals solution.
 
+#### Auto-delete Image files
+Image file deletion is optional. To auto-delete, use a custom repository and set the Image model attribute 'auto_delete_files=True'.
+
 #### Auto-delete Reform files
 Reform files are deleted with the reform. There is nothing else to do.
 
 
-#### Auto-delete Image files
-Image file deletion is optional. Set the Image attribute 'auto_delete_files=True' to auto delete.
 
-
-### Default behaviour
-By default, the core repository will not auto-delete the files associated with Images. It will auto-delete Reform models, and the reform files.
+### Behaviour of the default repository
+By default, the default repository will not auto-delete the original files associated with Images. It will auto-delete Reform models, and the reform files.
 
 
 
