@@ -1,7 +1,7 @@
 # Django-images
 A drop and go app (as much as a Django app can be) to handle upload and display of images.
 
-When I say plug-and-go, I mean there is a default repository built into the app. IT works in a Django way, and needs only a migration to start uploading and managing images. To show images, you need only to define a few filter classes and place the main template tag. That's all.
+Plug-and-go means a default repository built into the app. It works in a Django way, and needs only a migration to start uploading and managing images. To show images, only a few filter classes are needed, and to place the main template tag. That's all.
 
 The base code is concise and levers Django recommendations and facilities where possible. It may provide a base for others wishing to build their own app.
 
@@ -15,7 +15,7 @@ The app API does not let you,
 - create flexible filter chains
 - categorise/tag images
 
-All these facilities could be built into the base code. But then the app will not be, for you, a plug and go solution.
+All these facilities could be built into the base code. But then the app will not be a plug and go solution.
  
 The code API is a step back from the facilities mentioned above. It is small, concise, and fits good CSS/template-practice. 
 
@@ -101,7 +101,7 @@ If you have Django Admin, you can now upload images.
 
 
 ### Upload some images
-In Django admin, go to Image upload and try upload a few images.
+In Django admin, go to Image upload and upload a few images.
 
 I don't know about you, but if I have a new app I like to try with real data. If you have a collection of test images somewhere, try this management command,
 
@@ -217,7 +217,7 @@ There are two, ImageOneToOneField and ImageManyToOneField (for image pools),
 
 
 ##### Auto-delete images
-An ImageOneToOneField field can auto-delete associated images (and their reforms and files) with the model. See [Auto Delete](#auto-delete) 
+An ImageOneToOneField field can auto-delete associated Image models and files (and their reforms) with the model. See [Auto Delete](#auto-delete) 
 
 
 #### Stock Django
@@ -246,7 +246,7 @@ Only use models.CASCADE if you are sure this is what you want. It means, if an i
 #### Choosing between the two
 ImageOneToOneField/ImageManyToOneField
 - tidy
-- Work with preconfigured admin and auto-delete
+- Works with preconfigured admin and auto-delete
 
 Foreign Field
 - Django stock
@@ -358,15 +358,11 @@ Now migrate, and you are up and running.
 No! Python has been cautious about this kind of programming, and Django's solutions are a workround. Try stacking models of any kind and, unless you know the code line by line, the classes will create unusable migrations. In the current situation, for stability and maintainability, create models directly from the two abstract bases.
 
 ### Can I create different repositories, then point them at the same storage paths?
-The app tracks through the database tables, and the [management commands](#management-commands) work from them, so yes, you can.
-
-That said, when code offers opportunities for namespacing/ecapsulaytion, you need a good reason to ignore it.
+The app tracks through the database tables, and the [management commands](#management-commands) work from them, so yes, you can. That said, when code offers opportunities for namespacing/ecapsulaytion, you need a good reason to ignore it.
 
 ### Things to consider when subclassing models
-#### Do I need to migrate the defualt 'image' for a custom repository?
-No. Migrate the app containing the repository code.
-
-If you got here later, and already have the core repository migrated, but don't need the data, you can [zero migrate and remove the file folders](#quickStop).
+#### Do I need to migrate the default 'image' for a custom repository?
+No. Migrate the app containing the repository code. If you got here later, and already have the core repository migrated, but don't need the data, you can [zero migrate and remove the file folders](#quickStop).
 
 #### Auto delete of files
 May be good to set up your deletion policy from the start. See [Auto Delete](#auto-delete)
@@ -423,12 +419,7 @@ An ImageOneToManyField implies an image pool. Many connections to one image. Thi
 
   
 ### Automatic deletion of reform objects
-Reforms are treated as objects generated automatically, so automatic deletion is not controversial. Moreover, the template tag accesses reforms through the Image model. If the model for original image is deleted, the reforms will not display. 
-
-The core application removes reform models by default. So will custom repositories, as long as the 'image' foreign key is set to CASCADE.
-
-Reform files are auto-deleted with reform models.
-
+Reforms are treated as objects generated automatically, so automatic deletion is not controversial. Moreover, the template tag accesses reforms through the Image model so if the model for original image is deleted, the reforms are useless. Reform models are deleted by default, and so are the files.
 
 ### Automatic deletion of files
 The application provides a signals solution.
@@ -442,13 +433,13 @@ Reform files are deleted with the reform. There is nothing else to do.
 
 
 ### Behaviour of the default repository
-By default, the default repository will not auto-delete the original files associated with Images. It will auto-delete Reform models, and the reform files.
+By default, the default repository will not auto-delete the original files associated with Images. It will auto-delete reform models and their files.
 
 
 
 ## Filters
 ### Overview
-Filters are used to describe how an uploaded image should be modified for display. In the background, the app will automatically adjust the image to the given specification (or use a cached version).
+Filters are used to describe how an uploaded image should be modified for display. In the background, the app will automatically adjust the image to the filter specification (or use a cached version).
  
 A few filters are predefined. One utility/test filter,
 
@@ -464,7 +455,7 @@ And some base filters, which you can configure. These are centre-anchored,
 - SmartCrop
 - SmartResize
 
-If you only need different image sizes, then you only need to configure these. But if you want to pass some time with image-processing code, you can add filters to generate ''PuddingColour' and other effects.
+If you only need different image sizes, you only need to configure these. But if you want to pass some time with image-processing code, you can add filters to generate ''PuddingColour' and other effects.
 
 
 ### Filter placement and registration
@@ -650,7 +641,7 @@ In this system, models that refer to Image models can be null and blank, which r
 
 ### Package solutions
 #### ImageCoreAdmin
-For administration and maintenance of image collections. This is a specialised use, which would only be visible to end users if they are trusted.
+For administration and maintenance of image collections. This is a specialised use, which would only be visible to end users if trusted.
 
 The configuration is built into the image app, and can be used on custom repositories too.
 
@@ -832,7 +823,7 @@ Image accepts settings in several places. The app has moved away from site-wide 
     </dd>
     <dt>auto_delete_files</dt>
     <dd>
-        default=False, if the Image is deleted, the file is deleted too.  
+        (if the Image is deleted, the file is deleted too) default=False  
     </dd>
 </dl>
 
@@ -840,15 +831,15 @@ Image accepts settings in several places. The app has moved away from site-wide 
 <dl>
     <dt>upload_dir</dt>
     <dd>
-        default='reforms', Reform attribute
+        default='reforms'
     </dd>
     <dt>image_model</dt>
     <dd>
-        default='image.Image', Reform attribute
+        default='image.Image'
     </dd>
     <dt>file_format</dt>
     <dd>
-        (set thee default format of reforms) default=original format, Reform attribute, filter attribute
+        (set the default format of reforms) default=original format, Reform attribute, filter attribute
     </dd>
     <dt>jpeg_quality</dt>
     <dd>
@@ -870,6 +861,7 @@ Images accepts some site-wide settings,
 
     IMAGES = [
         {
+            'BROKEN': 'myapp/lonely.png',
             'SEARCH_APP_DIRS': True,
             'SEARCH_MODULES': [
                         "someSiteName",
@@ -916,7 +908,7 @@ The template is at,
 
     image/templates/image/image_detail.html
 
-In the template you can edit the tag to point at your own configurations. With visible results and basic image data, it is often easier to use than the shell.
+In the template you can edit the tag to point at your own configurations. With visible results and basic image data, the view is often easier to use than the shell.
 
 
 

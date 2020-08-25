@@ -10,8 +10,6 @@ auto_delete tests
 == Model
 Check models for clashes?
 
-
-
 == Management
 Is bulk delete really bulk delete? No, it's 'mass delete', though
 Bluk upload ignoring validations?
@@ -23,6 +21,7 @@ tests
 
 == Filters
 Test Wand
+Check 'static' code
 
 == Reforms
 
@@ -34,6 +33,7 @@ Register, want an instance? Admin want Model?
 
 == TemplateTags
 Test query
+Rewrite
 
 == Constants
 
@@ -42,14 +42,12 @@ Test query
 == Requests
 
 == Settings
-? Cache filepaths, and the like
 ? Test media paths are not idiotic
+Rebuild on module
 
 == Widgets
 
 == Forms
-
-== Widget
 
 = Tests
 Subclass [sigh]
