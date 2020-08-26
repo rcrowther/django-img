@@ -4,16 +4,18 @@ build-backend = "flit_core.buildapi"
 
 [tool.flit.metadata]
 module = "image"
-version = 0.0.1
-dist-name = "django-image"
+# version = 0.0.1
+dist-name = "django-img"
 author = "robert crowther"
 author-email = "rw.crowther@gmail.com"
 home-page = "https://github.com/rcrowther/django-image"
 description-file = "README.md"
-classifiers=[
+requires = [
+    "unidecode",
+]
+classifiers = [
     "Operating System :: OS Independent",
     "License :: OSI Approved :: BSD License",
     "Programming Language :: Python :: 3",
-    "Framework :: Django",
+    "Framework :: Django"
 ]
-

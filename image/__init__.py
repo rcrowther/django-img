@@ -1,3 +1,6 @@
+"""Image handling for Django. Includes upload code, repository and filter creation. Low on features, fast setup, modular."""
+__version__ = '0.0.1'
+
 from image.decorators import register
 from image.filters import Filter
 from image.filters_pillow import (

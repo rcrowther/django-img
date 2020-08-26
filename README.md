@@ -6,13 +6,16 @@ Plug-and-go means a default repository built into the app. It works in a Django 
 The base code is concise and levers Django recommendations and facilities where possible. It may provide a base for others wishing to build their own app.
 
 
+The distribution is called 'django-img', but internally the module is called 'image'.
+
+
 ## Why you may not want this app
 This may not be the app for you.
 
 The app API does not let you, 
 - write template tags with adjustable parameters
 - filter with runtime parameter processing
-- create flexible filter chains
+- create dynamic filter chains
 - categorise/tag images
 
 All these facilities could be built into the base code. But then the app will not be a plug and go solution.
@@ -20,7 +23,7 @@ All these facilities could be built into the base code. But then the app will no
 The code API is a step back from the facilities mentioned above. It is small, concise, and fits good CSS/template-practice. 
 
 Also, I have not,
-- considered SVG images
+- considered SVG images or movie files
 - tested cloud storage
 
 
