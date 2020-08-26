@@ -5,7 +5,6 @@ Plug-and-go means a default repository built into the app. It works in a Django 
 
 The base code is concise and levers Django recommendations and facilities where possible. It may provide a base for others wishing to build their own app.
 
-
 The distribution is called 'django-img', but internally the module is called 'image'.
 
 
@@ -84,7 +83,11 @@ Then,
 
 
 ### Install
-Download the app code to Django.
+PyPi,
+
+    pip install django-img
+
+Or download the app code to Django.
 
 Declare in Django settings,
 
