@@ -4,6 +4,7 @@ from image.models import AbstractImage, AbstractReform, Image, Reform
 
 
 ## These utils can only be loaded when Django/the app is ready
+#? could use django.utils.module_loading.import_string()
 def get_model(model_path, app_name=''):
     '''
     Get a model from a string path.

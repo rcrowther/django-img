@@ -1,4 +1,4 @@
-# Django-images
+# Django-img
 A drop and go app (as much as a Django app can be) to handle upload and display of images.
 
 Plug-and-go means a default repository built into the app. It works in a Django way, and needs only a migration to start uploading and managing images. To show images, only a few filter classes are needed, and to place the main template tag. That's all.
@@ -185,7 +185,7 @@ Don't like what you see?
 - Migrate backwards ('./manage.py migrate image zero')
 - Remove from 'apps.py'
 - Remove the two directories '/media/originals/', '/media/reforms/'
-- Remove the app folder.
+- Remove the app folder, or uninstall
 
 That's it, gone.
 
@@ -342,7 +342,7 @@ An expanded version of the above,
         form_limit_filepath_length=True
         auto_delete_files=True
 
-        etc.
+        ...
 
 
 
@@ -355,16 +355,16 @@ An expanded version of the above,
         # exactly the same in every subclass
         image = models.ForeignKey(image_model, related_name='+', on_delete=models.CASCADE)
 
-Some of these attributes introduce checks ('max_upload_size'), some set defaults('file_format'), some can be overridden ('file_format', 'jpeg_quality' can be overridden by filter settings). See [Settings](#settings) for details.
+Some of these attributes introduce checks ('max_upload_size'), some set defaults('file_format'), some can be overridden ('file_format', 'jpeg_quality' can be overridden by filter settings) (the configuration above is odd, and for illustration. If reforms are set to 'file_format'='png', 'jpeg_quality' is unlikely ever to be used). See [Settings](#settings) for details.
 
-Now migrate, and you are up and running.
+Migrate, and you are up and running.
 
 
 ### Inheritance! Can I build repositories using OOP techniques?
 No! Python has been cautious about this kind of programming, and Django's solutions are a workround. Try stacking models of any kind and, unless you know the code line by line, the classes will create unusable migrations. In the current situation, for stability and maintainability, create models directly from the two abstract bases.
 
 ### Can I create different repositories, then point them at the same storage paths?
-The app tracks through the database tables, and the [management commands](#management-commands) work from them, so yes, you can. That said, when code offers opportunities for namespacing/ecapsulaytion, you need a good reason to ignore it.
+The app tracks through the database tables, and the [management commands](#management-commands) work from them, so yes, you can. That said, when code offers opportunities for namespacing/encapsulation, you need a good reason to ignore it.
 
 ### Things to consider when subclassing models
 #### Do I need to migrate the default 'image' for a custom repository?
@@ -857,7 +857,7 @@ Image accepts settings in several places. The app has moved away from site-wide 
 <dl>
     <dt>auto_delete</dt>
     <dd>
-        if True, and signals are enabled, deletion of this model will delete image models.
+        if True, and signals are enabled, deletion of the model will delete image models.
     </dd>
 </dl>
 (the field naturally has many other settings, this setting is the only one related to this app)
