@@ -149,7 +149,7 @@ def check_positive_float_or_none(setting_name, v, eid, **kwargs):
         ))
     return errors
              
-def check_numeric_range(setting_name, v, imin, imax, eid):
+def check_numeric_range(setting_name, v, imin, imax, eid, **kwargs):
     errors = []
     try:
         if (type(v) != int or v < imin or v > imax):

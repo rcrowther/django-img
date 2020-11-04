@@ -8,7 +8,7 @@ from . import utils
 # A fundamental issue throughout the tests is that image uploading 
 # is transactional. But TestCase will not complete over transactions
 # So fails to trigger file deletion. 
-# Ratther than using TestTransaction, which is less clean, these tests 
+# Rather than using TestTransaction, which is less clean, these tests 
 # are littered with rearDown() methods to clean up orphaned files 
 # (poor orphans, unwanted...). 
 # ./manage.py test image.tests.test_image

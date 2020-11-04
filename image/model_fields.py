@@ -156,7 +156,7 @@ class ReformFileField(FileField):
 
 
 class ImageRelationFieldMixin():
-        
+    # Some common base material
     def _check_relation_model_is_image_model(self):
         # These checks are run in 'show migrations' and 'runmigrations'.
         # By this check, the related model must exist.

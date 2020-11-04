@@ -204,6 +204,7 @@ Index,
 - [Management Commands](#management-commands)
 - [Settings](#settings)
 - [Utils](#utilities)
+- [Tests](#tests)
 
 
 ## Model Fields
@@ -916,6 +917,20 @@ The template is at,
 
 In the template you can edit the tag to point at your own configurations. With visible results and basic image data, the view is often easier to use than the shell.
 
+
+## Tests
+I've not found a way to test this app without Python ducktape. There are tests. They are in a directory 'test_image'. This is a full app.
+
+To run the tests you must install django-img, then move 'test_image' to the top level of a project. Install,
+
+        INSTALLED_APPS = [
+            ...
+            'test_image.apps.TestImageConfig',
+            'image.apps.ImageConfig',
+            ...
+        ]
+
+...and migrate. The tests are in the ''tests' sub-folder of 'test_image'.
 
 
 ## Notes
