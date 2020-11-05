@@ -4,7 +4,7 @@ from django.template import Context, Template
 from django.template import TemplateSyntaxError
 from django.template.base import Token
 
-from image.models import Image
+#from test_image.models import TestImage
 from image.image_filters import Thumb
 from . import utils
 
@@ -109,21 +109,21 @@ class TestTags(TestCase):
             '{% load img_tags %}{% image image_model image.Thumb %}',
             context={'image_model': self.image}
             )
-        self.assertHTMLEqual(render, '<img src="/media/reforms/test-image_thumb.png" alt="test image"/>')
+        self.assertHTMLEqual(render, '<img src="/media/test_reforms/test-image_thumb.png" alt="test image"/>')
 
     def test_image_tag_extra_attrs(self):
         render = self.render_template(
             '{% load img_tags %}{% image image_model image.Thumb class="detail-img" %}',
             context={'image_model': self.image}
             )
-        self.assertHTMLEqual(render, '<img src="/media/reforms/test-image_thumb.png" alt="test image" class="detail-img"/>')
+        self.assertHTMLEqual(render, '<img src="/media/test_reforms/test-image_thumb.png" alt="test image" class="detail-img"/>')
 
     def test_image_query_tag(self):
         render = self.render_template(
-            '{% load img_tags %}{% imagequery image.Image "pk=1" image.Thumb %}',
+            '{% load img_tags %}{% imagequery test_image.TestImage "pk=1" image.Thumb %}',
             context={}
             )
-        self.assertHTMLEqual(render, '<img src="/media/reforms/test-image_thumb.png" alt="test image"/>')
+        self.assertHTMLEqual(render, '<img src="/media/test_reforms/test-image_thumb.png" alt="test image"/>')
 
     def tearDown(self):    
         self.reform.src.delete(False) 

@@ -1,5 +1,5 @@
 from image.utils import url_absolute_static_aware
-from wand.image import Image
+from wand.image import WandImage
 from wand.color import Color
 from wand.drawing import Drawing
 import math
@@ -46,7 +46,7 @@ def photoFX(wand, pop, grayscale, warm, night, strong, no, watermark):
         url = url_absolute_static_aware(watermark)
         scale_width = wand.width >> 1
         
-        with Image(filename=watermark) as overlay:
+        with WandImage(filename=watermark) as overlay:
             # scale the overlay to the inset.            
             overlay.resize(scale_width, round(scale_width/overlay.width * overlay.height))
             wand.composite(

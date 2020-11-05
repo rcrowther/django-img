@@ -1,4 +1,4 @@
-from wand.image import Image
+from wand.image import WandImage
 from io import BytesIO
 from image.filters import (
     Filter,
@@ -16,7 +16,7 @@ from image.decisions import reform_save_info
 class WandProcess():
 
     def process(self, src_file, model_args):
-        image = Image(file=src_file)
+        image = WandImage(file=src_file)
  
         # write_attrs currently {format, jpeg_quality}
         write_attrs = reform_save_info(

@@ -1,6 +1,6 @@
 from django.test import TestCase, TransactionTestCase
 from image.shortcuts import get_reform_or_not_found
-from image.models import Image
+#from test_image.models import TestImage
 from image.image_filters import Thumb
 from pathlib import Path
 from . import utils

@@ -3,7 +3,7 @@ from io import BytesIO
 import PIL.Image
 from django.core.files.images import ImageFile
 
-from image.models import Image
+from test_image.models import TestImage
 from image.image_filters import Thumb
 #from .image_subclass import NewsArticleImage, NewsArticleReform
 
@@ -45,7 +45,7 @@ def get_test_image():
     '''
     Generate an image in the db.
     '''
-    im = Image.objects.create(
+    im = TestImage.objects.create(
             src=get_test_image_file_jpg(),
         )
     return im

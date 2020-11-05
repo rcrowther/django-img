@@ -13,17 +13,17 @@ class TestModuleUtils(TestCase):
             
     def test_get_model_no_app(self):
         with self.assertRaises(ImproperlyConfigured):
-            module_utils.get_model('Image')
+            module_utils.get_model('ImagePorridge')
 
     def test_get_model_with_app(self):
-        module_utils.get_model('image.Image')
+        module_utils.get_model('test_image.TestImage')
         
     def test_get_model_with_implicit_app(self):
-        module_utils.get_model('Image', 'image')
+        module_utils.get_model('TestImage', 'test_image')
 
     def test_get_image_model_not_image(self):
         with self.assertRaises(ImproperlyConfigured):
-            module_utils.get_image_model('image.Thumb')
+            module_utils.get_image_model('test_image.Thumb')
 
     def test_get_image_model(self):
-        module_utils.get_image_model('image.Image')
+        module_utils.get_image_model('test_image.TestImage')

@@ -102,9 +102,6 @@ class AbstractImage(models.Model):
         if (cls.auto_delete_files):
             signals.post_delete.connect(cls.delete_file, sender=cls)
           
-              
-    # Not autopoulated by storage, so funny name.
-    # See the property
     upload_time = models.DateTimeField(_("Datetime of upload"),
         auto_now_add=True, editable=False
     )
@@ -309,15 +306,15 @@ class AbstractImage(models.Model):
         
         
         
-class Image(AbstractImage):
-    reform_model = 'Reform'
+# class Image(AbstractImage):
+    # reform_model = 'Reform'
 
-    class Meta:
-        verbose_name = _('image')
-        verbose_name_plural = _('images')
-        indexes = [
-            models.Index(fields=['upload_time']),
-        ]
+    # class Meta:
+        # verbose_name = _('image')
+        # verbose_name_plural = _('images')
+        # indexes = [
+            # models.Index(fields=['upload_time']),
+        # ]
 
 
 from django.db import transaction
@@ -417,13 +414,13 @@ class AbstractReform(models.Model):
 
 
 
-class Reform(AbstractReform):
-    image_model = Image     
+# class Reform(AbstractReform):
+    # image_model = Image     
 
-    # exactly the same in every subclass
-    image = models.ForeignKey(image_model, related_name='+', on_delete=models.CASCADE)
+    # # exactly the same in every subclass
+    # image = models.ForeignKey(image_model, related_name='+', on_delete=models.CASCADE)
 
-    class Meta:
-        verbose_name = _('reform')
-        verbose_name_plural = _('reforms')
+    # class Meta:
+        # verbose_name = _('reform')
+        # verbose_name_plural = _('reforms')
 

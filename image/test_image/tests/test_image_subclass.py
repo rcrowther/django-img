@@ -1,7 +1,6 @@
 import unittest
 
 from django.test import TestCase
-from image.models import Image, SourceImageIOError
 from .utils import (
     create_subclass,
 )

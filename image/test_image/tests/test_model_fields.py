@@ -2,17 +2,17 @@ import unittest
 
 from django.test import TestCase
 from django.db import models
-import image
+import test_image
 from image.model_fields import ImageOneToOneField, ImageManyToOneField 
 
 def mkImageOneToOneField():
     return ImageOneToOneField(
-                image.models.Image,
+                test_image.models.TestImage,
             )
 
 def mkImageManyToOneField():
     return ImageManyToOneField(
-                image.models.Image,
+                test_image.models.TestImage,
             )
             
 # def mkModel(model):
@@ -30,12 +30,12 @@ def mkImageManyToOneField():
 class TestFieldCreation(TestCase):
 
     def test_non_model_raises(self):
-        iff = ImageOneToOneField(image.models.Reform)
+        iff = ImageOneToOneField(test_image.models.TestReform)
         with self.assertRaises(Exception):
             iff.check()
             
     def test_str_non_model_raises(self):
-        iff = ImageOneToOneField('image.models.Reform')
+        iff = ImageOneToOneField('duff.Path')
         with self.assertRaises(Exception):
             iff.check()
 
