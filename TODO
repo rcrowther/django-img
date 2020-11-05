@@ -2,11 +2,7 @@
 Perms
 Revise class vars
 Remove delete signal put in special admin?
-Remove builtin classes
-That will mean new test classes
-Move test README into debug tutorial
-Time to remove settings?
-
+Commands need default Image removing
 
 = README
 

@@ -71,10 +71,10 @@ class ImageCoreAdmin(admin.ModelAdmin):
         #
         # by the by, this stinks. I say so.
         if (obj):
-            if (not('src'in self.readonly_fields)): 
+            if (not('src' in self.readonly_fields)): 
                 self.readonly_fields.append('src')
         else:
-           if ('src'in self.readonly_fields): 
+           if ('src' in self.readonly_fields): 
                 self.readonly_fields.remove('src')
         return super().get_form( request, obj, change, **kwargs)
 

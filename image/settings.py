@@ -1,6 +1,5 @@
 from django.conf import settings as dsettings
 from django.core.exceptions import ImproperlyConfigured
-#from django.utils.functional import cached_property
 
 
         

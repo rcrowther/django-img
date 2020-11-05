@@ -204,8 +204,6 @@ class AbstractImage(models.Model):
             if close_src:
                 src.close()
 
-    def get_reforms(self):
-        return self.get_reform_model().objects.filter(image_id=self.pk)
 
     def get_reform(self, filter_instance):
         ''' Generate a reform for this image.
@@ -215,7 +213,8 @@ class AbstractImage(models.Model):
         Reform = self.get_reform_model()
 
         try:
-            reform = self.get_reforms().get(
+            reform = Reform.objects.get(
+                image=self,
                 filter_id=filter_instance.human_id(),
             )
         except Reform.DoesNotExist:
@@ -243,7 +242,7 @@ class AbstractImage(models.Model):
             # We got everything Django likes. A model save should 
             # generate a Reform DB entry and the file itself.
             reform = Reform(
-                image_id = self.pk,
+                image = self,
                 filter_id = filter_instance.human_id(),
                 src = reform_file,
             )
@@ -305,16 +304,7 @@ class AbstractImage(models.Model):
         abstract = True
         
         
-        
-# class Image(AbstractImage):
-    # reform_model = 'Reform'
 
-    # class Meta:
-        # verbose_name = _('image')
-        # verbose_name_plural = _('images')
-        # indexes = [
-            # models.Index(fields=['upload_time']),
-        # ]
 
 
 from django.db import transaction
@@ -327,12 +317,11 @@ class AbstractReform(models.Model):
     @classmethod
     def delete_file(cls, instance, **kwargs):
         transaction.on_commit(lambda: instance.src.delete(False))
-
+        
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__()
         signals.post_delete.connect(cls.delete_file, sender=cls)
               
-        
     image_model = AbstractImage
     
     # relative to MEDIA_ROOT
@@ -346,6 +335,7 @@ class AbstractReform(models.Model):
         upload_to=get_reform_upload_to,
         )
     filter_id = models.CharField(max_length=255, db_index=True)
+
 
     @property
     def url(self):
@@ -411,16 +401,3 @@ class AbstractReform(models.Model):
         
     class Meta:
         abstract = True
-
-
-
-# class Reform(AbstractReform):
-    # image_model = Image     
-
-    # # exactly the same in every subclass
-    # image = models.ForeignKey(image_model, related_name='+', on_delete=models.CASCADE)
-
-    # class Meta:
-        # verbose_name = _('reform')
-        # verbose_name_plural = _('reforms')
-

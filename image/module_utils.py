@@ -51,13 +51,11 @@ def get_image_model(model_path, app_name=''):
         if path empty, Image, if path, an Image model, if path fails, 
         ImproperlyConfigured
     '''
-    Model = None
-    if (model_path):
-        Model = get_model(model_path, app_name)
-        if (not issubclass(Model, AbstractImage)):
-            raise ImproperlyConfigured("Given class not a subclass of AbstractImage: '{}'".format(
-                model_path
-            ))
+    Model = get_model(model_path, app_name)
+    if (not issubclass(Model, AbstractImage)):
+        raise ImproperlyConfigured("Given class not a subclass of AbstractImage: '{}'".format(
+            model_path
+        ))
     return Model
 
 def get_reform_model(model_path, app_name=''):
@@ -73,11 +71,9 @@ def get_reform_model(model_path, app_name=''):
         if path empty, Reform, if path, a Reform model, if path fails, 
         ImproperlyConfigured
     '''
-    Model = None
-    if (model_path):
-        Model = get_model(model_path, app_name)
-        if (not issubclass(Model, AbstractReform)):
-            raise ImproperlyConfigured("Given class not a subclass of AbstractReform: '{}'".format(
-                model_path
-            ))
+    Model = get_model(model_path, app_name)
+    if (not issubclass(Model, AbstractReform)):
+        raise ImproperlyConfigured("Given class not a subclass of AbstractReform: '{}'".format(
+            model_path
+        ))
     return Model

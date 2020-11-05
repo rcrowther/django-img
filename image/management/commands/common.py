@@ -5,10 +5,9 @@ from image import module_utils
 
 def add_model_argument(parser):
         parser.add_argument(
-            '-m',
-            '--model',
+            'model',
             type=str,
-            help='Target a model derived from Image, form:is <app.model>.',
+            help='Target a model derived from AbstractImage, form:is <app.model>.',
         )
         
 def get_image_model(options):

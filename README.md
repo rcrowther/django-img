@@ -397,9 +397,19 @@ Note that the base Image does not apply an index to upload_time, so if you want 
 
 ## Auto-delete
 ### Overview
-I read somewhere that a long time ago, Django would auto-delete files. This probably happened in model fields. This behaviour is not true now. If objects and fields are deleted, files are left in the host system. However, it suits this application, and some of it's intended uses, to auto-delete models and files. If you would like this behaviour, the app provides some solutions.
+I read somewhere that a long time ago, Django would auto-delete files. This probably happened in model fields. This behaviour is not true now. If objects and fields are deleted, files are left in the host system. However, it suits this application, and some of it's intended uses, to auto-delete mod els and files. If you would like this behaviour, the app provides some solutions.
 
-There are aspects to this. First, deletion of image models when a supporting model is deleted. Then, deletion of reform models when the image model is deleted. Finally, deletion of files, Image or Reform, when an model is deleted.
+There are aspects to this. First, the files for Reforms are always deleted with the reform. And reforms are always deleted when the image model is deleted. However, the choices arrive with the deletion of the Image. Should the file be deleted with the Image?  Finally, should an Image be deleted when a model using that image is deleted?
+
+
+#### Auto-delete of Reforms
+Reform files are deleted with the reform. There is nothing to do.
+
+Reforms are treated as objects generated automatically, so automatic deletion is not controversial. Reform models are deleted by the CASCADE in the foreign key, and so are the files.
+
+
+#### Auto-delete Image files
+Image file deletion is optional. To auto-delete, set the Image model attribute 'auto_delete_files=True'.
 
 
 ### Automatic deletion of image models when a supporting object is deleted
@@ -423,18 +433,9 @@ The custom field means lightweight field identification.
  
 An ImageOneToManyField implies an image pool. Many connections to one image. This is a  classic computing problem of reference counting. Best avoided.
 
-  
-### Automatic deletion of reform objects
-Reforms are treated as objects generated automatically, so automatic deletion is not controversial. Moreover, the template tag accesses reforms through the Image model so if the model for original image is deleted, the reforms are useless. Reform models are deleted by default, and so are the files.
 
-### Automatic deletion of files
-The application provides a signals solution.
 
-#### Auto-delete Image files
-Image file deletion is optional. To auto-delete, use a custom repository and set the Image model attribute 'auto_delete_files=True'.
 
-#### Auto-delete Reform files
-Reform files are deleted with the reform. There is nothing else to do.
 
 
 

@@ -10,11 +10,11 @@ class Command(BaseCommand):
     help = 'Automatically/bulk add images to an image model. Default model is the core app. The command tries to ignore errors and continue. It will append to existing collections. Attributes other than file data will default.'
 
     def add_arguments(self, parser):
+        common.add_model_argument(parser)
         parser.add_argument(
             'src_path', 
             type=str
         )
-        common.add_model_argument(parser)
 
                          
     def handle(self, *args, **options):
