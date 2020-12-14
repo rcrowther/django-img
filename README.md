@@ -796,11 +796,11 @@ To implement, create a view, then specialise the builtin view to your image mode
 
 Now you need to access the view. A URL is builtin to the model, so you can use this unusual declaration in ''urls.py',
 
-urlpatterns = [
-    ...
-    NewsArticleReformsView.url(), 
-    ...
-]
+    urlpatterns = [
+        ...
+        NewsArticleReformsView.url(), 
+        ...
+    ]
 
 And now admin needs to access the URL. Modify your Image admin like this, adding an extra column of links. This example assumes use of ImageCoreAdmin, but it is not necessary. Again, the URL is builtin,
 
