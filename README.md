@@ -199,6 +199,7 @@ Index,
 - [Admin](#admin)
 - [Forms](#forms)
 - [Template Tags](#template-tags)
+- [Admin-generated Reforms](#admin-generated-reforms)
 - [Management Commands](#management-commands)
 - [Settings](#settings)
 - [Utils](#utilities)
@@ -775,6 +776,49 @@ You can borrow filter collections from other apps. Use the module path and filte
     {% image "urban_decay" different_app.filter_name  %} 
 
 But try not to create a tangle between your apps. You would not do that with CSS or other similar resources. Store general filters in a central location, and namespace them.
+
+## Admin-generated Reforms
+Genrerate reforms directly using an admin-like form.
+
+The template tags work well for highly-structured content. For example, a product review will nearly always start with an image of the product in question. It can probaly be configured with template tags for a streamfield (untried). But I felt the app should also be usable for less structured content, i.e. markup.
+
+Rather than build some image selector, which has never finally worked for me, I have added a form that can generate reforms. It's between you and your deplyment where you place the reforms, and how you reference them in markup. But the form will generate reforms.
+
+To implement, create a view, then specialise the builtin view to your image model,
+
+
+    from .models import NewsArticleImage
+    from image.views import ImageReformsView
+
+
+    class NewsArticleReformsView(ImageReformsView):
+        model = NewsArticleImage
+
+Now you need to access the view. A URL is builtin to the model, so you can use this unusual declaration in ''urls.py',
+
+urlpatterns = [
+    ...
+    NewsArticleReformsView.url(), 
+    ...
+]
+
+And now admin needs to access the URL. Modify your Image admin like this, adding an extra column of links. This example assumes use of ImageCoreAdmin, but it is not necessary. Again, the URL is builtin,
+
+    from django.utils.html import format_html
+
+    class NewsArticleImageAdmin(ImageCoreAdmin):
+        list_display = ('filename', 'upload_day', 'image_delete', 'image_view', 'add_reform',)
+
+        def add_reform(self, obj):
+            opts = obj._meta
+            return format_html('<a href="{}" class="button">Add</a>',
+                obj.url_form_reform_add()
+            )
+        add_reform.short_description = 'Add Reform'
+
+Now, if you follow the 'AddReform' button displayed next to every image in the image model list, you should see a form like the following, and can generate reforms based on whatever filters are available,
+
+![Generate Reform Form](screenshots/generate_reforms.png?raw=true)
 
 
 

@@ -11,6 +11,7 @@ from image import utils
 from image import form_fields
 
 
+
 class ImageFileField(ImageField):
     '''
     A (model) ImageField.
