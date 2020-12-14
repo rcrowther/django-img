@@ -3,6 +3,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.db.models import ImageField
 from image.model_fields import ImageFileField
+from django.utils.html import format_html
 
 
 

@@ -7,9 +7,10 @@ The base code is concise and levers Django recommendations and facilities where 
 
 The distribution is called 'django-img', but internally the module is called 'image'.
 
+This is [a rewrite of Wagtail's Image app](#credits).
 
 ## Why you may or may not want this app
-This may not be the app for you.
+This may not be the app for you,
 
 Pro
 - Abstract base allows any number of repositories with custom configurations
@@ -154,7 +155,7 @@ Now refresh the view. The app will try to find the reform. When it fails, it wil
 ### (aside) Filters
 Perhaps your first request will be how to make a new filter.
 
-Make a new file called 'image filters'. Put it in the top level of any app (not in the site directory, that can be done but must be configured in a [settings.py](#settings). Put something in like this (adapt if you wish),
+Make a new file called 'image_filters'. Put it in the top level of any app (not in the site directory, that can be done but must be configured in a [settings.py](#settings). Put something in like this (adapt if you wish),
 
     from image import Resize, registry
 
@@ -504,13 +505,16 @@ which should be written as above (lowercase, and 'jpg', not 'jpeg'). So,
         width=260
         height=350
         format='png'
+        #fill_color="Coral"
+        #jpeg_quality=28
+        # optional effects
 
     registry.register(MediumImage)
 
 
 Crop and Resize can/often result in images narrower in one dimension. 
 
-The Smart filters do a background fill in a chosen colour, so return the requested size,
+The Smart filters do a background fill in a chosen colour. By usung a fill, they can maintain aspect rattio, but return the requested size,
 
     from image import ResizeSmart, registry
 
@@ -629,10 +633,6 @@ See the code for details.
 This app only enables creation of fixed filters intended for a broad range of images. You write a filter with parameters, the processing order is fixed, and it is set.
 
 This is a deliberate decision. It makes life easy. If you want to produce a front-end that can adjust the filters, or chain them, that is another step. This is not that app.
-
-
-
-
 
 
 ## Admin
@@ -946,7 +946,7 @@ The app generally uses URLs, not the filepaths: this can be confusing, but means
 
 
 ## Credits
-The upload and storage code (particularly the replicable models) are ripped from the Wagtail CMS. Though I am responsible for what has happened after that.
+This is a rewrite of the Image app from Wagtail CMS. Some core ideas are from Wagtail, such as the broken image handling and replicable repositories. Some patches of code are also similar, or only lightly modified, such as the upload and storage code. However, the configuration options and actions have been changed, and the filtering actions are entirely new.
 
 [Wagtail documentation](https://docs.wagtail.io/en/v2.8.1/advanced_topics/images/index.html)
 

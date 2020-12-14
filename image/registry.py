@@ -69,6 +69,10 @@ class ClassRegistry:
     @property
     def list(self):
         return self._registry
+
+    @property
+    def keys(self):
+        return self._registry.keys()    
     
     @property
     def size(self):

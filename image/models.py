@@ -249,6 +249,12 @@ class AbstractImage(models.Model):
             reform.save()
         return reform
 
+    def get_filters_applied(self):
+        '''Return all filter keys, so generated reforms, for this image.
+        '''
+        Reform = self.get_reform_model()
+        return Reform.objects.filter(image=self).values_list('filter_id', flat=True)
+        
     @property
     def filename(self):
         '''
@@ -289,6 +295,19 @@ class AbstractImage(models.Model):
             *checks.check_positive_float_or_none('max_upload_size', cls.max_upload_size, '{}.E003'.format(name), **kwargs),
             ]
         return errors
+        
+    def url_form_reform_add(self):
+        '''URL to point at the reform add form.
+        '''
+        return '/admin/{}/{}/reforms/{}/add'.format(self._meta.app_label, self._meta.model_name, self.pk)
+
+    @classmethod
+    def url_view_form_reform_add(cls):        
+        return 'admin/{}/{}/reforms/<int:pk>/add'.format(cls._meta.app_label, cls._meta.model_name)
+
+    @classmethod
+    def url_view_form_reform_add_name(cls):        
+        return 'admin_{}_{}_reforms_add'.format(cls._meta.app_label, cls._meta.model_name)
         
     def __repr__(self):
         return "{}(upload_time: {}, src:'{}')".format(

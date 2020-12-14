@@ -1,5 +1,5 @@
 from importlib import import_module
-from django.utils.module_loading import module_has_submodule
+from importlib.util import find_spec as importlib_find
 from django.apps import apps
 
 def autodiscover_modules(
@@ -43,6 +43,8 @@ def autodiscover_modules(
             except Exception:
                 # if the module doesn't exist, ignore the error, if
                 # it does and threw an error, bubble up.
-                if module_has_submodule(module_parent, name):
+                #NB: Django's module_has_submodule is not a good test. May 
+                # fail as code, so module not exist.
+                if (importlib_find(module_parent + '.' + name) is not None):
                     raise
     return r

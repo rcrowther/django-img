@@ -55,6 +55,9 @@ Rebuild on module
 
 == Forms
 
+= View
+Need to extend from local template and CSS!
+
 = Tests
 Subclass [sigh]
 Static [sigh]
