@@ -99,7 +99,7 @@ def image_save_path(obj, filename):
     # return the /media relative path.
     return os.path.join(media_path, stem + tag)
     
-def reform_save_path(obj, filename):
+def reform_save_path(obj, filename, app_namespace, lowercase):
     '''
     Get the save path from a source filepath.
     This calculates and truncates lengths. For example, the stock 
@@ -121,11 +121,20 @@ def reform_save_path(obj, filename):
     src_stem = p.stem
     
     # filterid is a dotted path
-    # It will be added to the reform file path, so make it url-like.
-    # We loose a little of the id by converting, but the file saving
+    filter_id = obj.filter_id
+    
+    # Some reduction of the filter_id
+    # We loose a little of the id by reducing, but the file saving
     # gear will mangle if there is a clash, so rename affects 
     # no basic functionality. 
-    filter_id = obj.filter_id.lower().replace('.', '_')
+    
+    # Is the appname requested?
+    if (not app_namespace):
+        filter_id = filter_id[filter_id.index('.') + 1:]
+    else:
+        # filter_id will be added to the reform file path, so make it url-like.
+        #filter_id = obj.filter_id.lower().replace('.', '_')
+        filter_id = filter_id.replace('.', '_')
 
     # make the end-tag
     # e.g. tag = "-image_thumb.png"
@@ -137,4 +146,7 @@ def reform_save_path(obj, filename):
     stem = src_stem[:stem_limit]        
 
     # return the /media relative path.
-    return os.path.join(media_path, stem + tag)
+    internal_path = stem + tag
+    if (lowercase):
+        internal_path = internal_path.lower()
+    return os.path.join(media_path, internal_path)

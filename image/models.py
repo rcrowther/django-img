@@ -345,9 +345,17 @@ class AbstractReform(models.Model):
     
     # relative to MEDIA_ROOT
     upload_dir='reforms'
+    
+    # Add the appname to the filename. This is good id, but
+    # in practice makes long filenames e.g. 
+    # site_images_thumbnail-washing_machine.png
+    app_namespace = True
+
+    # lowercase the filename. Default True.
+    lowercase = True
     file_format = None
     jpeg_quality = 80
-            
+        
     # For naming, see the note in AbstractImage
     src = ReformFileField(
         unique=True,
@@ -384,7 +392,11 @@ class AbstractReform(models.Model):
     def get_upload_to(self, filename):
         # Incoming filename comes from get_reform() in Image, and  
         # only needs path appending.
-        return decisions.reform_save_path(self, filename)
+        return decisions.reform_save_path(self, 
+            filename, 
+            self.app_namespace,
+            self.lowercase
+        )
 
     def delete(self, using=None, keep_parents=False):
         r = super().delete(using, keep_parents)

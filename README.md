@@ -106,7 +106,7 @@ Migrate,
     ./manage.py makemigrations image
     ./manage.py migrate image
 
-If you have Django Admin, you can now upload images.
+Now you need to [declare a repository](#custom-image-repositories).
 
 
 
@@ -348,14 +348,24 @@ An expanded version of the above,
 
     class NewsArticleReform(AbstractReform):
         image_model = NewsArticleImage
+
+        # relative to MEDIA_ROOT
         upload_dir='news_reforms'
+
+        # Add the appname to the filename. This is good id, but
+        # in practice makes long filenames e.g. 
+        # site_images_thumbnail-washing_machine.png
+        app_namespace = False
+
+        # lowercase the filename. Default is True.
+        lowercase = True
         file_format='png'
         jpeg_quality=28
 
         # exactly the same in every subclass
         image = models.ForeignKey(image_model, related_name='+', on_delete=models.CASCADE)
 
-Some of these attributes introduce checks ('max_upload_size'), some set defaults('file_format'), some can be overridden ('file_format', 'jpeg_quality' can be overridden by filter settings) (the configuration above is odd, and for illustration. If reforms are set to 'file_format'='png', 'jpeg_quality' is unlikely ever to be used). See [Settings](#settings) for details.
+Some of these attributes introduce checks ('max_upload_size'), some set defaults('file_format'), some can be overridden ('file_format', 'jpeg_quality' can be overridden by filter settings) (the configuration above is odd, and for illustration e.g. if reforms are set to 'file_format'='png', 'jpeg_quality' will never be used). See [Settings](#settings) for more details.
 
 Migrate, and you are up and running.
 
@@ -777,6 +787,7 @@ You can borrow filter collections from other apps. Use the module path and filte
 
 But try not to create a tangle between your apps. You would not do that with CSS or other similar resources. Store general filters in a central location, and namespace them.
 
+
 ## Admin-generated Reforms
 Genrerate reforms directly using an admin-like form.
 
@@ -787,8 +798,8 @@ Rather than build some image selector, which has never finally worked for me, I 
 To implement, create a view, then specialise the builtin view to your image model,
 
 
-    from .models import NewsArticleImage
     from image.views import ImageReformsView
+    from .models import NewsArticleImage
 
 
     class NewsArticleReformsView(ImageReformsView):
