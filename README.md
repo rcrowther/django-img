@@ -62,13 +62,13 @@ The app includes code to upload images. Some custom Django admin is provided, wh
 ### Depemdancies
 Unidecode,
 
-    pip unidecode
+    pip install unidecode
 
 [Unidecode](https://pypi.org/project/Unidecode/)
 
 Pillow,
 
-    pip pillow
+    pip install pillow
 
 [Pillow](https://pillow.readthedocs.io/en/stable/index.html)
 
@@ -98,7 +98,6 @@ Declare in Django settings,
         INSTALLED_APPS = [
             ...
             'image.apps.ImageConfig',
-            ...
         ]
 
 Migrate,
@@ -106,7 +105,7 @@ Migrate,
     ./manage.py makemigrations image
     ./manage.py migrate image
 
-Now you need to [declare a repository](#custom-image-repositories).
+Now you need to [declare a repository](#custom-image-repositories). Further examples assume the example repository created there.
 
 
 
@@ -115,9 +114,9 @@ In Django admin, go to Image upload and upload a few images.
 
 I don't know about you, but if I have a new app I like to try with real data. If you have a collection of test images somewhere, try this management command,
 
-    ./manage.py image_create_bulk pathToMyDirectory
+    ./manage.py image_create_bulk news_article_images.NewsArticleImage pathToMyDirectory
 
-You can create, meaning upload and register, fifteen or twenty images in a few seconds.
+Note you need to give a path to a Model. You can create, meaning upload and register, fifteen or twenty images in a few seconds.
 
 
 
@@ -155,11 +154,11 @@ Now refresh the view. The app will try to find the reform. When it fails, it wil
 ### (aside) Filters
 Perhaps your first request will be how to make a new filter.
 
-Make a new file called 'image_filters'. Put it in the top level of any app (not in the site directory, that can be done but must be configured in a [settings.py](#settings). Put something in like this (adapt if you wish),
+Make a new file called 'image_filters'. Put it in the top level of any app (not in the site directory, that can be done but must be configured in a [settings.py](#settings). Put something in like this (adapt if you wish e.g. ResizeSmart, Crop...),
 
-    from image import Resize, registry
+    from image import CropSmart, registry
 
-    class MediumImage(Resize)
+    class MediumImage(CropSmart):
         width=260
         height=350
         format='png'
@@ -168,7 +167,7 @@ Make a new file called 'image_filters'. Put it in the top level of any app (not 
  
 Now adapt the template tag (or the tag in 'image/templates/image/image_detail.html') to point at the new filter,
 
-    {% imagequery image.Image "pk=1" someAppName.MediumImage %}
+    {% imagequery image.Image "pk=1" pathToImageFilterFile.MediumImage %}
 
 Visit the page again. Image uses the new filter definition to generate a new reform (filters the image) then displays it.
 
@@ -210,17 +209,32 @@ Index,
 Two ways,
 
 #### Custom ImageRelationFieldMixin fields
-There are two, ImageOneToOneField and ImageManyToOneField (for image pools),
+There are two, ImageOneToOneField and ImageManyToOneField. An image class name is passed as a paremeter.
+
+ImageOneToOneField (for images with only one placement),
+
+    from image.model_fields import ImageOneToOneField
+
+
+    class Page(models.Model):
+        ...
+        img = ImageOneToOneField(
+            'page.Image'
+            )
+
+and ImageManyToOneField (for image pools),
 
     from image.model_fields import ImageManyToOneField
 
 
     class Page(models.Model):
-
+        ...
         img = ImageManyToOneField(
             'page.Image'
             )
 
+#### Inherited models
+https://docs.djangoproject.com/en/3.2/topics/db/models/#be-careful-with-related-name-and-related-query-name
 
 ##### Auto-delete images
 An ImageOneToOneField field can auto-delete associated Image models and files (and their reforms) with the model. See [Auto Delete](#auto-delete) 
@@ -246,7 +260,7 @@ You can also use a Django foreign key declaration,
 
 null=True and blank=True means users can delay adding an image until later. And related_name='*' means that Images will not track the models you are creating. See Django documentation of model fields for more details.
 
-Only use models.CASCADE if you are sure this is what you want. It means, if an image is deleted, the model that carries the image is deleted too. This is not usually what you want.
+Only use models.CASCADE if you are sure this is what you want. It means, if an image is deleted, the model that carries the image is deleted too. This is probably the wrong order of dependancy, and not usually what you want!
 
 
 #### Choosing between the two
@@ -277,9 +291,19 @@ For example, you may want a repository attached to a main Article model, and als
  
 
 ### Subclassing Image/Reform 
-Custom Image repository code is placed in 'models.py' files and migrated. You decide how you want your namespacing to work. The code can be placed in an app handling one kind of model or, for general use, in a separate app.
+Custom Image repository code is placed in 'models.py' files and migrated. You decide how you want your namespacing to work. The code can be placed in an app handling one kind of model or, for general use, in a separate app. For a seperate app,
 
-Here is a minimal subclass. In the 'models.py' file in an app, do this,
+    ./manage.py startapp news_article_images
+
+Declare the app in settings.py,
+
+        INSTALLED_APPS = [
+            ...
+            'image.apps.ImageConfig',
+            'news_article_images.apps.NewsArticleImagesConfig',
+        ]
+
+Here is a minimal subclass. In a 'models.py' file, do this,
 
     from image.models import AbstractImage, AbstractReform
 
@@ -313,8 +337,8 @@ Not the last word in DRY coding, but you should be able to work out what the cod
 
 Migrate,
 
-    ./manage.py makemigrations NewsArticle
-    ./manage.py migrate NewsArticle
+    ./manage.py makemigrations news_article_images
+    ./manage.py migrate news_article_images
 
 You now have a new image upload app. It has it's own DB tables. Change it's configuration (see next section). Refer to it in other models,
 
