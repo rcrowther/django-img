@@ -1,4 +1,6 @@
 # Django-img
+> :warning: **Module may in future be deprecated** I'm developing [a similar app with much awkward code removed]( https://github.com/rcrowther/django-image-lite)
+
 An app to handle upload and display of images.
 
 The app needs at least one repository declaring then a migration. After declaring an admin, upload is possible. To show images, only a few filter classes are needed (some are builtin), and to place the main template tag. That's all.
